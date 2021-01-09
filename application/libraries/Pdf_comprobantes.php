@@ -419,6 +419,161 @@ class Pdf_comprobantes extends TCPDF
 //        
     }
 
+    public function data_table_informacion( $data, $head_cols, $col_add_data, $flag_nro_item = false ) {//suma de $widthcols = 200 - $flag_nro_item
+        $this->set_formato($this->format);
+
+        $this->Ln(1);        
+        $this->SetFillColor(241, 241, 241);//color
+
+        if( $this->format == 'A4'){
+            if($this->orientation == 'L'){
+                $this->comprobante_table_head['max_w'] = 285;
+                $this->comprobante_table_head['border'] = 1;
+            }
+
+        }else if ( $this->format == 'Ticket_A' ){
+            $this->comprobante_table_head['h'] = 4;
+            $this->comprobante_table_head['border'] = 0;
+            $this->comprobante_table_head['max_w'] = $this->max_width;
+            $this->comprobante_table_head['font_h'] = 7;
+            $this->comprobante_table_body['border'] = 0;
+            $this->comprobante_table_body['h'] = 4;
+
+            $flag_nro_item = false;
+            $count_head_cols = count($head_cols) ;            
+
+
+        } 
+        //Calcular espacio libre y de saltos
+        if ( $this->format == 'Ticket_A' ){
+
+            $espacio_libre = $ind_esp_libre = $espacio_repartir= 0;
+            for ($i=0; $i < $count_head_cols; $i++) {                 
+                if( $head_cols[$i][1] >= 30 ){
+                    $espacio_libre += $head_cols[$i][1];
+                    $head_cols[$i][1] = 100; // % porcentaje
+                    $ind_esp_libre ++;
+                }
+            }
+
+            $espacio_repartir = number_format($espacio_libre / ( $count_head_cols - ($ind_esp_libre) ),2);
+
+            for ($i=0; $i < $count_head_cols; $i++) {                 
+                if( $head_cols[$i][1] < 30 ){                   
+                    $head_cols[$i][1] += $espacio_repartir; // % porcentaje
+                }
+            }
+
+        } 
+        
+        $th = $this->comprobante_table_head;
+        $this->SetFont('helvetica', '', $th['font_h']);
+
+
+        $nro_item_w = 0; //el width de item
+        if($flag_nro_item){ //Mostrar nro de item
+            $nro_item_w = 5 * ($th['max_w']/100);
+            $this->comprobante_table_head['max_w'] -= $nro_item_w;
+
+            $this->Cell($nro_item_w, $th['h'], 'Item', $th['border'], 0, 'C', 1); 
+        }
+
+        $th = $this->comprobante_table_head;
+
+        //print_r($head_cols);exit();        
+        foreach ($head_cols as $key => $value) {
+            $cell_w = $value[1] * ($th['max_w']/100);//Calculo el espacio en porcetanje
+            $align_td = ( isset($value[2]))? $value[2] :'C';
+            $this->Cell($cell_w, $th['h'],  $value[0], $th['border'], 0, $align_td, 1);
+            if($cell_w >=$th['max_w']){
+                $this->Ln(); 
+            }
+        }        
+        $this->Ln();
+               
+        
+
+        $tb = $this->comprobante_table_body;
+        $fill = $nro_item =  0;       
+
+        foreach ($data as $key => $val) {
+
+            $hc_i = 0; // order de width para las cabecera
+            $h_min = 0;//heigt minimo
+
+            foreach ($val as $skey => $svalue) {
+
+                $cell_w = $head_cols[$hc_i][1] * ($th['max_w']/100);
+                $new_h = $this->getNumLines($svalue,$cell_w);
+                $h_min = ($new_h>$h_min)?$new_h:$h_min;
+            }
+
+            $h_min *= 6;//heigt minimo
+
+            //Mostrar nro de item
+            if($flag_nro_item){$this->Cell($nro_item_w, $h_min, ++$nro_item, $tb['border'], 0, 'R', $fill);}
+            
+            //Eliminar parte de array 
+            $data_add = $val[$col_add_data["data"]];
+            unset($val[$col_add_data["data"]]);
+
+            foreach ($val as $skey => $svalue) {
+                $cell_w = $head_cols[$hc_i][1] * ($th['max_w']/100);                
+                $align_td = ( isset($head_cols[$hc_i][2]))? $head_cols[$hc_i][2] :'L';
+
+                $tb['h'] = $h_min;//heigt minimo
+                $ln_new = 0;
+
+                if($cell_w >=$th['max_w']){
+                   $ln_new = 1;
+                }
+                //$this->Cell($cell_w, $tb['h'], $svalue, $tb['border'], 0,$align_td , $fill);
+                $nuevo = $this->MultiCell($cell_w, $h_min, $svalue , $tb['border'], $align_td , $fill, $ln_new);
+                
+                $hc_i++;
+                
+            }
+            $this->Ln(); 
+
+            if(trim($data_add)!= '' && !is_null($data_add) ){
+
+                $hc_i = 0;
+                $this->SetFont('helvetica', '', $th['font_h'] - 2);
+
+                if($flag_nro_item){$this->Cell($nro_item_w, $h_min, '', $tb['border'], 0, 'R', $fill);}
+                
+                foreach ($val as $skey => $svalue) {
+                    $cell_w = $head_cols[$hc_i][1] * ($th['max_w']/100);                
+                    $align_td = ( isset($head_cols[$hc_i][2]))? $head_cols[$hc_i][2] :'L';
+
+                    $tb['h'] = $h_min;//heigt minimo
+                    $ln_new = 0;
+
+                    if($cell_w >=$th['max_w']){ $ln_new = 1;}
+
+                    $val_data_add = $skey == $col_add_data['col_add'] ? "  ".$data_add : '';
+                    
+                    $nuevo = $this->MultiCell($cell_w, $h_min, $val_data_add , $tb['border'], $align_td , $fill, $ln_new);
+                    
+                    $hc_i++;
+                    
+                }
+                $this->SetFont('helvetica', '', $th['font_h']);
+
+
+                $this->Ln(); 
+            }
+
+
+            $fill = !$fill; //Flag de coor de celda  
+        }
+
+        $this->Cell($th['max_w'] + $nro_item_w, 2, '', 'T',0); 
+        $this->Ln(1); 
+             
+//        
+    }
+
     public function data_table_footer( $formato, $data ,$msj) {
 
 

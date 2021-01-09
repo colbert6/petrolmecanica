@@ -81,7 +81,7 @@ class Ventas extends MY_Controller {
         $this->load->model('almacen');
         $this->load->model('get_data');
 
-        $output = array('cliente_base' => $this->cliente->get_cliente('idcliente',0) ); 
+        $output = array('cliente_base' => $this->cliente->get_cliente('idcliente',1) ); 
         $get_clientes = $this->load->view('get_data/clientes', $output,true) ;
 
         $output = array( 'onSelected' => 'add_detalle(obj);' ); //cuando se seleccione el valor

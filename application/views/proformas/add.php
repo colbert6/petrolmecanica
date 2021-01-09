@@ -4,6 +4,10 @@
     overflow-y: scroll;  
   }
 
+  .ocultar_info_item {
+    display: none;
+  }
+
 
 </style>
 
@@ -96,23 +100,7 @@
         <div id="div_detalle_venta">
 
             
-        <div class="col-xs-12 col-md-6 item" style="padding-right: 0px;padding-bottom: 4px;" id_prod="1">
-          <div class="input-group">
-            <span class="input-group-btn">
-              <button type="button" class="btn btn-danger btn-flat">
-                <i class="fa fa-times" onclick="remover_detalle_venta(1)"></i></button></span>
-                <input class="form-control" name="prodtext[]" value="pistola automática 3/4&quot;"><input type="hidden" name="idprod[]" value="1">
-            <span class="input-group-btn">
-              <button type="button" class="btn btn-info btn-flat">
-                <i class="fa fa-sort-amount-desc" onclick="add_descripcion_producto_venta(1)"></i></button></span>
-          </div>  
-        </div>  
-
-        <div class="col-xs-4 col-md-2 item_cantidad" style="padding-right: 0px;padding-bottom: 4px;" id_prod="1"><input type="number" name="cant[]" class="form-control" placeholder="Cantidad" value="1" onkeyup="calcular_subtotal(1)" onchange="calcular_subtotal(1)"></div><div class="col-xs-4 col-md-2 item_precio" style="padding-right: 0px;padding-bottom: 4px;" id_prod="1"><input type="number" name="prec[]" class="form-control" placeholder="Precio" value="0.00" onkeyup="calcular_subtotal(1)" onchange="calcular_subtotal(1)"></div><div class="col-xs-4 col-md-2 item_subtotal" style="padding-right: 0px;padding-bottom: 4px;" id_prod="1"><input type="number" class="form-control" readonly="" tabindex="-1" value="0.00"></div>
-
-        <div class="col-xs-12 col-md-12 item" style="padding-right: 0px;padding-bottom: 4px;" id_prod="1">
-          <textarea class="form-control"></textarea>
-        </div>
+        
 
             
         </div>  

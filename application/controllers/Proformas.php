@@ -214,7 +214,9 @@ class Proformas extends MY_Controller {
         $pdf->comprobante_data( 4 ,$data_comprobante);
 
         $width_cols = array(  array('Descripcion',60 ,'L') , array('Cant.',10, 'R'),array('P.unit',15,'R'),array('Subtotal',15,'R') );
-        $pdf->data_table( $det_proforma ,  $width_cols, true);//data , headers, indice
+
+        $col_add_data = array('col_add'=> 'descripcion', 'data' => 'info');
+        $pdf->data_table_informacion( $det_proforma , $width_cols, $col_add_data, true);//data , headers, data añadir a columna, indice
 
        
         $data_footer = array('monto_letra' => array( 'texto' => num_to_letras($proforma['Total'])),

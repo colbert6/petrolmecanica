@@ -21,10 +21,13 @@ function add_detalle(obj){
 	html = "<div class='col-xs-12 col-md-6 item' style='padding-right: 0px;padding-bottom: 4px;' id_prod=\'"+idp+"\'>";
 	html += "<div class='input-group'>";
 	html += "<span class='input-group-btn'>";	
-	html += "<button type='button' class='btn btn-danger btn-flat' ><i class='fa fa-times'  onclick=\'remover_detalle_venta("+idp+")\'></i></button>";
+	html += "<button type='button' class='btn btn-danger btn-flat' onclick=\'remover_detalle_venta("+idp+")\'><i class='fa fa-times'></i></button>";
 	html += "</span>";
 	html += "<input class='form-control' name='prodtext[]' value=\'"+obj.producto+"\'>";
 	html += "<input type='hidden' name='idprod[]'  value=\'"+idp+"\'>";
+  html += "<span class='input-group-btn'>"; 
+  html += "<button type='button' class='btn btn-info btn-flat' onclick=\'mostrar_info_item_venta("+idp+")\'><i class='fa fa-sort-amount-desc'></i></button>";
+  html += "</span>";
 	html += "</div>  ";
 	html += "</div>  ";
 
@@ -40,6 +43,10 @@ function add_detalle(obj){
 	html += "<input type='number' class='form-control' readonly tabindex='-1'  value=\'"+obj.precio_venta+"\'>";
 	html += "</div>";
 
+  html += "<div class='col-xs-12 col-md-12 item_info ocultar_info_item' style='padding-bottom: 4px;' id_prod=\'"+idp+"\'>";
+  html += "<textarea class='form-control' name='info_item[]' placeholder='Escribe más información del item'></textarea>";
+  html += "</div>";
+
 	$("#div_detalle_venta").append(html);
   	$('#cantidadItem').html($('.item').length);
 
@@ -47,6 +54,10 @@ function add_detalle(obj){
    
   	calcular_total();
 
+}
+
+function mostrar_info_item_venta(idproducto){
+  $('div.item_info[id_prod='+idproducto+']').toggleClass('ocultar_info_item');
 }
 
 function remover_detalle_venta(idproducto){
@@ -103,7 +114,8 @@ var save = function(){
                                       label: "Imprimir",
                                       className: 'btn-info',
                                       callback: function() {
-                                            open_imprimir('proformas/print_proforma?idproforma=', idsave);   
+                                            open_imprimir('proformas/print_proforma?idproforma=', idsave);
+                                               
                                       }
                                     },
                                     

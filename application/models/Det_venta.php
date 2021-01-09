@@ -69,24 +69,7 @@ class Det_venta extends CI_Model {
 
     public function cpe_detventa($idventa)
     {    
-
-        /*
-        "NIU" as unidad_de_medida,
-                  prod.codigo as codigo ,
-                  cat.codigo_std as codigo_producto_sunat,
-                  detv.descripcion  as descripcion,
-                  dvent.cantidad as cantidad,
-                  dvent.precio  as valor_unitario,
-                  dvent.precio  as precio_unitario,
-                  "0" as    descuento,
-                  ( dvent.cantidad * dvent.precio )  as subtotal,
-                  "8" as tipo_de_igv,
-                  "0" as igv,
-                  ( dvent.cantidad * dvent.precio )  as total,
-                  "false" as anticipo_regularizacion,
-                  "" as anticipo_documento_serie,
-                  "" as anticipo_documento_numero
-        */    
+         
         $this->db->select('
 
 

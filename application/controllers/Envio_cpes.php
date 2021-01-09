@@ -51,16 +51,17 @@ class Envio_cpes extends MY_Controller {
         $crud = new grocery_CRUD();        
 
         $crud->columns('idmaster','fecha_emision','comprobante' , 'estado');
-        $crud->set_table('cpe_pendientes');
+        $crud->set_table('cpe_envio_pendientes');
         $crud->set_primary_key('idmaster');
         //$crud->set_relation('usuario_envio','colaborador','nombre');
         
         $crud->unset_delete();
+        $crud->unset_edit();
 
         $crud->order_by('fecha_emision','desc');
 
-        $crud->add_action('envio cpe', '', base_url('Envio_cpes/envio_pse/?tipo_envio=generar_comprobante&id='),'fa fa-send cpe_envio');
-        $crud->add_action('envio cpe anulacion', '', base_url('Envio_cpes/envio_pse/?tipo_envio=generar_anulacion&id='),'fa fa-close cpe_envio');
+        $crud->add_action('envio cpe anulacion', '', base_url('Envio_cpes/envio_cpe/?tipo_envio=generar_anulacion&id='),'fa fa-close cpe_envio');
+        $crud->add_action('envio cpe', '', base_url('Envio_cpes/envio_cpe/?tipo_envio=generar_comprobante&id='),'fa fa-send cpe_envio');
 
         $crud->unset_delete();
         $crud->unset_clone();
@@ -138,14 +139,10 @@ class Envio_cpes extends MY_Controller {
         
     }
 
-    public function envio_pse() {
+    public function envio_cpe() {
         $idventa = $this->input->get('id');
         $tipo_envio = $this->input->get('tipo_envio');
         
-        $this->load->helper('nubefact');
-        //echo "<pre>";
-
-        $enlace='-';
         $data_json = array();
 
         //Obtenermos la data en json
@@ -156,14 +153,15 @@ class Envio_cpes extends MY_Controller {
         }
 
         //obtenemos el resultado
-        //print_r( $data_json);exit();
+        echo "<pre>";
+        print_r( $data_json);exit();
 
         if(count($data_json) &&  $data_json != 'null' ){
             
             $result = envio_json($data_json);//la respuesta devuelve en formatojson_decode($result_json, true);
             
         }else{
-            $result = array('errors'=>'No se encontro datos en la consulta.', 'codigo'=>666);
+            $result = array('errors'=>'No se encontro datos del comprobante.', 'codigo'=>666);
         }
 
 
@@ -207,8 +205,6 @@ class Envio_cpes extends MY_Controller {
              );
 
             $this->envio_cpe->set_envio($datos_result_cpe);
-
-            $enlace = $result["enlace"];
         }
 
         print_r(json_encode( $result));
@@ -225,17 +221,13 @@ class Envio_cpes extends MY_Controller {
         $data = $this->venta->cpe_venta($idventa);        
 
         if( count($data) ) {
-
             $data_det = $this->det_venta->cpe_detventa($idventa);
-            $data["items"]= $data_det;
-
-            $data_json =json_encode($data);
-
+            $data["detalle"]= $data_det;
         }else{
-            $data_json = array();
+            $data = array();
         }
 
-        return $data_json;
+        return $data;
     }
 
     public function get_venta_json($idventa,$tipo = 'generar'){ 
@@ -265,3 +257,13 @@ class Envio_cpes extends MY_Controller {
 
 
 }
+
+
+/*
+vista pendientes
+SELECT ve.idventa as idmaster, ve.fecha_venta as fecha_emision, ve.nro_documento as comprobante, ve.estado as estado
+FROM venta as ve
+WHERE (ve.envio_cpe_emision = 0) or (ve.envio_cpe_baja = 0 and ve.estado ='anulado')
+ORDER BY ve.fecha_venta ASC
+
+*/

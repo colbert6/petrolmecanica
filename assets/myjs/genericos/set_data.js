@@ -75,5 +75,5 @@ function open_imprimir (url_controller, idsave){
     url = base_url + url_controller + idsave;
     //window.open(url, '_blank');
     window.open(url);
-    //$(location).attr('href', url_reload);   
+    $(location).attr('href', url_reload);   
 }

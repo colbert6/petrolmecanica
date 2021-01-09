@@ -26,6 +26,7 @@ class Det_proforma extends CI_Model {
             $this->presentacion_idpresentacion = $producto->presentacion_minima;
             $this->idpresentacion = $producto->presentacion_minima;
             $this->descripcion = $_POST['prodtext'][$i];
+            $this->informacion = $_POST['info_item'][$i];
             $this->cantidadxpresentacion = 1;
 
             $this->precioxpresentacion = $_POST['prec'][$i];
@@ -51,6 +52,7 @@ class Det_proforma extends CI_Model {
                         detp.descripcion as descripcion,
                         detp.cantidad as cantidad,
                         detp.precioxpresentacion as 'precio',
+                        detp.informacion as info,
                         detp.subtotal as subtotal    ");
         $this->db->from('detalle_proforma detp');    
 
