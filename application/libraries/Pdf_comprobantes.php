@@ -490,8 +490,6 @@ class Pdf_comprobantes extends TCPDF
             }
         }        
         $this->Ln();
-               
-        
 
         $tb = $this->comprobante_table_body;
         $fill = $nro_item =  0;       
@@ -501,21 +499,22 @@ class Pdf_comprobantes extends TCPDF
             $hc_i = 0; // order de width para las cabecera
             $h_min = 0;//heigt minimo
 
+            //Eliminar parte de array 
+            $data_add = trim($val[$col_add_data["data"]]);
+            unset($val[$col_add_data["data"]]);
+
             foreach ($val as $skey => $svalue) {
 
                 $cell_w = $head_cols[$hc_i][1] * ($th['max_w']/100);
                 $new_h = $this->getNumLines($svalue,$cell_w);
                 $h_min = ($new_h>$h_min)?$new_h:$h_min;
+
             }
 
             $h_min *= 6;//heigt minimo
 
             //Mostrar nro de item
-            if($flag_nro_item){$this->Cell($nro_item_w, $h_min, ++$nro_item, $tb['border'], 0, 'R', $fill);}
-            
-            //Eliminar parte de array 
-            $data_add = $val[$col_add_data["data"]];
-            unset($val[$col_add_data["data"]]);
+            if($flag_nro_item){$this->Cell($nro_item_w, $h_min, ++$nro_item, $tb['border'], 0, 'R', $fill);}    
 
             foreach ($val as $skey => $svalue) {
                 $cell_w = $head_cols[$hc_i][1] * ($th['max_w']/100);                
@@ -536,6 +535,27 @@ class Pdf_comprobantes extends TCPDF
             $this->Ln(); 
 
             if(trim($data_add)!= '' && !is_null($data_add) ){
+
+                $hc_i = 0; // order de width para las cabecera
+                $h_min = 0;//heigt minimo
+
+                foreach ($val as $skey => $svalue) {
+
+                    $val_data_add = $skey == $col_add_data['col_add'] ? $data_add : '';
+
+                    $cell_w = $head_cols[$hc_i][1] * ($th['max_w']/100);
+                    $new_h = $this->getNumLines($val_data_add,$cell_w);
+                    $h_min = ($new_h>$h_min)?$new_h:$h_min;
+                    $hc_i++;
+                }
+
+                if( $h_min > 5 ){
+                    $data_add = "[...]";
+                    $h_min = 1;
+                }
+
+
+                $h_min *= 4;//heigt minimo
 
                 $hc_i = 0;
                 $this->SetFont('helvetica', '', $th['font_h'] - 2);
@@ -576,8 +596,6 @@ class Pdf_comprobantes extends TCPDF
 
     public function data_table_footer( $formato, $data ,$msj) {
 
-
-
         if( $this->format == 'A4'){
            
             $this->comprobante_codigo_qr['w'] = 25;
@@ -590,19 +608,16 @@ class Pdf_comprobantes extends TCPDF
                 $this->comprobante_table_footer_totales['h'] = 5;
                 $this->comprobante_mensaje['w'] = 170;
             }
-            if($this->getY() > $this->max_heigth + $this->h_footer ){ 
-                $this->AddPage() ;
-                $this->Setx($this->pos_x);
-            }
+            if($this->getY() > $this->max_heigth ){
+                $this->Ln(5);
+            }            
 
-            $this->pos_y = $this->getY();
-            $this->pos_x = $this->getX();
+            $pos_y_footer = $this->getY();
+            $pos_x_footer = $this->getX();         
 
-            
-
-            $this->comprobante_codigo_qr['pos_y'] = $this->pos_y + 8;
-            $this->comprobante_mensaje['pos_y'] = $this->pos_y + 8;
-            $this->comprobante_mensaje['pos_x'] = $this->pos_x +  $this->comprobante_codigo_qr['w'] + 10;
+            $this->comprobante_codigo_qr['pos_y'] = $pos_y_footer + 8;
+            $this->comprobante_mensaje['pos_y'] = $pos_y_footer + 8;
+            $this->comprobante_mensaje['pos_x'] = $pos_x_footer +  $this->comprobante_codigo_qr['w'] + 10;
 
 
 
@@ -716,7 +731,7 @@ class Pdf_comprobantes extends TCPDF
             $this->SetFont('', '', $cm['font_h']);
             $text= "Obs : ".$observacion." <br>";
             $text.="<br>".$this->cuentas_bancarias;
-            $this->MultiCell( $ctfl['w'] + $ctft['w'], '', $text,  $cm['border'],  $cm['align'],false,0,'', '',true,0,true );
+            $this->MultiCell( $ctfl['w'] + $ctft['w'], '', $text,  $cm['border'],  $cm['align'],false,1,'', '',true,0,true );
 
 
         }   elseif( $formato == 'pie_guia'){
@@ -736,9 +751,85 @@ class Pdf_comprobantes extends TCPDF
 
         }    
 
-        $this->Ln();       
+        $this->Ln(1);    
+
+
     }
 
+    public function add_imagen(){
+        $this->Ln(1);
+        
+        $imags = array( array('img' => 'aile.jpg', 'w'=> 20, 'h' => 10, 'esp' => 1  ),
+            array('img' => 'blue_retina.png', 'w'=> 17.65, 'h' => 10, 'esp' => 1  ),
+            array('img' => 'cim_tek.png', 'w'=> 27, 'h' => 9.72, 'esp' => 1  ),
+            array('img' => 'dresser.png', 'w'=> 21, 'h' => 10, 'esp' => 1   ),            
+            array('img' => 'GVR_logo.jpg', 'w'=> 20, 'h' => 10, 'esp' => 1   ),
+            array('img' => 'kolorkut.jpg', 'w'=> 38, 'h' => 10, 'esp' => 1   ),
+            array('img' => 'fe_petro.jpg', 'w'=> 33, 'h' => 10, 'esp' => 1   ),
+            array('img' => 'Kraus.jpg', 'w'=> 25, 'h' => 10, 'esp' => 1  ),
+            array('img' => 'opw.jpg', 'w'=> 38, 'h' => 9, 'esp' => 1  ),
+            array('img' => 'red_jacket.jpg', 'w'=> 29, 'h' => 6, 'esp' => 1  ),
+            array('img' => 'tokheim.jpg', 'w'=> 26, 'h' => 10, 'esp' => 1  ),
+         );
 
+
+        $x_default = $pos_x =$this->GetX() - 5;
+        $y_default = $this->GetY();
+
+        $salto_linea = 10;
+        foreach ($imags as $key => $val) { 
+
+            $path_img = 'assets/img_logos/'.$val['img'];            
+            $this->Image($path_img,$x_default,$y_default,$val['w'],$val['h'],'', '', '', false, 300, '', false, false, 0);
+            $x_default+= $val['w'] + $val['esp'];
+
+            if ($x_default > $this->max_width - 15) {
+
+                $x_default = $pos_x;
+                $y_default += 10;
+                $salto_linea +=11;
+            }
+        }
+
+        $this->Ln($salto_linea );
+    }
+
+     public function anexo_informacion( $data, $flag_nro_item = false ) {//suma de $widthcols = 200 - $flag_nro_item
+        /*$this->SetAutoPageBreak(TRUE, 10);
+        $this->AddPage();*/
+        
+        $this->Ln(10);
+        //echo "string".$this->GetY();   
+        $this->Sety($this->GetY());
+        $this->Setx($this->pos_x);
+        
+        $this->Ln(1);
+        $this->Cell(0, 6, 'ANEXO - DETALLE DE PRODUCTOS', 0, 1, 'C', 1); 
+        $this->Ln(1); 
+
+        $tb = $this->comprobante_table_body;
+        $fill = $nro_item =  0;       
+
+        foreach ($data as $key => $val) {
+
+            $nro_item++;
+            $this->SetFont('helvetica', '', 10);
+            $this->Setx($this->pos_x);
+            $producto = $nro_item.".- ".$val['descripcion'];
+            $this->Cell(0, 6, $producto, 'LTR', 1, 'L', $fill); 
+            //$w, $h=0, $txt='', $border=0, $ln=0, $align='', $fill=false,
+            
+            $this->SetFont('helvetica', '', 8);  
+            $info = str_replace("\n", "<br>",$val['info']);
+            $this->writeHTML($info, 1, 0, 1, 0, 'J');            
+            $this->Ln(1);              
+
+            $fill = !$fill; //Flag de coor de celda  
+        }
+
+        $this->Ln(1); 
+             
+//        
+    }
 
 }

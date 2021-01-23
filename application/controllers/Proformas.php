@@ -67,7 +67,7 @@ class Proformas extends MY_Controller {
         $this->load->js('assets/myjs/genericos/calculos.js');//genericos
         $this->load->js('assets/myjs/genericos/get_data.js');//genericos
         $this->load->js('assets/myjs/genericos/set_data.js');//genericos
-        $this->load->js('assets/myjs/proformas.js');
+        $this->load->js('assets/myjs/proformas_.js');
         
         $this->load->js('assets/js/bootbox.min.js');
         $this->load->js('assets/js/typeahead/typeahead.min.js');
@@ -173,12 +173,12 @@ class Proformas extends MY_Controller {
         //$orientation = ())? $this->input->get('orientation') : 'P' ;
         //$format = (isset($this->input->get('format')))? $this->input->get('format'):'A4';
 
-        
         $proforma = $this->proforma->get_print_proforma($this->input->get('idproforma'));
         $det_proforma = $this->det_proforma->get_print_det_proforma($this->input->get('idproforma'));
+        $det_proforma_info = $this->det_proforma->get_print_det_proforma_info($this->input->get('idproforma'));
 
         //echo "<pre>";print_r($det_venta);exit();
-        $nombrepdf  = 'Proforma _ '.$proforma['Nro_documento']; ;
+        $nombrepdf  = 'Proforma _ '.$proforma['Nro_documento']; 
 
         $this->load->library('Pdf_comprobantes');
         $pdf = new Pdf_comprobantes($orientation, 'mm', $format , true, 'UTF-8', false);
@@ -189,12 +189,10 @@ class Proformas extends MY_Controller {
         //Parametros del PDF
         $pdf->SetTitle($nombrepdf);
         
-        $pdf->SetAutoPageBreak(TRUE, 10);
+        $pdf->SetAutoPageBreak(TRUE, 15);
         $pdf->AddPage();
 
-        /*$nuevo = $pdf->MultiCell(10,'','hola que tal ashdasdasdas', 1,'L',0,0);
-        $nuevo = $pdf->MultiCell(10,'','hola que t222al ashdasdasdas', 1,'L',0,0);
-        $nuevo = $pdf->MultiCell(10,'','hola que ta2l 2ashd11asdaaasdas', 1,'L',0,1);*/
+        $pdf->add_imagen();
 
         $data_usuario_receptor = array('Cliente' => array($proforma['Cliente'],'1'),
                                   'RUC' => array($proforma['RUC/DNI'],'1'),
@@ -215,17 +213,18 @@ class Proformas extends MY_Controller {
 
         $width_cols = array(  array('Descripcion',60 ,'L') , array('Cant.',10, 'R'),array('P.unit',15,'R'),array('Subtotal',15,'R') );
 
-        $col_add_data = array('col_add'=> 'descripcion', 'data' => 'info');
-        $pdf->data_table_informacion( $det_proforma , $width_cols, $col_add_data, true);//data , headers, data añadir a columna, indice
-
+        $pdf->data_table( $det_proforma , $width_cols, true);//data , headers, data añadir a columna, indice
        
         $data_footer = array('monto_letra' => array( 'texto' => num_to_letras($proforma['Total'])),
                             'monto' => array('op_importe'=>$proforma['Total']),
                             'observacion' => array( 'texto' =>  $proforma['Observacion'])  
                                );
         $pdf->data_table_footer( 'pie_proforma',  $data_footer , 'msj');
-        
-        $pdf->Output($nombrepdf, 'I');
+
+        $pdf->anexo_informacion( $det_proforma_info, true);//data , headers, data añadir a columna, indice
+
+        ob_end_clean();
+        $pdf->Output($nombrepdf.'.pdf', 'I');
     }
 
    

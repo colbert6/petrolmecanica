@@ -180,8 +180,8 @@ class Venta extends CI_Model {
     {        
         $this->db->select(' 
 
-            IF( LENGTH( vent.cliente_documento) = 11, 6, IF( LENGTH( vent.cliente_documento ) = 8, 1,  "-" )  ) AS cliente_tipo_de_documento,
-            IF( LENGTH( vent.cliente_documento) > 0, vent.cliente_documento, "0")  AS cliente_numero_de_documento,
+            IF( LENGTH( vent.cliente_documento) = 11, 6, IF( LENGTH( vent.cliente_documento ) = 8, 1,  "-" )  ) AS cliente_tipodocumento,
+            IF( LENGTH( vent.cliente_documento) > 0, vent.cliente_documento, "0")  AS cliente_numerodocumento,
             vent.cliente_razon_social as cliente_nombre,
             vent.cliente_direccion, 
             "PE" as cliente_pais,
@@ -206,12 +206,15 @@ class Venta extends CI_Model {
             vent.igv as total_igv,
             vent.subtotal as sub_total,
             vent.total as total,
+            "" as total_letras,
+            "" as nro_otr_comprobante,
+            "" as transporte_nro_placa,
             "PEN" as cod_moneda ,
             "0000" as cod_sucursal_sunat , 
-            DATE_FORMAT( vent.fecha_venta,"%Y-%m-%d") as fecha_de_emision, 
-            DATE_FORMAT( vent.fecha_venta,"%Y-%m-%d") as fecha_de_vencimiento,
+            DATE_FORMAT( vent.fecha_venta,"%Y-%m-%d") as fecha_comprobante, 
+            DATE_FORMAT( vent.fecha_venta,"%Y-%m-%d") as fecha_vto_comprobante,
 
-            "01" as cod_tipo_documento ,
+            01 as cod_tipo_documento ,
             SUBSTRING_INDEX(vent.nro_documento,"-",1)  AS  serie_comprobante,
             (SUBSTRING_INDEX(vent.nro_documento,"-",-1) * 1) as numero_comprobante
             ');
@@ -228,13 +231,14 @@ class Venta extends CI_Model {
 
     public function cpe_venta_anulacion($idventa)
     {        
-        $this->db->select(" 
-                    'generar_anulacion' as operacion,
-                    tipo_comp.codigo_nubefact as tipo_de_comprobante, 
-                    SUBSTRING(vent.nro_documento, 1, 4) as serie,
-                    (SUBSTRING(vent.nro_documento, 6, 8) * 1) as numero,
-                    'ERROR EN EL PEDIDO' as motivo,
-                    '' as codigo_unico ");
+        $this->db->select('
+                1 as ITEM_DET,
+                "01" as TIPO_COMPROBANTE,
+                SUBSTRING(vent.nro_documento, 1, 4) as SERIE,
+                (SUBSTRING(vent.nro_documento, 6, 8) * 1) as NUMERO,
+                "ERROR EN EL PEDIDO" as MOTIVO,
+                DATE_FORMAT( vent.fecha_venta,"%Y-%m-%d") as fecha_comprobante
+                ');
 
         $this->db->from('venta as vent');
         $this->db->join('tipo_comprobante tipo_comp', 'tipo_comp.idtipo_comprobante = vent.tipo_comprobante_idtipo_comprobante');

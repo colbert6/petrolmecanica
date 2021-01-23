@@ -52,6 +52,22 @@ class Det_proforma extends CI_Model {
                         detp.descripcion as descripcion,
                         detp.cantidad as cantidad,
                         detp.precioxpresentacion as 'precio',
+                        detp.subtotal as subtotal    ");
+        $this->db->from('detalle_proforma detp');    
+
+        $this->db->where('detp.proforma_idproforma',$idproforma);
+        $query = $this->db->get();
+
+        return $query->result_array();
+    }
+
+    public function get_print_det_proforma_info($idproforma)
+    {        
+        $this->db->select("
+                        
+                        detp.descripcion as descripcion,
+                        detp.cantidad as cantidad,
+                        detp.precioxpresentacion as 'precio',
                         detp.informacion as info,
                         detp.subtotal as subtotal    ");
         $this->db->from('detalle_proforma detp');    

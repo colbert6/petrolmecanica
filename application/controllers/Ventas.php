@@ -120,16 +120,16 @@ class Ventas extends MY_Controller {
     public function save()
     {   
         
-
+        $validar_envio_cpe = 1;
         $return = array( 'estado_validacion' => true , 'estado' => false, 'msj' => '' , 'error'=> '' , 'idsave' => '' , 'enlace' => '');  
 
         //VALIDACIONES
-        
-
 
 
         //Guardar movimiento
-        $this->db->trans_start();//Inicio de transaccion
+        $this->db->trans_start();//Inicio de transaccion        
+
+        try{
 
         $this->load->model('get_data');
         $idserie = $this->input->post('idserie');
@@ -152,7 +152,7 @@ class Ventas extends MY_Controller {
             if( $ruc_cliente != '00000000000' AND strlen($ruc_cliente) == 11 ){
                 $nro_documento_cliente = $ruc_cliente;
             }else{
-                $return['error']= 'Número de RUC incorrecto';
+                $return['error']= 'ERROR: Número de RUC incorrecto.';
                 $return['estado_validacion'] = false;     
             }
 
@@ -165,7 +165,7 @@ class Ventas extends MY_Controller {
                 }else if($dni_cliente != '00000000' AND strlen($dni_cliente) == 8){
                     $nro_documento_cliente = $dni_cliente;                          
                 }else{
-                    $return['error']= 'Debe ingresar número de documento valido para ventas mayores a 700 soles.';
+                    $return['error']= 'ERROR: Debe ingresar número de documento valido para ventas mayores a 700 soles.';
                     $return['estado_validacion'] = false;
                 }
             }
@@ -217,49 +217,59 @@ class Ventas extends MY_Controller {
         if ($this->db->trans_status() === FALSE) { 
 
             $error = $this->db->error();
-            $return['msj']= $error['message'];
-            $return['error']= $error['message'];           
+            $return['msj'] = $return['error']= 'ERROR: Operaciones de Base de Datos. <br>'.$error['message'];           
             $this->db->trans_rollback(); 
 
         } else {
 
-            $this->db->trans_commit();//$this->db->trans_rollback(); 
-            $return['estado']=true;
+            if($validar_envio_cp){//Envio exitoso obligatorio para crear una venta
 
+                //Envio CPE
+                $tipo_envio="generar_comprobante";   
+                $result_envio_cpe = $this->primer_envio_cpe($tipo_envio,$idventa);
 
-            /*$return['enlace'] = '-';
-            $respuesta_pse = $this->envio_pse($idventa,'generar_comprobante');
+                if($result_envio_cpe['respuesta'] == 'ok' && $this->db->trans_status() !== FALSE){
+                    $this->db->trans_commit();
+                    $return['estado']=true;
+                }else{
+                    $error = $this->db->error();
+                    $this->db->trans_rollback(); 
+                    $return['msj'] =  $return['error'] = 'ERROR: Envio electrónico. <br>- '.$result_envio_cpe['mensaje'].'<br>- '.$error['message'];  
+                }
 
-            if( isset($respuesta_pse['enlace'])  ){
-              $return['enlace'] = $respuesta_pse['enlace'];  
-            }*/
+            }else{
+                //Si no se desea validar el envio a cpe, $validar_envio_cp=0
+                $this->db->trans_commit(); 
+                $return['estado']=true;
+            }
+                
+        }
 
+        } catch (Exception $e) {
+
+            $this->db->trans_rollback(); 
+            $return['error']= "ERROR: Controller > ".$e->getMessage(); 
         }
 
        
 
         print json_encode($return);
+            
     }
 
     public function anular()
     {   
 
-
         $return = array('estado' => false, 'msj' => '' , 'error'=> '' , 'idsave' => '' , 'enlace' => '');        
-
-
-
         $idventa = $this->input->get('idventa');
 
         $this->load->model('venta');  
         $venta = $this->venta->venta_byId($idventa);
-
-
         
+        if($venta['estado'] == 'vigente'){     
 
-        
-        if($venta['estado'] == 'vigente'){
-
+            //Guardar movimiento
+            $this->db->trans_start();//Inicio de transaccion         
 
             //Modificar Stock
             $this->load->model('stock');       
@@ -276,17 +286,38 @@ class Ventas extends MY_Controller {
             $this->load->model('det_venta');    
             $this->det_venta->anular_det_venta($idventa);
 
-            /*if($venta['idtipo_comprobante'] == $this->id_factura || $venta['idtipo_comprobante'] == $this->id_boleta ){
-                $this->envio_pse($idventa,"generar_anulacion");
-            }*/
+            //if($venta['idtipo_comprobante'] == $this->id_factura || $venta['idtipo_comprobante'] == $this->id_boleta ){}
 
-            //envio cpe
-            $return['estado'] = true;
-            $return['msj'] = 'Venta anulada'; 
+            if ($this->db->trans_status() === FALSE) {
+
+                $error = $this->db->error();
+                $return['msj'] = $return['error']= "ERROR: Operaciones de Base de Datos. <br>".$error['message'];  
+                $this->db->trans_rollback(); 
+
+            }else{        
+
+                //Envio anulacion CPE
+                $tipo_envio="generar_anulacion";   
+                $result_envio_cpe = $this->primer_envio_cpe($tipo_envio,$idventa);
+
+                if($result_envio_cpe['respuesta'] == 'ok' && $this->db->trans_status() !== FALSE){
+
+                    //$this->db->trans_commit();
+                    $this->db->trans_rollback(); 
+                    $return['estado'] = true;
+                    $return['msj'] = 'VENTA ANULADA'; 
+
+                }else{
+
+                    $error = $this->db->error();
+                    $this->db->trans_rollback(); 
+                    $return['msj'] = $return['error'] = 'ERROR: Envio electrónico. <br>- '.$result_envio_cpe['mensaje'].'<br>- '.$error['message'];    
+                }
+            }
 
         }else{
 
-            $return['msj']= 'ERROR: no se pudo anular la venta';      
+            $return['msj'] = $return['error'] = 'ERROR: La venta debe estar vigente.'; 
         } 
 
         print json_encode($return);
@@ -358,8 +389,7 @@ class Ventas extends MY_Controller {
         $width_cols = array(  array('Descripcion',40 ,'L') , array('Cant.',20, 'R'),array('P.unit',20,'R'),array('Subtotal',20,'R') );
         $pdf->data_table( $det_venta ,  $width_cols, true);       
         
-
-       
+      
 
 
         $cod_documento_client = '0';
@@ -469,116 +499,53 @@ class Ventas extends MY_Controller {
     ///--------------------------CPE--------------------
 
 
-    public function reenvio_pse($idventa,$tipo_envio ) {
+   public function primer_envio_cpe($tipo_envio,$idventa) {
 
-        $respuesta_reenvio = $this->envio_pse($idventa,$tipo_envio);
-        print_r(json_encode($respuesta_reenvio));
-    }
-
-    public function envio_pse($idventa,$tipo_envio ) {
-
-        $this->load->helper('nubefact');
-        //echo "<pre>";
-        $enlace='-';
+        //Parametros
+        /*$idventa = $this->input->get('id');
+        $tipo_envio = $this->input->get('tipo_envio');   */     
         $data_json = array();
+        $this->load->library('Facturalaya');
+        $envio_cpe = new Facturalaya();
 
-        //Obtenermos la data en json
+        //Creamos el array con la data del cpe
         if($tipo_envio == "generar_comprobante"){
-            $data_json = $this->generar_comprobante_json($idventa);
-        }else if($tipo_envio =="generar_anulacion"){
-            $data_json = $this->generar_anulacion_json($idventa);
-        }
-        //obtenemos el resultado
-
-        print_r($data_json);exit();
-        if(count($data_json)){
+            $data_json = $envio_cpe->generar_comprobante_json($idventa, $this);
+            if (isset($data_json["numero_comprobante"])) {
+                $data_json["numero_comprobante"] = $data_json["numero_comprobante"] * 1;
+            }
             
-            $result = envio_json($data_json);//la respuesta devuelve en formatojson_decode($result_json, true);
+        }else if($tipo_envio =="generar_anulacion"){
+            $data_json = $envio_cpe->generar_anulacion_json($idventa, $this);
+        }
+
+        //Validación - Problema con data del cpe
+        if(count($data_json) &&  $data_json != 'null' ){
+            $result = $envio_cpe->builder_cpe($data_json, $tipo_envio);
             
         }else{
-            $result = array('errors'=>'No se encontro datos en la consulta.', 'codigo'=>666);
+            $result = array('mensaje'=>'No se encontro datos del comprobante.', 
+                'respuesta'=> "error", 'titulo'=> "error",'cod_sunat'=> "error local" , 'codigo'=> "error local");            
         }
 
-
         $this->load->model('envio_cpe');
+        $data_json["tipo_envio"] = $tipo_envio;
+        $data_json["idmaster"] = $idventa;
+        
+        if($result['respuesta'] == 'ok'){ //Guardar 
+            $this->envio_cpe->set_envio($data_json, $result);//guardar registro envio
+            $this->envio_cpe->update_envio_cpe($idventa, $tipo_envio);//Actualizar en tabla venta
 
-        if (isset($result['errors'])) {
-            //Mostramos los errores si los hay
-            //echo $result['errors'];
-            $datos_result_cpe = array( 'errors' => $result['errors'],
-                            'tipo_envio' => $tipo_envio,
-                            'idmaster' => $idventa,
-                            'fecha' => date("Y-m-d H:i:s"),
-                            'codigo' => $result['codigo'],
-                            'usuario_envio' => $this->session->userdata('id_user')  );
-            $this->envio_cpe->set_error($datos_result_cpe);
-           
-
-        } else {
-            //Mostramos la respuesta
-            $data = json_decode($data_json, true);//algunos parametros que no secomparten
-
-            $datos_result_cpe = array(  
-
-                'idmaster' =>  $idventa,
-                'tipo' =>  $data["tipo_de_comprobante"],
-                'correlativo' =>  $data["numero"],
-                'serie' =>  $data["serie"],
-                'sunat_description' =>  $result["sunat_description"],
-                'sunat_note' =>  $result["sunat_note"],
-                'sunat_responsecode' =>  $result["sunat_responsecode"],
-                'sunat_soap_error' =>  $result["sunat_soap_error"],
-                'aceptada_por_sunat' =>  $result['aceptada_por_sunat'],
-                'usuario_envio' =>  $this->session->userdata('id_user') ,
-                'envio_pse' =>  true,
-                'fecha_envio' =>  date("Y-m-d H:i:s"),
-                'fecha_mod' =>  '',
-                'estado_envio' =>  '-',
-                'tipoenvio' => $tipo_envio,
-                'fecha_emi' =>  '',
-                'enlace' =>  $result["enlace"]
-             );
-
-            $this->envio_cpe->set_envio($datos_result_cpe);
-
-            $enlace = $result["enlace"];
+        }else{ //No debería ingresar, ya que toda venta debe ser enviada  
+            $result['codigo'] = isset($result['codigo'])? $result['codigo']:$result['cod_sunat'];
+            $result['mensaje'] = isset($result['mensaje'])? $result['mensaje']:$result['msj_sunat'];
+            $this->envio_cpe->set_error($data_json, $result);//guardar registro error envio
         }
 
         return $result;
-        //echo"<pre>"; print_r($data_json); print_r($result);
 
     }
-
-    public function generar_comprobante_json($idventa){ 
-       
-        //FACTURA O BOLETA
-        $this->load->model('venta');
-        $this->load->model('det_venta');
-
-        $data = $this->venta->cpe_venta($idventa);        
-
-        if( count($data) ) {
-
-            $data_det = $this->det_venta->cpe_detventa($idventa);
-            $data["items"]= $data_det;
-
-            $data_json =json_encode($data);
-
-        }else{
-            $data_json = array();
-        }
-
-        return $data_json;
-    }
-
-    public function generar_anulacion_json($idventa){
-
-        $this->load->model('venta');
-        $data = $this->venta->cpe_venta_anulacion($idventa); 
-        
-        $data_json = json_encode($data);
-        return $data_json;
-    }
+    
 
     //CREAMOS EL CODIGO QR PARA LA FACTURA ELECTRONICA
     public function crear_qr($data_text, $name_file='qr_code'){

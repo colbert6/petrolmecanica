@@ -45,13 +45,17 @@ $(document).ready(function () {
     })
 
     $('.imprimir , .guia').on('click', function (e){
+        e.preventDefault();
+        href = $(this).attr('href'); 
+        window.open(href, '_blank');
+    })
+
+    $('.ruta_result').on('click', function (e){
 
         e.preventDefault();
-
         href = $(this).attr('href'); 
-
-        window.open(href, '_blank');
-
+        url = href.split('ir=');   //console.log(url)
+        window.open(url[1], '_blank');
 
     })
 
@@ -100,11 +104,16 @@ $(document).ready(function () {
             type: 'GET',
             dataType: 'JSON',
             async: true,
+            beforeSend: function(){
+                msj_proceso = bootbox.alert({
+                    title: 'Solicitud enviada',
+                    message: "<p id='carga_msj'> <i class='fa fa-spin fa-spinner'></i> Procesando ...</p>",
+                    closeButton: false
+                }); 
+           },
             success: function (datos) {
                 //  var rpta = JSON.parse(datos);
                 texto = JSON.stringify(datos, null, '    ');
-
-
                 bootbox.dialog({
                     title: "Consulta de CPE",
                     message: "<pre>"+texto,
@@ -115,7 +124,24 @@ $(document).ready(function () {
                         }
                     },
                 });
-            }
+            },
+            error:function (result) {
+                texto = JSON.stringify(datos, null, '    ');
+                bootbox.dialog({
+                    title: "Consulta de CPE - ERROR",
+                    message: "<pre>"+texto,
+                    size: 'large',
+                    buttons: {
+                        confirm: {
+                            label: '<i class="fa fa-check"></i> Aceptar'
+                        }
+                    },
+                });
+            },
+            complete: function(){
+             // Handle the complete event
+             msj_proceso.modal('hide');
+           }
         });
      
 

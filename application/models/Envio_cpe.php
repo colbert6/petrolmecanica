@@ -1,41 +1,51 @@
 <?php 
 class Envio_cpe extends CI_Model {
   
-
-    
-    public function set_error($data)
+    public function set_error($data_envio, $data_result)
     {   
 
-        $this->errors =  $data['errors'];
-        $this->tipo_envio = $data['tipo_envio'];
-        $this->idmaster = $data['idmaster'];
-        $this->fecha = $data['fecha'];
-        $this->codigo =  $data['codigo'];
-        $this->usuario_envio =  $data['usuario_envio'];
+        if(isset($data_result['mensaje'])){
+            $this->errors =  $data_result['mensaje'];
+        }else if(isset($data_result['msj_sunat']) ){
+            $this->errors =  $data_result['msj_sunat'];
+        }else{
+            $this->errors = "-";
+        }
+
+        $this->tipo_envio = $data_envio['tipo_envio'];
+        $this->idmaster = $data_envio['idmaster'];
+        $this->fecha = date("Y-m-d H:i:s");
+        if(isset($data_result['codigo'])){
+            $this->codigo =  $data_result['codigo'];
+        }else if(isset($data_result['cod_sunat']) ){
+            $this->codigo =  $data_result['cod_sunat'];
+        }else{
+            $this->codigo = "-";
+        }
+
+        $this->usuario_envio =  0;
+        $this->data_result =  json_encode($data_result);
 
         return  $this->db->insert('error_envio_electronico', $this);
     }
 
-    public function set_envio($data)
+    public function set_envio($data_envio, $data_result)
     {   
+        $this->idmaster = $data_envio['idmaster'];
+        $this->tipo = isset($data_envio['cod_tipo_documento'])?$data_envio['cod_tipo_documento']:0;
+        $this->correlativo = isset($data_envio['numero_comprobante'])?$data_envio['numero_comprobante']:0; 
+        $this->serie = isset($data_envio['serie_comprobante'])?$data_envio['serie_comprobante']:"0";
 
-        $this->idmaster = $data['idmaster'];
-        $this->tipo = $data['tipo'];
-        $this->correlativo = $data['correlativo'];
-        $this->serie = $data['serie'];
-        $this->sunat_description = $data['sunat_description'];
-        $this->sunat_note = $data['sunat_note'];
-        $this->sunat_responsecode = $data['sunat_responsecode'];
-        $this->sunat_soap_error = $data['sunat_soap_error'];
-        $this->aceptada_por_sunat = $data['aceptada_por_sunat'];
-        $this->usuario_envio = $data['usuario_envio'];
-        $this->envio_pse = $data['envio_pse'];
-        $this->fecha_envio = $data['fecha_envio'];
-        $this->fecha_mod = $data['fecha_mod'];
-        $this->estado_envio = $data['estado_envio'];
-        $this->tipoenvio = $data['tipoenvio'];
-        $this->fecha_emi = $data['fecha_emi'];
-        $this->enlace = $data['enlace'];
+        $this->cod_sunat = $data_result['cod_sunat'];
+        $this->msj_sunat = $data_result['msj_sunat'];
+        $this->ruta_xml = isset($data_envio['ruta_xml'])?$data_envio['ruta_xml']:"0";
+        $this->ruta_cdr = isset($data_envio['ruta_xml'])?$data_envio['ruta_xml']:"0";
+        $this->ruta_pdf = isset($data_envio['ruta_pdf'])?$data_envio['ruta_pdf']:"0";
+
+        $this->tipoenvio = $data_envio['tipo_envio'];
+        $this->fecha_envio = date("Y-m-d H:i:s");
+        $this->fecha_emi = isset($data_envio['fecha_comprobante'])?$data_envio['fecha_comprobante']:""; 
+        $this->data_result =  json_encode($data_result);
 
         return  $this->db->insert('envio_electronico', $this);
     }
@@ -50,7 +60,31 @@ class Envio_cpe extends CI_Model {
         return  1;
     }
 
-    
+    public function update_envio_cpe($idventa, $tipo)
+    {   
+
+        switch ($tipo) {
+            case 'generar_comprobante':
+                $campo = 'envio_cpe_emision';
+                break;
+
+             case 'generar_anulacion':
+                $campo = 'envio_cpe_baja';
+                break;
+            
+            default:
+                $campo = '';
+                break;
+        }
+        if($campo != '' ){
+            $this->db->set($campo, 1);
+            $this->db->where('idventa',$idventa);
+            $this->db->update('venta');
+        }
+        
+
+        return  1;
+    }    
 
 
 }

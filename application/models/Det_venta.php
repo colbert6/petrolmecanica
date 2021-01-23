@@ -72,22 +72,23 @@ class Det_venta extends CI_Model {
          
         $this->db->select('
 
-
-                  IF(tipo_producto = "servicio", "ZZ" ,"NIU" )as unidad_de_medida,
-                  detv.producto_idproducto as codigo ,
-                  pp.codproducto as codigo_producto_sunat,
-                  detv.descripcion  as descripcion,
-                  detv.cantidad  as cantidad,
-                  (detv.precioxpresentacion )  as valor_unitario,
-                  (detv.precioxpresentacion * 1.18)  as precio_unitario,
-                  "0" as    descuento,
-                  ( detv.cantidad * detv.precioxpresentacion )  as subtotal,
-                  "1" as tipo_de_igv,
-                  (detv.precioxpresentacion * 1.18) - (detv.precioxpresentacion )   as igv,
-                  ( detv.cantidad * detv.precioxpresentacion ) * 1.18  as total,
-                  "false" as anticipo_regularizacion,
-                  "" as anticipo_documento_serie,
-                  "" as anticipo_documento_numero
+          ROW_NUMBER() OVER(PARTITION BY detv.venta_idventa) AS ITEM_DET,
+          IF(tipo_producto = "servicio", "ZZ" ,"NIU" ) as UNIDAD_MEDIDA_DET,
+          "01" as PRECIO_TIPO_CODIGO,
+          "10" as COD_TIPO_OPERACION_DET,
+          ROUND(detv.cantidad)  as CANTIDAD_DET,
+          detv.precioxpresentacion  as PRECIO_DET,
+          ROUND(detv.precioxpresentacion, 2) - ROUND(detv.precioxpresentacion/1.18, 2) as IGV_DET,
+          "0" as ICBPER_DET,
+          "0" as ISC_DET,
+          ROUND(detv.precioxpresentacion / 1.18, 2) as PRECIO_SIN_IGV_DET,
+          TRUNCATE(ROUND(detv.precioxpresentacion / 1.18, 2) * detv.cantidad,2) as IMPORTE_DET,
+          detv.producto_idproducto as "CODIGO_DET",
+          detv.descripcion  as "DESCRIPCION_DET",
+          "no" as DESCUENTO_ITEM,
+          "0" as PORCENTAJE_DESCUENTO,
+          "0" as MONTO_DESCUENTO,
+          "00" as CODIGO_DESCUENTO
 
         ');
 
