@@ -21,7 +21,7 @@ class Clientes extends MY_Controller {
         $crud->columns('razon_social','ruc','dni'); //,'nombre_comercial'
 
 
-        $crud->required_fields('ruc','razon_social');//Requeridos
+        $crud->required_fields('ruc','razon_social', 'ubigeo');//Requeridos
         $crud->unique_fields(array('razon_social','ruc','dni'));//unicos
         
         $crud->unset_add_fields('nombre_comercial','estado');

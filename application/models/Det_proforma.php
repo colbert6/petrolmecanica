@@ -73,6 +73,7 @@ class Det_proforma extends CI_Model {
         $this->db->from('detalle_proforma detp');    
 
         $this->db->where('detp.proforma_idproforma',$idproforma);
+        $this->db->where('detp.informacion !=', '');
         $query = $this->db->get();
 
         return $query->result_array();

@@ -186,7 +186,7 @@ class Venta extends CI_Model {
             vent.cliente_direccion, 
             "PE" as cliente_pais,
             "" as cliente_ciudad,
-            "" as cliente_codigoubigeo,
+            coalesce(cli.cod_ubigeo,"") as cliente_codigoubigeo,
             "" as cliente_departamento,
             "" as cliente_provincia,
             "" as cliente_distrito,
@@ -214,13 +214,14 @@ class Venta extends CI_Model {
             DATE_FORMAT( vent.fecha_venta,"%Y-%m-%d") as fecha_comprobante, 
             DATE_FORMAT( vent.fecha_venta,"%Y-%m-%d") as fecha_vto_comprobante,
 
-            01 as cod_tipo_documento ,
+            "01" as cod_tipo_documento ,
             SUBSTRING_INDEX(vent.nro_documento,"-",1)  AS  serie_comprobante,
             (SUBSTRING_INDEX(vent.nro_documento,"-",-1) * 1) as numero_comprobante
             ');
 
         $this->db->from('venta vent');
         $this->db->join('tienda tt', 'tt.idtienda = vent.tienda_idtienda');
+        $this->db->join('cliente cli', 'cli.idcliente = vent.cliente_idcliente', 'left');
         $this->db->join('tipo_comprobante tc', 'tc.idtipo_comprobante = vent.tipo_comprobante_idtipo_comprobante');
         $this->db->where('vent.idventa',$idventa);
 
@@ -243,7 +244,7 @@ class Venta extends CI_Model {
         $this->db->from('venta as vent');
         $this->db->join('tipo_comprobante tipo_comp', 'tipo_comp.idtipo_comprobante = vent.tipo_comprobante_idtipo_comprobante');
         $this->db->where('vent.idventa',$idventa);
-        $this->db->where('vent.estado','anulado');
+        //$this->db->where('vent.estado','anulado');
 
         $query = $this->db->get();
 

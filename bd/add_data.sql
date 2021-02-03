@@ -17,7 +17,7 @@ FROM venta as ve
 WHERE (ve.envio_cpe_emision = 0) or (ve.envio_cpe_baja = 0 and ve.estado ='anulado')
 ORDER BY ve.fecha_venta ASC;
 
-
+DROP TABLE IF EXISTS `envio_electronico`;
 CREATE TABLE `envio_electronico` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `idmaster` int(11) DEFAULT NULL,
@@ -55,3 +55,8 @@ CREATE TABLE `error_envio_electronico` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+
+ALTER TABLE `cliente` ADD `cod_ubigeo`  varchar(6) NOT NULL DEFAULT '060101' AFTER `estado`;
+
+-- ejecutado

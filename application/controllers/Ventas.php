@@ -222,7 +222,7 @@ class Ventas extends MY_Controller {
 
         } else {
 
-            if($validar_envio_cp){//Envio exitoso obligatorio para crear una venta
+            if($validar_envio_cpe){//Envio exitoso obligatorio para crear una venta
 
                 //Envio CPE
                 $tipo_envio="generar_comprobante";   
@@ -298,12 +298,12 @@ class Ventas extends MY_Controller {
 
                 //Envio anulacion CPE
                 $tipo_envio="generar_anulacion";   
-                $result_envio_cpe = $this->primer_envio_cpe($tipo_envio,$idventa);
+                $result_envio_cpe = $this->primer_envio_cpe($tipo_envio,$idventa); 
 
                 if($result_envio_cpe['respuesta'] == 'ok' && $this->db->trans_status() !== FALSE){
 
-                    //$this->db->trans_commit();
-                    $this->db->trans_rollback(); 
+                    $this->db->trans_commit();
+                    //$this->db->trans_rollback(); 
                     $return['estado'] = true;
                     $return['msj'] = 'VENTA ANULADA'; 
 
@@ -532,14 +532,16 @@ class Ventas extends MY_Controller {
         $data_json["tipo_envio"] = $tipo_envio;
         $data_json["idmaster"] = $idventa;
         
-        if($result['respuesta'] == 'ok'){ //Guardar 
+        if($result['respuesta'] == 'ok'){ //Guardar
             $this->envio_cpe->set_envio($data_json, $result);//guardar registro envio
             $this->envio_cpe->update_envio_cpe($idventa, $tipo_envio);//Actualizar en tabla venta
+
 
         }else{ //No debería ingresar, ya que toda venta debe ser enviada  
             $result['codigo'] = isset($result['codigo'])? $result['codigo']:$result['cod_sunat'];
             $result['mensaje'] = isset($result['mensaje'])? $result['mensaje']:$result['msj_sunat'];
             $this->envio_cpe->set_error($data_json, $result);//guardar registro error envio
+
         }
 
         return $result;

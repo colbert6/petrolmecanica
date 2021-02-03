@@ -136,6 +136,7 @@ class Envio_cpes extends MY_Controller {
         }else if($tipo_envio =="generar_anulacion"){
             $data_json = $envio_cpe->generar_anulacion_json($idventa, $this);
         }
+        //print_r($data_json);  die();
 
         //Validación - Problema con data del cpe
         if(count($data_json) &&  $data_json != 'null' ){

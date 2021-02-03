@@ -36,11 +36,11 @@ class Envio_cpe extends CI_Model {
         $this->correlativo = isset($data_envio['numero_comprobante'])?$data_envio['numero_comprobante']:0; 
         $this->serie = isset($data_envio['serie_comprobante'])?$data_envio['serie_comprobante']:"0";
 
-        $this->cod_sunat = $data_result['cod_sunat'];
-        $this->msj_sunat = $data_result['msj_sunat'];
-        $this->ruta_xml = isset($data_envio['ruta_xml'])?$data_envio['ruta_xml']:"0";
-        $this->ruta_cdr = isset($data_envio['ruta_xml'])?$data_envio['ruta_xml']:"0";
-        $this->ruta_pdf = isset($data_envio['ruta_pdf'])?$data_envio['ruta_pdf']:"0";
+        $this->cod_sunat =isset($data_result['cod_sunat'])?$data_result['cod_sunat']:"0";
+        $this->msj_sunat = isset($data_result['msj_sunat'])?$data_result['msj_sunat']:" "; 
+        $this->ruta_xml = isset($data_result['ruta_xml'])?$data_result['ruta_xml']:"0";
+        $this->ruta_cdr = isset($data_result['ruta_cdr'])?$data_result['ruta_cdr']:"0";
+        $this->ruta_pdf = isset($data_result['ruta_pdf'])?$data_result['ruta_pdf']:"0";
 
         $this->tipoenvio = $data_envio['tipo_envio'];
         $this->fecha_envio = date("Y-m-d H:i:s");
