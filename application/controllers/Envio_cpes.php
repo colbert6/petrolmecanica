@@ -151,12 +151,15 @@ class Envio_cpes extends MY_Controller {
         $data_json["tipo_envio"] = $tipo_envio;
         $data_json["idmaster"] = $idventa;
         
-        if($result['respuesta'] == 'ok'){ //Guardar 
+        if($result['respuesta'] == 'ok' &&  $result['cod_sunat'] == 0){ //Guardar 
             $this->envio_cpe->set_envio($data_json, $result);//guardar registro envio
             $this->envio_cpe->update_envio_cpe($idventa, $tipo_envio);//Actualizar en tabla venta
 
-        }else{            
+        }else{
+            $result['codigo'] = isset($result['codigo'])? $result['codigo']:$result['cod_sunat'];
+            $result['mensaje'] = isset($result['mensaje'])? $result['mensaje']:$result['msj_sunat'];            
             $this->envio_cpe->set_error($data_json, $result);//guardar registro error envio
+            $result['respuesta'] == 'error';
         }
 
         return $result;

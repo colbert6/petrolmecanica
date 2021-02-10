@@ -374,6 +374,8 @@ class Ventas extends MY_Controller {
         $pdf->SetAutoPageBreak(TRUE, 10);
         $pdf->AddPage();
 
+        $pdf->add_imagen();
+
         $data_usuario_receptor = array('Cliente' => array($venta['Cliente'],'4'),
                                   'RUC' => array($venta['RUC/DNI'],'1'),
                                   'Dirección' => array($venta['Direccion'],'5')  );
@@ -532,7 +534,7 @@ class Ventas extends MY_Controller {
         $data_json["tipo_envio"] = $tipo_envio;
         $data_json["idmaster"] = $idventa;
         
-        if($result['respuesta'] == 'ok'){ //Guardar
+        if($result['respuesta'] == 'ok' &&  $result['cod_sunat'] == 0 ){ //Guardar
             $this->envio_cpe->set_envio($data_json, $result);//guardar registro envio
             $this->envio_cpe->update_envio_cpe($idventa, $tipo_envio);//Actualizar en tabla venta
 
@@ -541,6 +543,7 @@ class Ventas extends MY_Controller {
             $result['codigo'] = isset($result['codigo'])? $result['codigo']:$result['cod_sunat'];
             $result['mensaje'] = isset($result['mensaje'])? $result['mensaje']:$result['msj_sunat'];
             $this->envio_cpe->set_error($data_json, $result);//guardar registro error envio
+            $result['respuesta'] == 'error';
 
         }
 

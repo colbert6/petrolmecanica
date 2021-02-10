@@ -201,7 +201,7 @@ class Venta extends CI_Model {
             0 as total_icbper,
             0 as total_otr_imp,
             vent.descuento as total_descuento,
-            "0.1" as impuesto_icbper,
+            "0.2" as impuesto_icbper,
             18 as porcentaje_igv,
             vent.igv as total_igv,
             vent.subtotal as sub_total,
@@ -214,7 +214,7 @@ class Venta extends CI_Model {
             DATE_FORMAT( vent.fecha_venta,"%Y-%m-%d") as fecha_comprobante, 
             DATE_FORMAT( vent.fecha_venta,"%Y-%m-%d") as fecha_vto_comprobante,
 
-            "01" as cod_tipo_documento ,
+            tc.codsunat as cod_tipo_documento ,
             SUBSTRING_INDEX(vent.nro_documento,"-",1)  AS  serie_comprobante,
             (SUBSTRING_INDEX(vent.nro_documento,"-",-1) * 1) as numero_comprobante
             ');

@@ -72,13 +72,13 @@ class Det_venta extends CI_Model {
          
         $this->db->select('
 
-          ROW_NUMBER() OVER(PARTITION BY detv.venta_idventa) AS ITEM_DET,
+          1 AS ITEM_DET,
           IF(tipo_producto = "servicio", "ZZ" ,"NIU" ) as UNIDAD_MEDIDA_DET,
           "01" as PRECIO_TIPO_CODIGO,
           "10" as COD_TIPO_OPERACION_DET,
           ROUND(detv.cantidad)  as CANTIDAD_DET,
           detv.precioxpresentacion  as PRECIO_DET,
-          ROUND(detv.precioxpresentacion, 2) - ROUND(detv.precioxpresentacion/1.18, 2) as IGV_DET,
+          ROUND((ROUND(detv.precioxpresentacion, 2) - ROUND(detv.precioxpresentacion/1.18, 2)) * detv.cantidad, 2) as IGV_DET,
           "0" as ICBPER_DET,
           "0" as ISC_DET,
           ROUND(detv.precioxpresentacion / 1.18, 2) as PRECIO_SIN_IGV_DET,
@@ -97,8 +97,14 @@ class Det_venta extends CI_Model {
         $this->db->where('detv.venta_idventa',$idventa);
 
         $query = $this->db->get();
+        $det_venta_cpe = $query->result_array();
+        $tam_det_venta_cpe = count($det_venta_cpe);
 
-        return $query->result_array();
+        for ($i=0; $i < $tam_det_venta_cpe; $i++) { 
+          $det_venta_cpe[$i]['ITEM_DET'] = $i + 1;
+        }
+
+        return $det_venta_cpe;
     }
 
 }

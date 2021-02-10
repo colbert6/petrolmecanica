@@ -34,7 +34,7 @@ class Facturalaya{
 	private function get_token_cliente() {
 		$data = array();
 		$data['token_cliente'] = 'facturalaya_colbert_9DA7j3jOm82xFIK'; //KEY para que puedas consumir nuestra api
-		$data['ruc_proveedor'] = "20602440908"; //Tu número de RUC, el cuál será responsable por los datos enviados en todos los json
+		$data['ruc_proveedor'] = "10730319342"; //Tu número de RUC, el cuál será responsable por los datos enviados en todos los json
 		$data['secret_data'] = array(
 			"tipo_certificado"		=> "pse_facturalaya", //no cambiar
 			"tipo_proceso" 			=> "prueba", //prueba, produccion: aquí si deseas enviar en prueba o producción
