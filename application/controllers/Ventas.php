@@ -521,6 +521,8 @@ class Ventas extends MY_Controller {
             $data_json = $envio_cpe->generar_anulacion_json($idventa, $this);
         }
 
+        //print_r($data_json);die();
+
         //Validación - Problema con data del cpe
         if(count($data_json) &&  $data_json != 'null' ){
             $result = $envio_cpe->builder_cpe($data_json, $tipo_envio);
@@ -543,7 +545,7 @@ class Ventas extends MY_Controller {
             $result['codigo'] = isset($result['codigo'])? $result['codigo']:$result['cod_sunat'];
             $result['mensaje'] = isset($result['mensaje'])? $result['mensaje']:$result['msj_sunat'];
             $this->envio_cpe->set_error($data_json, $result);//guardar registro error envio
-            $result['respuesta'] == 'error';
+            $result['respuesta'] = 'error';
 
         }
 

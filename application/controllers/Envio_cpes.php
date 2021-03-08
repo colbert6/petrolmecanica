@@ -159,7 +159,7 @@ class Envio_cpes extends MY_Controller {
             $result['codigo'] = isset($result['codigo'])? $result['codigo']:$result['cod_sunat'];
             $result['mensaje'] = isset($result['mensaje'])? $result['mensaje']:$result['msj_sunat'];            
             $this->envio_cpe->set_error($data_json, $result);//guardar registro error envio
-            $result['respuesta'] == 'error';
+            $result['respuesta'] = 'error';
         }
 
         return $result;
