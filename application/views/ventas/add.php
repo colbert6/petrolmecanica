@@ -71,6 +71,40 @@
           </div>
 
           <div class="form-group">
+            <div class="col-sm-4">
+              <label for="tipo_moneda" class="control-label">Tipo_moneda</label> 
+              <label for="forma_pago" class="control-label">Forma_pago</label>
+
+              <label for="condicion_pago" class="control-label">Condición_pago</label> 
+              <label for="numero_cuotas" class="control-label">Nro_cuotas</label>
+            </div>
+            <div class="col-sm-8">
+              <select class="form-control" id="tipo_moneda" name="tipo_moneda">
+           
+                <?php foreach ($tipo_moneda as $t_moneda): ?>
+                <option value="<?= $t_moneda->id ?>"><?= $t_moneda->descripcion ?></option>
+                <?php endforeach; ?>
+              </select>
+              <select class="form-control" id="forma_pago" name="forma_pago">
+           
+                <?php foreach ($forma_pago as $f_pago): ?>
+                <option value="<?= $f_pago->id ?>"><?= $f_pago->descripcion ?></option>
+                <?php endforeach; ?>
+              </select>
+              
+              <select class="form-control" id="condicion_pago" name="condicion_pago">
+           
+                <?php foreach ($condicion_pago as $c_pago): ?>
+                <option value="<?= $c_pago->id ?>"><?= $c_pago->descripcion ?></option>
+                <?php endforeach; ?>
+              </select>
+              <input type="number" class="form-control" id="numero_cuotas" name="numero_cuotas" value="1" >
+              
+            </div>
+          </div>
+
+
+          <div class="form-group">
             <label for="idserie" class="col-sm-2 control-label">Comp.</label>
 
             <div class="col-sm-10">

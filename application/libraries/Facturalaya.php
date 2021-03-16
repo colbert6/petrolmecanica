@@ -123,8 +123,44 @@ class Facturalaya{
        
     }
 
+    public function generar_cuotas($data_venta){
 
-     public function generar_comprobante_json($idventa, $ci){ 
+    	if($data_venta['forma_pago'] == 'credito'){
+
+    		$nro_cuotas = $nro_cuotas_cont = $data_venta["nro_cuotas"];	
+			$monto_venta = $data_venta["total"];
+			$monto_cuota_promedio = round($monto_venta / $nro_cuotas, 2);
+			$monto_amortizado = 0;
+
+    		$fecha_vencimiento = $data_venta['forma_pago'];
+    		$detalle_cuotas = array();
+
+    		while ( $nro_cuotas_cont >= 1) {
+    			$fecha_vencimiento = date("Y-m-d", strtotime($fecha_vencimiento."+ 1 month")); 
+
+    			$monto_cuota = $monto_cuota_promedio;
+    			if($nro_cuotas_cont > 1){  // la cuota 1 debe ser igual al restante de lo que no se ha amortizado  				
+    				$monto_amortizado += $monto_cuota_promedio;
+    			}else{
+    				$monto_cuota = $monto_venta - $monto_amortizado ;
+    			}
+    			
+    			$detalle_cuotas[] = array('fecha_vencimiento' => $fecha_vencimiento,  'monto_cuota'=> $monto_cuota);
+    			$nro_cuotas_cont--;
+    		}
+
+    		$data_venta['monto_deuda_total'] = $monto_venta;
+    		$data_venta['detalle_cuotas'] = $detalle_cuotas;
+
+    	}
+
+    	unset($data_venta["nro_cuotas"]);    	
+
+    	return $data_venta;
+    }
+
+
+    public function generar_comprobante_json($idventa, $ci){ 
        
         //FACTURA O BOLETA
         $ci->load->model('venta');
@@ -133,6 +169,9 @@ class Facturalaya{
         $data = $ci->venta->cpe_venta($idventa);        
 
         if( count($data) ) {
+
+        	$data = $this->generar_cuotas($data);//generar cuotas si es necesario
+
             $data_det = $ci->det_venta->cpe_detventa($idventa);
             $data["detalle"]= $data_det;
         }else{

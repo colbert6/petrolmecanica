@@ -93,7 +93,10 @@ class Ventas extends MY_Controller {
             'series' => $this->get_data->get_series(array( $this->id_factura,$this->id_boleta) ),
             'guia_remision' => $this->get_data->get_series(array( $this->id_guia_remision) ), //$this->id_ticket,
             'get_clientes' =>  $get_clientes,
-            'get_productos' =>  $get_productos
+            'get_productos' =>  $get_productos,
+            'tipo_moneda' => $this->get_data->get_tipo_moneda(),
+            'condicion_pago' => $this->get_data->get_periodo_pagos(),
+            'forma_pago' =>$this->get_data->get_forma_pago()
               ); 
 
         $this->load->view('ventas/add', $output ) ;
@@ -385,6 +388,9 @@ class Ventas extends MY_Controller {
         $data_comprobante = array('Emitido' => array($venta['Fecha'],'1'),
                                   'Tienda' => array($venta['Tienda'],'1'),  
                                   'Vendedor' => array($vendedor_fijo,'1'),
+                                  'Condición pago' => array($venta['condicion_pago'],'1'),
+                                  'Forma pago' => array($venta['forma_pago'],'1'), 
+                                  'Moneda' => array($venta['moneda'],'1'),
                                   'Observacion' => array($venta['Observacion'],'3')  );
         $pdf->comprobante_data( 3 ,$data_comprobante);
 

@@ -152,9 +152,34 @@ class Get_data extends CI_Model {
         return $query->result();
     }
 
+    public function get_forma_pago($id = '%')
+    {
+        $this->db->select(" idforma_pago as id, descripcion ");
+        $this->db->from('forma_pago as fp');
+        if( $id != '%'){
+            $this->db->where('tp.idforma_pago',$id);
+        }
+        $this->db->where('fp.estado','Activo');
+        $this->db->order_by('idforma_pago', 'desc');
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function get_tipo_moneda($id = '%')
+    {
+        $this->db->select(" idtipo_moneda as id, descripcion ");
+        $this->db->from('tipo_moneda as tm');
+        if( $id != '%'){
+            $this->db->where('tm.idtipo_moneda',$id);
+        }
+        $this->db->where('tm.estado','Activo');
+        $query = $this->db->get();
+        return $query->result();
+    }
+
     public function get_periodo_pagos($id = '%')
     {
-        $this->db->select(" idperiodo_pago as id, descripcion, abreviatura ");
+        $this->db->select(" idperiodo_pago as id, descripcion, abreviatura, codigo_facturalaya ");
         $this->db->from('periodo_pago as pp');
 
         if( $id != '%'){
