@@ -151,9 +151,9 @@ class Venta extends CI_Model {
         $this->db->join('tienda tt', 'tt.idtienda = vent.tienda_idtienda');
         $this->db->join('tipo_comprobante tc', 'tc.idtipo_comprobante = vent.tipo_comprobante_idtipo_comprobante');
         $this->db->join('colaborador col', 'col.idcolaborador = vent.colaborador_idcolaborador');
-        $this->db->join('forma_pago fp', 'fp.idforma_pago = vent.idforma_pago');
-        $this->db->join('tipo_moneda tm', 'tm.idtipo_moneda = vent.idtipo_moneda');
-        $this->db->join('periodo_pago pp', 'pp.idperiodo_pago = vent.idperiodo_pago');
+        $this->db->join('forma_pago fp', 'fp.idforma_pago = vent.idforma_pago','left');
+        $this->db->join('tipo_moneda tm', 'tm.idtipo_moneda = vent.idtipo_moneda','left');
+        $this->db->join('periodo_pago pp', 'pp.idperiodo_pago = vent.idperiodo_pago','left');
         $this->db->where('vent.idventa',$idventa);
         $query = $this->db->get();
 
