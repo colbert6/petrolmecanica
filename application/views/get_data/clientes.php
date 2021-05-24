@@ -38,11 +38,18 @@
  </div-->
 
  <div class="form-group" style="margin-bottom: 0px;">
-    <label for="ruc_cliente" class="col-xs-3 col-sm-4 control-label" style="text-align: left;">Ruc </label>
     <div class="col-xs-9 col-sm-8" >
-     	<input type="text" class="form-control" id="ruc_cliente" name="ruc_cliente" placeholder="Ruc" value="<?php echo $ruc; ?>" onkeypress="soloNumeros(event,'ruc')" maxlength="11">
+        <input type="button" value="Nuevo cliente" class="btn btn-info" onclick="get_cliente_document_info_sunat()">
     </div>
  </div>
+
+ <div class="form-group" style="margin-bottom: 0px;">
+    <label for="ruc_cliente" class="col-xs-3 col-sm-4 control-label" style="text-align: left;">Ruc </label>
+    <div class="col-xs-9 col-sm-8" >
+     	<input type="text" class="form-control" id="ruc_cliente" name="ruc_cliente" placeholder="Ruc" value="<?php echo $ruc; ?>" onkeypress="soloNumeros(event,'ruc')" maxlength="11"> 
+    </div>    
+ </div>
+
 
 <div class="form-group" style="margin-bottom: 0px;">
     <label for="cliente" class="col-xs-10 col-sm-2 control-label">Cliente </label>
@@ -100,7 +107,7 @@
   });
 
 
-  //Solo permite introducir numeros.
+    //----- Solo permite introducir numeros.
     function soloNumeros(e , tipo){
       var key = window.event ? e.which : e.keyCode;
       if(key == 13 ){
@@ -146,7 +153,90 @@
         
 
     }
+    //-----
 
+    //---- Add new client ---- 
+    function get_cliente_document_info_sunat(){
+        //10730319342
+        bootbox.prompt({
+            title: "Ingrese el RUC a buscar", 
+            inputType: 'number',
+            callback: function(result){ 
+                tipo_documento='ruc';
+                get_client_info_sunat(tipo_documento, result);  
+            }
+        });
+    }
+
+    function get_client_info_sunat(tipo_documento, numero_documento){
+
+        if( numero_documento.length != $('#'+tipo_documento+'_cliente').attr('maxlength')){
+            alerta("ALERTA","INCORRECTO: El número de digitos no corresponde al tipo de documento (11)", 'warning');
+
+        }else{
+            //String valor = $('#'+tipo+'_cliente').val();
+            $.ajax({
+                url: base_url + 'get_datas/get_cliente_document_info_sunat',
+                type: 'GET',
+                data: 'tipo='+tipo_documento+'&numero='+numero_documento,
+                dataType: 'JSON',
+                success: function (obj) {
+                    if(obj=== null){
+                        bootbox.alert("No se encontro cliente con el documento indicado");
+                    }if(obj.respuesta === "error"){
+                        bootbox.alert(obj.mensaje);
+                    }else{
+                        html = "DATA ENCONTRADA <br> ---------------<br>";
+                        html += "Condicion: "+obj.condicion+" <br>";
+                        html += "Estado: "+obj.estado+" <br>";
+                        html += "RUC: "+obj.ruc+" <br>";
+                        html += "Razon_social: "+obj.razon_social+" <br>";
+                        html += "Nombre_comercial: "+obj.nombre_comercial+" <br>";
+                        html += "Direccion: "+obj.direccion+" <br>";
+                        html += "telefono: "+obj.telefono+" <br>";
+                        html += "Codigo_ubigeo: "+obj.codigo_ubigeo+" <br>";
+                        html += "<br><br> Es correcto la información?  <br>";
+                        confirm_client_finded(html, obj);
+                    }
+                    
+                }
+            });
+        }
+    }
+
+    function confirm_client_finded(html_client_info, obj_client_info){
+        bootbox.confirm({
+            message: html_client_info,
+            buttons: {
+                confirm: {
+                    label: 'Añadir CLIENTE',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'NO',
+                    className: 'btn-danger'
+                }
+            },
+            callback: function (result) {
+                if(result){
+                    $.ajax({
+                        url: base_url + 'clientes/add_cliente_from_info_sunat',
+                        type: 'POST',
+                        data: obj_client_info,
+                        dataType: 'JSON',
+                        success: function (obj) {                            
+                            if(obj.estado){
+                                alerta("RESPUESTA","Se ha creado nuevo cliente",'success');
+                            }else{
+                                alerta("ERROR",obj.msj,'warning');
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+    //----
 
 </script>
 

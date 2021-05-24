@@ -17,6 +17,18 @@ class Get_datas extends MY_Controller {
         print json_encode($this->get_data->get_clientes($get_query) );
     }
 
+    public function get_cliente_document_info_sunat()
+    {
+        $tipo_doc = $this->input->get('tipo');
+        $numero_doc = $this->input->get('numero');
+
+        $data_json = array();
+        $this->load->library('Facturalaya');
+        $envio_cpe = new Facturalaya();
+        $data_json = $envio_cpe->get_client_info_sunat($tipo_doc, $numero_doc);
+        print ($data_json);
+    }
+
     public function get_cliente_document()
     {
         $tipo_doc = $this->input->get('tipo');

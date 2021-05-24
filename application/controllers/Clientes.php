@@ -34,6 +34,36 @@ class Clientes extends MY_Controller {
         $this->load->view('grocery_crud/basic_crud', (array)$output ) ;
     }
 
+    public function add_cliente_from_info_sunat()
+    {   
+        $this->db->trans_start();
+
+        $this->load->model('cliente'); 
+
+        $return = array('estado' => false, 'msj' => '' , 'error'=> '' , 'idsave' => 0);
+
+        $flag_valid_cliente = $this->cliente->valid_cliente('ruc',$this->input->post('ruc')); 
+
+        if(count($flag_valid_cliente)){
+            $return['msj']= "Cliente YA EXISTE";
+        }else{
+            $this->cliente->insert_cliente();
+            $idcliente = $this->db->insert_id();
+
+            if ($this->db->trans_status() === FALSE) {
+                $this->db->trans_rollback();
+                $return['msj']= $error['message'];
+            } else {
+
+                $this->db->trans_commit();
+                $return['estado']=true;
+            }
+
+        }
+        
+        print json_encode($return);
+        
+    }
 
 	
 

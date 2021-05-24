@@ -42,6 +42,7 @@ class Facturalaya{
 		return $data;
 	}
 
+
 	public function get_data_emisor() {
 
         $data_emisor = array(
@@ -59,6 +60,46 @@ class Facturalaya{
 			'direccion_codigopais' 		=> 'PE' //no cambiar
 		);
 		return $data_emisor;
+    }
+
+    public function get_client_info_sunat($tipo_documento, $numero_documento) {
+
+        $data_emisor = $this->get_token_cliente();
+        $token_cliente = $data_emisor['token_cliente'];
+
+        if($tipo_documento == 'dni') {
+            $ruta = "https://facturalahoy.com/api/persona/".$numero_documento.'/'.$token_cliente;    
+        } elseif ($tipo_documento == 'ruc') {
+            $ruta = "https://facturalahoy.com/api/empresa/".$numero_documento.'/'.$token_cliente;
+        }
+
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_URL => $ruta,
+            CURLOPT_USERAGENT => 'Consulta Datos',
+            CURLOPT_CONNECTTIMEOUT => 0,
+            CURLOPT_TIMEOUT => 400,
+            CURLOPT_FAILONERROR => true
+        ));
+
+        $respuesta = curl_exec($curl);
+        if (curl_error($curl)) {
+            $error_msg = curl_error($curl);
+        }
+
+        if (isset($error_msg)) {
+            $resp['respuesta'] = 'error';
+            $resp['titulo'] = 'Error';
+            $resp['data'] = '';
+            $resp['encontrado'] = false;
+            $resp['mensaje'] = 'Error en Api de Búsqueda';
+            $resp['errores_curl'] = $error_msg;
+            
+            $respuesta = json_encode($resp);
+        }
+    
+        return $respuesta;
     }
 
     public function builder_cpe($data_cpe, $tipo){

@@ -1,13 +1,15 @@
 <?php
-$token_cliente = ''; //TOKEN
-$num_doc = ''; //NÚMERO DE DNI
-$tipo = ''; // {dni, ruc}
+
+
+$token_cliente = 'facturalaya_colbert_9DA7j3jOm82xFIK'; //TOKEN
+$num_doc = '10730319342'; //NÚMERO DE DNI
+$tipo = 'ruc'; // {dni, ruc}
 
 
 if($tipo == 'dni') {
 	$ruta = "https://facturalahoy.com/api/persona/".$num_doc.'/'.$token_cliente;	
 } elseif ($tipo == 'ruc') {
-	$ruta = "https://facturalahoy.com/api/empresa/".$num_doc.'/'.$password;
+	$ruta = "https://facturalahoy.com/api/empresa/".$num_doc.'/'.$token_cliente;
 }
 
 $curl = curl_init();
