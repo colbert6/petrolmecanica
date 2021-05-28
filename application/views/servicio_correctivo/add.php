@@ -329,7 +329,7 @@
     <div class="box box-success">
       <div class="box-body">  
         
-          <div class="col-md-6">
+          <div class="col-md-6 col-xs-12">
             <div class="form-group" >
               <label for="fecha_venta" class="col-xs-4 col-sm-2 control-label">Fecha visita</label>
               <div class="col-xs-8 col-sm-10">
@@ -338,7 +338,7 @@
             </div> 
           </div>
                 
-          <div class="col-md-6">
+          <div class="col-md-6 col-xs-12">
             Estado de los Equipos (Después de la Reparación)
           <table class="table table-striped medidor">
             <thead>

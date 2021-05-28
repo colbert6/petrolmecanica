@@ -63,16 +63,16 @@ class Pdf_servicios extends TCPDF
     public $logo_data = array ( 'mostrar'=> true , 'w'=> 45 , 'y' => 15);
     public $empresa_data = array ( 'align'=> 'J', 'w'=> 100 , 'ln' => 0 , 'font_h'=> 9 );
     public $comprobante_id = array ( 'border' => 1,'w' => 50, 'ln'=> 1, 'font_h'=> 10 );       
-    public $receptor_data = array ( 'max_col'=>0,'border' => 1, 'ln' => 1 ,'w' => 190, 'font_h'=> 11);   
-    public $servicios_data = array ( 'max_col'=>0,'border' => 1, 'ln' => 1 ,'w' => 190, 'font_h'=> 10);     
+    public $receptor_data = array ( 'max_col'=>0,'border' => 1, 'ln' => 1 ,'w' => 190, 'font_h'=> 10);   
+    public $servicios_data = array ( 'max_col'=>0,'border' => 1, 'ln' => 1 ,'w' => 190, 'font_h'=> 9);     
   
-    public $comprobante_data = array ( 'max_col'=>0,'border' => 1, 'ln' => 1 ,'w' => 200, 'font_h'=> 10);      
-    public $comprobante_table_head = array('font_h'=> 10 , 'max_w' => 200, 'border'=>1 , 'h'=>5 );     
-    public $comprobante_table_body =array('font_h'=> 10 , 'border'=>'LR' , 'h'=>5 );      
+    public $comprobante_data = array ( 'max_col'=>0,'border' => 1, 'ln' => 1 ,'w' => 200, 'font_h'=> 9);      
+    public $comprobante_table_head = array('font_h'=> 9 , 'max_w' => 200, 'border'=>1 , 'h'=>5 );     
+    public $comprobante_table_body =array('font_h'=> 9 , 'border'=>'LR' , 'h'=>5 );      
     public $comprobante_table_footer_letras =array('w'=> 130 , 'border'=>1 , 'h'=>5 , 'ln' => false);           
     public $comprobante_table_footer_totales =array( 'align'=> 'R','w' => 70,'border'=>1 , 'h'=>5 , 'ln'=> 1 );  
     public $comprobante_codigo_qr = array( 'align'=> 'C','w' => 25,'border'=>0 ,'ln'=>0 , 'h'=>25);    
-    public $comprobante_mensaje = array( 'align'=> 'L','w' =>  90,'border'=>1 ,'ln'=>0 ,'font_h'=> 10 , 'pos_x' => 5  );         
+    public $comprobante_mensaje = array( 'align'=> 'L','w' =>  90,'border'=>1 ,'ln'=>0 ,'font_h'=> 9 , 'pos_x' => 5  );         
     
 
     public $pos_y=3.5;
@@ -177,29 +177,31 @@ class Pdf_servicios extends TCPDF
       $this->SetFont('helvetica', '', $rd['font_h']);
       
       $this->Cell($rd['w']*0.1, 0, 'Fecha', $this_border, 0, 'R');
-      $this->Cell($rd['w']*0.15, 0,'Fecha', 1, 0, 'L'); 
+      $this->Cell($rd['w']*0.15, 0, $data['fecha'] , 1, 0, 'L'); 
       $this->Cell($rd['w']*0.15, 0, 'Hora', $this_border, 0, 'R');
-      $this->Cell($rd['w']*0.1, 0,'hora', 1, 1, 'L');
+      $this->Cell($rd['w']*0.1, 0,$data['hora'], 1, 1, 'L');
       $this->Ln($rd['ln']);
       
       $this->Cell($rd['w']*0.1, 0, 'Cliente', $this_border, 0, 'R');
-      $this->MultiCell($rd['w']*0.67, 0,'cliente', 1, 'L',0,0);  
+      $this->MultiCell($rd['w']*0.67, 0,$data['cliente'], 1, 'L',0,0);  
       $this->Cell($rd['w']*0.08, 0, 'R.U.C.', $this_border, 0, 'R');
-      $this->Cell($rd['w']*0.15, 0,'ruc', 1, 1, 'L');
+      $this->Cell($rd['w']*0.15, 0,$data['ruc_cliente'], 1, 1, 'L');
       $this->Ln($rd['ln']);     
       
       $this->Cell($rd['w']*0.1, 0, 'Dirección', $this_border, 0, 'R');
-      $this->MultiCell($rd['w']*0.3, 0,'direccion'.$txt, 1, 'L',0,0);  
+      $this->MultiCell($rd['w']*0.9, 0,$data['direccion_cliente'], 1, 'L',0,0); 
+
+      $this->Ln();
+
+      /*$this->Cell($rd['w']*0.1, 0, 'Dirección', $this_border, 0, 'R');
+      $this->MultiCell($rd['w']*0.3, 0,$data['direccion_cliente'], 1, 'L',0,0);  
       $this->Cell($rd['w']*0.1, 0, 'Distrito', $this_border, 0, 'R');
-      $this->Cell($rd['w']*0.2, 0,'distrito', 1, 0, 'L');
+      $this->Cell($rd['w']*0.2, 0,$data['distrito'], 1, 0, 'L');
       $this->Cell($rd['w']*0.1, 0, 'Telef.', $this_border, 0, 'R');
-      $this->Cell($rd['w']*0.2, 0,'tel', 1, 1, 'L');      
+      $this->Cell($rd['w']*0.2, 0,$data['telefono'], 1, 1, 'L');      */
     }
   
-    public function servicios_data($data) {
-      //Cell($w, $h=0, $txt='', $border=0, $ln=0, $align='', $fill=0, $link='', $stretch=0, $ignore_min_height=false, $calign='T', $valign='M')
-      // MultiCell($w, $h, $txt, $border=0, $align='J', $fill=0, $ln=1, $x='', $y='', $reseth=true, $stretch=0, $ishtml=false, $autopadding=true, $maxh=0)
-      //$this->set_formato($this->format);
+    public function servicios_data($data, $item ) {
       
       $sd = $this->servicios_data;
       $this_border = 0;
@@ -209,31 +211,42 @@ class Pdf_servicios extends TCPDF
       $this->Ln();
       $this->Cell($sd['w']*0.1, 0, 'Servicios solicitados / Trabajos realizados', $this_border, 1, 'L');
       
+      $check_disp = empty($data['servicio_realizado_tipo_'.$item.'_1']) ? '' : 'X';
+      $check_surt = empty($data['servicio_realizado_tipo_'.$item.'_2']) ? '' : 'X';
+      $check_otros = empty($data['servicio_realizado_tipo_'.$item.'_3']) ? '' : 'X';
+
       $this->Cell($sd['w']*0.05, 0, 'Disp.', $this_border, 0, 'R');
-      $this->Cell($sd['w']*0.045, 0,'X', 1, 0, 'L'); 
-      $this->Cell($sd['w']*0.075, 0, 'Surt.', $this_border, 0, 'R');
-      $this->Cell($sd['w']*0.045, 0,'X', 1, 0, 'L');
-      $this->Cell($sd['w']*0.075, 0, 'Otros', $this_border, 0, 'R');
-      $this->Cell($sd['w']*0.055, 0,'X', 1, 0, 'L');
+      $this->Cell($sd['w']*0.04, 0,$check_disp, 1, 0, 'L'); 
+      $this->Cell($sd['w']*0.05, 0, 'Surt.', $this_border, 0, 'R');
+      $this->Cell($sd['w']*0.04, 0,$check_surt, 1, 0, 'L');
+      $this->Cell($sd['w']*0.06, 0, 'Otros', $this_border, 0, 'R');
+      $this->Cell($sd['w']*0.04, 0,$check_otros, 1, 0, 'L');
+
+      $marca_info = $data['marca_'.$item];
+      $modelo_info = $data['modelo_'.$item];
+      $serie_info = $data['serie_'.$item];
       
-      $this->Cell($sd['w']*0.1, 0, 'Marca', $this_border, 0, 'R');
-      $this->Cell($sd['w']*0.12, 0,'X', 1, 0, 'L'); 
-      $this->Cell($sd['w']*0.1, 0, 'Modelo', $this_border, 0, 'R');
-      $this->Cell($sd['w']*0.12, 0,'X', 1, 0, 'L');
-      $this->Cell($sd['w']*0.1, 0, 'Serie', $this_border, 0, 'R');
-      $this->Cell($sd['w']*0.12, 0,'X', 1, 1, 'L');
+      $this->Cell($sd['w']*0.075, 0, 'Marca', $this_border, 0, 'R');
+      $this->Cell($sd['w']*0.20, 0,$marca_info, 1, 0, 'L'); 
+      $this->Cell($sd['w']*0.075, 0, 'Modelo', $this_border, 0, 'R');
+      $this->Cell($sd['w']*0.20, 0,$modelo_info, 1, 0, 'L');
+      $this->Cell($sd['w']*0.07, 0, 'Serie', $this_border, 0, 'R');
+      $this->Cell($sd['w']*0.12, 0,$serie_info, 1, 1, 'L');
       $this->Ln();
+
+      $desperfecto_info = $data['desperfecto_'.$item];
+      $trabajo_realizado_info = $data['trabajo_realizado_'.$item];
       
       $this->Cell($sd['w']*0.1, 0, 'Desperfecto : ', $this_border, 0, 'R');
-      $this->MultiCell($sd['w']*0.9, 0,'', 'B', 'L',0,1);  
+      $this->MultiCell($sd['w']*0.9, 0,$desperfecto_info, 'B', 'L',0,1);  
       $this->Ln();
       $this->Ln();
       
       //$this->Cell($sd['w']*0.1, 0, 'Trabajo realizado : ', $this_border, 0, 'R');
       $this->MultiCell($sd['w']*0.1, 0,'Trabajo realizado : ', $this_border, 'L',0,0);  
-      $this->MultiCell($sd['w']*0.9, 0,'', 'B', 'L',0,1);  
+      $this->MultiCell($sd['w']*0.9, 0,$trabajo_realizado_info, 'B', 'L',0,1);  
       
-      
+      $this->Ln(10);
     }
 
     
@@ -311,7 +324,7 @@ class Pdf_servicios extends TCPDF
             $this->comprobante_table_head['h'] = 4;
             $this->comprobante_table_head['border'] = 0;
             $this->comprobante_table_head['max_w'] = $this->max_width;
-            $this->comprobante_table_head['font_h'] = 7;
+            $this->comprobante_table_head['font_h'] = 6;
             $this->comprobante_table_body['border'] = 0;
             $this->comprobante_table_body['h'] = 4;
 
@@ -384,7 +397,7 @@ class Pdf_servicios extends TCPDF
                 $h_min = ($new_h>$h_min)?$new_h:$h_min;
             }
 
-            $h_min *= 6;//heigt minimo
+            $h_min *= 2;//heigt minimo
 
             //Mostrar nro de item
             if($flag_nro_item){$this->Cell($nro_item_w, $h_min, ++$nro_item, $tb['border'], 0, 'R', $fill);}

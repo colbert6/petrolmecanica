@@ -156,14 +156,28 @@ class ServicioCorrectivo extends MY_Controller {
             $format = $this->input->get('format');
         }
         
-        //$orientation = ())? $this->input->get('orientation') : 'P' ;
-        //$format = (isset($this->input->get('format')))? $this->input->get('format'):'A4';
-        
+        // Get data
         $servicio = $this->servicio_correctivo->servicio_byId($this->input->get('idservicio'));
-        //$det_proforma = $this->det_proforma->get_print_det_proforma($this->input->get('idproforma'));
+        //echo "<pre>";print_r($servicio);exit();
 
-        //echo "<pre>";print_r($det_venta);exit();
-        $nombrepdf  = 'Servicio _ '.$servicio['correlativo']; ;
+        // Format data
+        $ds = $servicio;
+        $det_medidores_a = $det_medidores_b = array();
+        for ($i=1; $i <= 6; $i++) { 
+            $det_medidores_a[] = array($i,$ds['med_producto_1_'.$i], $ds['med_alto_caudal_1_'.$i], $ds['med_bajo_caudal_1_'.$i], $i,$ds['med_producto_2_'.$i], $ds['med_alto_caudal_2_'.$i], $ds['med_bajo_caudal_2_'.$i]);
+
+            $det_medidores_b[] = array($i,$ds['med_producto_3_'.$i], $ds['med_alto_caudal_3_'.$i], $ds['med_bajo_caudal_3_'.$i], $i,$ds['med_producto_4_'.$i], $ds['med_alto_caudal_4_'.$i], $ds['med_bajo_caudal_4_'.$i]);
+        }
+
+        // Format data
+        $est_equipos  = array();
+        for ($i=1; $i <= 3; $i++) { 
+            $est_equipos[] = array( 'Equipo N°'.$i, $ds['est_equipo_bueno_1_'.$i], $ds['est_equipo_malo_1_'.$i] , $ds['est_observacion_1_'.$i]);            
+        }
+
+        
+        // Create of file pdf
+        $nombrepdf  = 'Servicio _ '.$servicio['correlativo'];
 
         $this->load->library('Pdf_servicios');
         $pdf = new Pdf_servicios($orientation, 'mm', $format , true, 'UTF-8', false);
@@ -177,50 +191,37 @@ class ServicioCorrectivo extends MY_Controller {
         $pdf->SetAutoPageBreak(TRUE, 10);
         $pdf->AddPage();
 
-        /*$nuevo = $pdf->MultiCell(10,'','hola que tal ashdasdasdas', 1,'L',0,0);
-        $nuevo = $pdf->MultiCell(10,'','hola que t222al ashdasdasdas', 1,'L',0,0);
-        $nuevo = $pdf->MultiCell(10,'','hola que ta2l 2ashd11asdaaasdas', 1,'L',0,1);*/
+        $pdf->receptor_data( $servicio);
 
-        $data_usuario_receptor = array('Fecha' => array('fecha','1'),
-                                  'Hora' => array('hora','1'),
-                                  ' ' => array(' ','2'),
-                                  'Cliente' => array('cliente','3'),
-                                  'R.U.C.' => array('ruc','1'),
-                                  'Dirección' => array('direccion','2'),
-                                  'Distrito' => array('distrito','1'),
-                                  'Telef.' => array('tele','1'),
-                                      );
-        $pdf->receptor_data( $data_usuario_receptor);
-      
-        $pdf->servicios_data( $data_usuario_receptor);
-      
-        //Cell($w, $h=0, $txt='', $border=0, $ln=0, $align='', $fill=0, $link='', $stretch=0, $ignore_min_height=false, $calign='T', $valign='M')
+        $pdf->servicios_data( $servicio, 1);
 
-        // test Cell stretching
-        //$pdf->Cell(0, 0, 'Fecha ', 1, 1, 'C', 0, '', 0);
+        $width_cols = array(  array('Medidor',7 ,'L') , array('Producto',23, 'C'),array('Alto caudal',10,'R'),array('Bajo caudal',10,'R'),array('Medidor',7 ,'L') , array('Producto',23, 'C'),array('Alto caudal',10,'R'),array('Bajo caudal',10,'R') );
 
-        /*$vendedor_fijo = "Edinson Jimenez" ;//$proforma['Usuario']
-        $fecha_vencimiento =  date("Y-m-d",strtotime(substr($proforma['Fecha'], 0,10)."+ 5 days")); 
-        $data_comprobante = array('Emitido' => array($proforma['Fecha'],'2'),
-                                  'Vencimiento' => array($fecha_vencimiento,'2'),
-                                  //'Tienda' => array($proforma['Tienda'],'1'),  
-                                  'Vendedor' => array($vendedor_fijo,'2'),
-                                  //'Comprobante' => array($proforma['Comprobante'],'1'),
-                                  'Moneda' => array($proforma['Tipo_pago'],'2'),//Tipo pago
-                                  //'Periodo pago' => array($proforma['Periodo_pago'],'1'),
-                                   );
-        $pdf->comprobante_data( 4 ,$data_comprobante);
+        $pdf->data_table( $det_medidores_a ,  $width_cols, false); 
 
-        $width_cols = array(  array('Descripcion',60 ,'L') , array('Cant.',10, 'R'),array('P.unit',15,'R'),array('Subtotal',15,'R') );
-        $pdf->data_table( $det_proforma ,  $width_cols, true);//data , headers, indice
+        $tam_wi = 190;
+        $pdf->MultiCell($tam_wi*0.15, 0,'OBSERVACIÓN : ', 0, 'L',0,0);  
+        $pdf->MultiCell($tam_wi*0.85, 0,$servicio['observacion_1'], 'B', 'L',0,1);  
+        $pdf->Ln();
 
-       
-        $data_footer = array('monto_letra' => array( 'texto' => num_to_letras($proforma['Total'])),
-                            'monto' => array('op_importe'=>$proforma['Total']),
-                            'observacion' => array( 'texto' =>  $proforma['Observacion'])  
-                               );
-        $pdf->data_table_footer( 'pie_proforma',  $data_footer , 'msj');*/
-        
+        //$pdf->servicios_data( $servicio, 2);
+
+        //$pdf->data_table( $det_medidores_b ,  $width_cols, false);  
+
+        /*$pdf->MultiCell($tam_wi*0.1, 0,'OBSERVACIÓN : ', 0, 'L',0,0);  
+        $pdf->MultiCell($tam_wi*0.9, 0,$servicio['observacion_2'], 'B', 'L',0,1); 
+        $pdf->Ln();*/
+
+
+        $width_cols_equipos = array(  array(' ', 15 ,'L') , array('Bueno',12, 'C'),array('Malo',12,'R'),array('Observacion',21,'C'));
+
+        $pdf->data_table( $est_equipos ,  $width_cols_equipos, false); 
+
+        $pdf->Ln();
+        $pdf->MultiCell($tam_wi*0.2, 0,'Fecha de Visita : ', 0, 'L',0,0);  
+        $pdf->MultiCell($tam_wi*0.3, 0,$servicio['fecha_visita'], 'B', 'L',0,1); 
+
+        ob_end_clean();
         $pdf->Output($nombrepdf, 'I');
     }
     

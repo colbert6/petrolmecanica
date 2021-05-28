@@ -70,6 +70,27 @@ class Det_venta extends CI_Model {
     public function cpe_detventa($idventa)
     {    
          
+        /*$this->db->select('
+
+          1 AS ITEM_DET,
+          IF(tipo_producto = "servicio", "ZZ" ,"NIU" ) as UNIDAD_MEDIDA_DET,
+          "01" as PRECIO_TIPO_CODIGO,
+          "10" as COD_TIPO_OPERACION_DET,
+          ROUND(detv.cantidad)  as CANTIDAD_DET,
+          detv.precioxpresentacion  as PRECIO_DET,
+          ROUND((ROUND(detv.precioxpresentacion, 2) - ROUND(detv.precioxpresentacion/1.18, 2)) * detv.cantidad, 2) as IGV_DET,
+          "0" as ICBPER_DET,
+          "0" as ISC_DET,
+          ROUND(detv.precioxpresentacion / 1.18, 2) as PRECIO_SIN_IGV_DET,
+          TRUNCATE(ROUND(detv.precioxpresentacion / 1.18, 2) * detv.cantidad,2) as IMPORTE_DET,
+          detv.producto_idproducto as "CODIGO_DET",
+          detv.descripcion  as "DESCRIPCION_DET",
+          "no" as DESCUENTO_ITEM,
+          "0" as PORCENTAJE_DESCUENTO,
+          "0" as MONTO_DESCUENTO,
+          "00" as CODIGO_DESCUENTO
+
+        ');*/
         $this->db->select('
 
           1 AS ITEM_DET,
