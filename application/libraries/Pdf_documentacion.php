@@ -70,7 +70,7 @@ class Pdf_documentacion extends TCPDF
     public $comprobante_mensaje = array( 'align'=> 'L','w' =>  90,'border'=>1 ,'ln'=>0 ,'font_h'=> 10 , 'pos_x' => 5  );         
     
 
-    public $pos_y=4;
+    public $pos_y=8;
     public $pos_x=10;
 
     public function Header() {        

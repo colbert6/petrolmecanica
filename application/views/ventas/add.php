@@ -121,9 +121,10 @@
           <div class="form-group">
             <label for="idserie" class="col-sm-2 control-label">Guia</label>
 
-            <div class="col-sm-10">
+            <div class="col-sm-6">
               <input type="text" class="form-control" id="nro_guia_remision" name="nro_guia_remision" placeholder="Correlativo" readonly="readonly" value="<?php echo $guia_remision[0]->correlativo; ?>">
             </div>
+            
           </div>
 
           <?php echo $get_clientes; ?>

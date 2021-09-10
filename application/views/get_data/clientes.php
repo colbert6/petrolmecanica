@@ -37,9 +37,12 @@
     </div>
  </div-->
 
- <div class="form-group" style="margin-bottom: 0px;">
-    <div class="col-xs-9 col-sm-8" >
-        <input type="button" value="Nuevo cliente" class="btn btn-info" onclick="get_cliente_document_info_sunat()">
+ <div class="form-group" >
+    <div class="col-xs-6 col-sm-6" >
+        <input type="button" value="- Importar Proforma -" class="btn btn-primary" onclick="get_correlativo_proforma_info()">
+    </div>
+    <div class="col-xs-6 col-sm-6" >
+        <input type="button" value="- Nuevo cliente -" class="btn btn-info" onclick="get_cliente_document_info_sunat()">
     </div>
  </div>
 
@@ -237,6 +240,96 @@
         });
     }
     //----
+
+
+    //--- //---- Add exportar proforma ---- 
+    function get_correlativo_proforma_info(){
+        //10730319342
+        bootbox.prompt({
+            title: "Ingrese el ID PROFORMA a buscar", 
+            //inputType: 'number',
+            callback: function(result){ 
+                identificador_proforma='correlativo_proforma';
+                get_proforma_info(identificador_proforma, result);  
+            }
+        });
+    }
+
+
+    //-------PROFORMA-----------
+    function get_proforma_info(tipo_documento, numero_documento){
+
+        //String valor = $('#'+tipo+'_cliente').val();
+        $.ajax({
+            url: base_url + 'get_datas/get_proforma_info',
+            type: 'GET',
+            data: 'tipo='+tipo_documento+'&numero='+numero_documento,
+            dataType: 'JSON',
+            success: function (obj) {
+                if(obj=== null){
+                    bootbox.alert("No se encontro datos de la proforma");
+                }if(obj.respuesta === "error"){
+                    bootbox.alert(obj.mensaje);
+                }else{
+                    html = "PROFORMA " +obj.Nro_documento+" ENCONTRADA<br> ---------------<br>";
+                    html += "Cliente: "+obj.Cliente+" <br>";
+                    html += "Ruc: "+obj.Ruc+" <br>";
+                    html += "Direccion: "+obj.Direccion+" <br>";
+                    html += "Comprobante: "+obj.Comprobante+" <br>";
+                    html += "Fecha: "+obj.Fecha+" <br>";
+                    html += "Observacion: "+obj.Observacion+" <br>";
+                    html += "Periodo_pago: "+obj.Periodo_pago+" <br>";
+                    html += "Tipo_pago: "+obj.Tipo_pago+" <br>";
+                    html += "Total: "+obj.Total+" <br>";
+                    html += "<br><br> Es CORRECTA la información?  <br>";
+                    confirm_proforma_finded(html, obj);
+                }
+                
+            }
+        });
+        
+    }
+
+    function confirm_proforma_finded(html_client_info, obj_client_info){
+        bootbox.confirm({
+            message: html_client_info,
+            buttons: {
+                confirm: {
+                    label: 'Importar PROFORMA',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'NO',
+                    className: 'btn-danger'
+                }
+            },
+            callback: function (result) {
+                if(result){
+                    $('#ruc_cliente').val(obj_client_info.Ruc);
+                    $('#tipo_moneda').val(obj_client_info.idtipo_moneda);
+                    $('#condicion_pago').val(obj_client_info.idperiodo_pago);
+                    get_cliente_document('ruc');
+                    buscar_importar_proforma(obj_client_info.idproforma)
+                    
+                }
+            }
+        });
+    }
+
+    function buscar_importar_proforma(idproforma){
+        $.ajax({
+            url: base_url + 'proformas/exportar_proforma_detalle',
+            type: 'GET',
+            data: 'idproforma='+idproforma,
+            dataType: 'JSON',
+            success: function (obj) {                            
+                
+
+                obj.forEach(element => add_detalle(element));
+            },
+
+        });
+    }
 
 </script>
 

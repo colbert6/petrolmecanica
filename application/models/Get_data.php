@@ -131,7 +131,7 @@ class Get_data extends CI_Model {
     public function get_correlativo($idserie)
     {
         //$query = $this->db->get('producto', 10);
-        $this->db->select(" CONCAT( serie.serie,'-',serie.correlativo ) as correlativo , serie.titulo  ");
+        $this->db->select(" CONCAT( serie.serie,'-',serie.correlativo ) as correlativo , serie.titulo , serie.correlativo as correlativo_solo  ");
         $this->db->from('serie_comprobante as serie');
         $this->db->where('serie.idserie_comprobante',$idserie);
         $query = $this->db->get();
@@ -208,6 +208,34 @@ class Get_data extends CI_Model {
         return $query->result();
     }
 
+    public function get_proforma_documento($tipo_doc, $numero_doc)
+    {
+        
+        $this->db->select(" pro.idproforma,
+                pro.estado as Estado,
+                pro.fecha_creacion as Fecha, 
+                pro.cliente_razon_social as Cliente, 
+                pro.cliente_documento as 'Ruc',
+                pro.cliente_direccion as Direccion,
+                pp.descripcion as Periodo_pago,
+                pp.idperiodo_pago as idperiodo_pago,
+                tp.descripcion as Tipo_pago,
+                tp.idtipo_pago as idtipo_moneda,
+                tc.descripcion Comprobante, 
+                pro.nro_documento as Nro_documento, 
+                pro.total as Total,
+                pro.observacion as Observacion ");
+
+        $this->db->from('proforma pro');
+        $this->db->join('tipo_comprobante tc', 'tc.idtipo_comprobante = pro.tipo_comprobante_idtipo_comprobante');
+        $this->db->join('tipo_pago tp', 'tp.idtipo_pago = pro.tipo_pago_idtipo_pago');
+        $this->db->join('periodo_pago pp', 'pp.idperiodo_pago = pro.periodo_pago_idperiodo_pago');
+        $this->db->where('pro.'.$tipo_doc,$numero_doc);
+        $query = $this->db->get();
+
+        return $query->row();
+
+    }
 
 
 }

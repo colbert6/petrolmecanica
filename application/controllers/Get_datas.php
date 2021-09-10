@@ -70,6 +70,15 @@ class Get_datas extends MY_Controller {
 
     }
 
+    public function get_proforma_info()
+    {
+        $tipo_doc = 'nro_documento';//$this->input->get('tipo');
+        $numero_doc = trim($this->input->get('numero'));
+
+        $this->load->model('get_data');
+        print json_encode($this->get_data->get_proforma_documento($tipo_doc, $numero_doc) );
+    }
+
 
 
 
