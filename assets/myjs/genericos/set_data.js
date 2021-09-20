@@ -50,7 +50,7 @@ function set_data( set_data ){
                 bootbox.dialog({
                     title: 'Respuesta',
                     closeButton: false,
-                    message: msj_success_true,
+                    message: result.msj_success_true || msj_success_true,
                     buttons: buttons_respuesta
                 });
                 

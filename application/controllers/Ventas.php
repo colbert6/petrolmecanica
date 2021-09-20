@@ -67,7 +67,7 @@ class Ventas extends MY_Controller {
 
         $this->load->js('assets/myjs/genericos/calculos.js');//genericos
         $this->load->js('assets/myjs/genericos/get_data.js');//genericos
-        $this->load->js('assets/myjs/genericos/set_data.js');//genericos
+        $this->load->js('assets/myjs/genericos/set_data_.js');//genericos
         $this->load->js('assets/myjs/movimientos.js');
 
         $this->load->js('assets/myjs/ventas.js');
@@ -228,6 +228,8 @@ class Ventas extends MY_Controller {
 
         } else {
 
+            //Si $validar_envio_cpe = 1, la venta incluye el envio CPE
+            //OJO: no importa la rpta del envio CPE, la venta sera guardada
             if($validar_envio_cpe){//Envio exitoso obligatorio para crear una venta
 
                 //Envio CPE
@@ -237,14 +239,24 @@ class Ventas extends MY_Controller {
                 if($result_envio_cpe['respuesta'] == 'ok' && $this->db->trans_status() !== FALSE){
                     $this->db->trans_commit();
                     $return['estado']=true;
+                    $msj_Venta_mas_CPE = 'VENTA GUARDADA <br> Envio comprobante electrónico EXITOSO';
                 }else{
                     $error = $this->db->error();
-                    $this->db->trans_rollback(); 
-                    $return['msj'] =  $return['error'] = 'ERROR: Envio electrónico. <br>- '.$result_envio_cpe['mensaje'].'<br>- '.$error['message'];  
+                    /*$this->db->trans_rollback(); 
+                    $return['msj'] =  $return['error'] = 'ERROR: Envio electrónico. <br>- '.$result_envio_cpe['mensaje'].'<br>- '.$error['message'];  */
+
+                    $this->db->trans_commit();//Para guardar la venta
+                    $return['estado']=true; //Para guardar la venta
+                    $msj_Venta_mas_CPE = 'VENTA GUARDADA <br><br>  ERROR Envio comprobante electrónico: <br>- '.$result_envio_cpe['mensaje'].'<br>- '.$error['message'];
                 }
 
+                $return['msj_success_true'] = $msj_Venta_mas_CPE;
+
             }else{
-                //Si no se desea validar el envio a cpe, $validar_envio_cp=0
+                //Si $validar_envio_cpe = 0, la venta NO incluye el envio CPE
+                //Si la venta se tiene exito localmente se guarda
+                $msj_Venta_sin_CPE = 'VENTA GUARDADA <br> Envio comprobante electrónico PENDIENTE';
+                $return['msj_success_true'] = $msj_Venta_sin_CPE;
                 $this->db->trans_commit(); 
                 $return['estado']=true;
             }

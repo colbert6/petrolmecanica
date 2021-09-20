@@ -116,6 +116,8 @@ class Facturalaya{
     			return 0;
     			break;
     	}
+
+        //print_r($data_cpe);die();
     	
     	$data = array_merge($data_cpe, $this->get_token_cliente());
     	$data["emisor"] = $this->get_data_emisor();
@@ -166,14 +168,14 @@ class Facturalaya{
 
     public function generar_cuotas($data_venta){
 
-    	if($data_venta['forma_pago'] == 'credito'){
+    	if($data_venta['forma_de_pago'] == 'credito'){
 
     		$nro_cuotas = $nro_cuotas_cont = $data_venta["nro_cuotas"];	
 			$monto_venta = $data_venta["total"];
 			$monto_cuota_promedio = round($monto_venta / $nro_cuotas, 2);
 			$monto_amortizado = 0;
 
-    		$fecha_vencimiento = $data_venta['forma_pago'];
+    		$fecha_vencimiento = $data_venta['forma_de_pago'];
     		$detalle_cuotas = array();
 
     		while ( $nro_cuotas_cont >= 1) {
@@ -193,7 +195,9 @@ class Facturalaya{
     		$data_venta['monto_deuda_total'] = $monto_venta;
     		$data_venta['detalle_cuotas'] = $detalle_cuotas;
 
-    	}
+    	}else{
+            $data_venta['detalle_cuotas'] =  array();
+        }
 
     	unset($data_venta["nro_cuotas"]);    	
 
