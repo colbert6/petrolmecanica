@@ -175,7 +175,7 @@ class Facturalaya{
 			$monto_cuota_promedio = round($monto_venta / $nro_cuotas, 2);
 			$monto_amortizado = 0;
 
-    		$fecha_vencimiento = $data_venta['forma_de_pago'];
+    		$fecha_vencimiento = $data_venta['fecha_comprobante'];
     		$detalle_cuotas = array();
 
     		while ( $nro_cuotas_cont >= 1) {
@@ -207,6 +207,7 @@ class Facturalaya{
 
     public function generar_comprobante_json($idventa, $ci){ 
        
+
         //FACTURA O BOLETA
         $ci->load->model('venta');
         $ci->load->model('det_venta');
@@ -216,6 +217,7 @@ class Facturalaya{
         if( count($data) ) {
 
         	$data = $this->generar_cuotas($data);//generar cuotas si es necesario
+            //print_r($data);exit();
 
             $data_det = $ci->det_venta->cpe_detventa($idventa);
             $data["detalle"]= $data_det;

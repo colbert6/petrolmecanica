@@ -67,7 +67,7 @@ class Ventas extends MY_Controller {
 
         $this->load->js('assets/myjs/genericos/calculos.js');//genericos
         $this->load->js('assets/myjs/genericos/get_data.js');//genericos
-        $this->load->js('assets/myjs/genericos/set_data_.js');//genericos
+        $this->load->js('assets/myjs/genericos/set_data.js');//genericos
         $this->load->js('assets/myjs/movimientos.js');
 
         $this->load->js('assets/myjs/ventas.js');
@@ -351,6 +351,52 @@ class Ventas extends MY_Controller {
         print json_encode($this->venta->control($fecha));
     }
 
+    public function generar_cuotas_print($data_venta){
+
+        $Idperiodo_pago = $data_venta['Idperiodo_pago'];
+        $Nro_cuotas = $data_venta['Nro_cuotas'];
+        $Total = $data_venta['Total'];
+        $Fecha = $data_venta['Fecha'];
+
+        $detalle_cuotas = array();
+
+        if($Idperiodo_pago == '2'){
+
+            $nro_cuotas = $nro_cuotas_cont = $Nro_cuotas; 
+            $monto_venta = $Total;
+            $monto_cuota_promedio = round($monto_venta / $nro_cuotas, 2);
+            $monto_amortizado = 0;
+
+            $fecha_vencimiento = $Fecha;            
+
+            while ( $nro_cuotas_cont >= 1) {
+                $fecha_vencimiento = date("Y-m-d", strtotime($fecha_vencimiento."+ 1 month")); 
+
+                $monto_cuota = $monto_cuota_promedio;
+                if($nro_cuotas_cont > 1){  // la cuota 1 debe ser igual al restante de lo que no se ha amortizado               
+                    $monto_amortizado += $monto_cuota_promedio;
+                }else{
+                    $monto_cuota = $monto_venta - $monto_amortizado ;
+                }
+                
+                $detalle_cuotas[] = array('fecha_vencimiento' => $fecha_vencimiento,  'monto_cuota'=> $monto_cuota);
+                $nro_cuotas_cont--;
+            }
+
+            $print_cuotas = "<br> Monto Pendiente Pago: (".$Total.")  / Nro Cuotas (".$Nro_cuotas.") : <br>";
+            foreach ($detalle_cuotas as $key => $value) {
+                $monto_cuota = number_format($value['monto_cuota'], 2, '.', '');
+                $print_cuotas .= " (".$value['fecha_vencimiento'].") ".$monto_cuota." / ";
+
+            }
+
+        }
+
+        
+
+        return $print_cuotas;
+    }
+
   
     public function print_venta()
     {   
@@ -372,7 +418,7 @@ class Ventas extends MY_Controller {
         $venta = $this->venta->get_print_venta($this->input->get('idventa'));
         $det_venta = $this->det_venta->det_venta_byId($this->input->get('idventa'));
 
-        if( count($venta) == 0 OR count($det_venta) == 0 ){ die('NO SE ENCONTRARON RESULTADOS'); exit();};
+        if( count($venta) == 0 OR count($det_venta) == 0 ){ die('<h3>NO SE ENCONTRARON RESULTADOS</h3>'); exit();};
 
         //$orientation = ())? $this->input->get('orientation') : 'P' ;
         //$format = (isset($this->input->get('format')))? $this->input->get('format'):'A4';
@@ -398,6 +444,8 @@ class Ventas extends MY_Controller {
                                   'RUC' => array($venta['RUC/DNI'],'1'),
                                   'Dirección' => array($venta['Direccion'],'5')  );
         $pdf->receptor_data( 5 ,$data_usuario_receptor);
+
+        $print_cuota = $this->generar_cuotas_print($venta);
         
         $vendedor_fijo = "Edinson Jimenez" ;//$venta['Usuario']
         $data_comprobante = array('Emitido' => array($venta['Fecha'],'1'),
@@ -406,7 +454,7 @@ class Ventas extends MY_Controller {
                                   'Condición pago' => array($venta['condicion_pago'],'1'),
                                   'Forma pago' => array($venta['forma_pago'],'1'), 
                                   'Moneda' => array($venta['moneda'],'1'),
-                                  'Observacion' => array($venta['Observacion'],'3')  );
+                                  'Observacion' => array($venta['Observacion'].$print_cuota,'3')  );
         $pdf->comprobante_data( 3 ,$data_comprobante);
 
         $width_cols = array(  array('Descripcion',40 ,'L') , array('Cant.',20, 'R'),array('P.unit',20,'R'),array('Subtotal',20,'R') );

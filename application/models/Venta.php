@@ -145,7 +145,9 @@ class Venta extends CI_Model {
                 vent.subtotal as Subtotal,
                 vent.igv as Igv,
                 vent.observacion as Observacion,
-                vent.nro_guia_remision as Nro_guia  ");
+                vent.nro_guia_remision as Nro_guia,
+                vent.nro_cuotas as Nro_cuotas,
+                vent.idperiodo_pago as Idperiodo_pago ");
 
         $this->db->from('venta vent');
         $this->db->join('tienda tt', 'tt.idtienda = vent.tienda_idtienda');

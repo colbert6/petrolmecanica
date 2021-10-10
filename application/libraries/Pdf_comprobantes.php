@@ -217,14 +217,14 @@ class Pdf_comprobantes extends TCPDF
         foreach ($data as $key => $value) {
 
             if(!$rd['max_col']){
-                $text.="<th colspan='".$value[1]."' > ".$key." : ".$value[0]."</th>" ;
+                $text.='<th colspan="'.$value[1].'" > '.$key.' : '.$value[0].'</th>' ;
                 $colspan += $value[1];
                 if($colspan % $n_col == 0  &&  $colspan < $max_colspan ) {
                     $text.= '</tr><tr>';
                 }
             }else if($rd['max_col']){
                 $i_row++;
-                $text.="<th> ".$key." : ".$value[0]."</th>" ;
+                $text.='<th> '.$key.' : '.$value[0].'</th>' ;
                 if( $i_row < $max_rows ) {
                     $text.= '</tr><tr>';
                 }
@@ -233,6 +233,9 @@ class Pdf_comprobantes extends TCPDF
 
         $text.='</tr>';
         $text.='</table>';
+
+
+
         
         $this->SetFont('helvetica', '', $rd['font_h']);
         $this->MultiCell( $rd['w'], '', $text, $rd['border'], 'L', 0,$rd['ln'], '', '', false, 0,true );      
@@ -274,14 +277,14 @@ class Pdf_comprobantes extends TCPDF
         foreach ($data as $key => $value) {
 
             if(!$cd['max_col']){
-                $text.="<th colspan='".$value[1]."' > ".$key." : ".$value[0]."</th>" ;
+                $text.='<td colspan="'.$value[1].'" > '.$key.' : '.$value[0].'</td>' ;
                 $colspan += $value[1];
                 if($colspan % $n_col == 0  &&  $colspan < $max_colspan ) {
                     $text.= '</tr><tr>';
                 }
             }else if($cd['max_col']){
                 $i_row++;
-                $text.="<th> ".$key." : ".$value[0]."</th>" ;
+                $text.='<td> '.$key.' : '.$value[0].'</td>' ;
                 if( $i_row < $max_rows ) {
                     $text.= '</tr><tr>';
                 }
@@ -290,10 +293,11 @@ class Pdf_comprobantes extends TCPDF
 
         $text.='</tr>';
         $text.='</table>';
-        
+
+       
         $this->SetFont('helvetica', '', $cd['font_h']);
         $this->MultiCell( $cd['w'], '', $text, $cd['border'], 'L', 0,$cd['ln'], '', '', false, 0,true );      
-        //echo $text;      exit();   
+        //echo "<code>".$text."</code>";      exit();   
     }
 
     public function data_table( $data, $head_cols, $flag_nro_item = false ) {//suma de $widthcols = 200 - $flag_nro_item
