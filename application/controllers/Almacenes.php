@@ -23,11 +23,11 @@ class Almacenes extends MY_Controller {
 
         $crud = new grocery_CRUD();
 
-        $crud->columns('codbarras','producto','presentacion', 'precio_venta','stock', 'tienda');
+        $crud->columns('categoria','marca','producto','presentacion', 'precio_venta','stock', 'tienda');
         $crud->set_table('producto_stock'); //Change to your table name
         $crud->set_primary_key('idproducto');
 
-        $crud->order_by('producto','asc');
+        $crud->order_by('categoria','asc');
 
 
         $crud->unset_operations();

@@ -238,5 +238,18 @@ class Get_data extends CI_Model {
     }
 
 
+    // DEVELOP
+    public function get_data_parametros_bd($id = '%')
+    {
+        $this->db->from('parametros as par');
+        if( $id != '%'){
+            $this->db->where('par.nombre',$id);
+        }
+        $query = $this->db->get();
+        
+        return $query->result_array();
+    }
+
+
 }
 
