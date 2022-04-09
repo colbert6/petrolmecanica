@@ -51,7 +51,7 @@
           <div class="form-group" style="margin-bottom: 0px;">
             <label for="tipo_pago" class="col-xs-5 col-sm-5 control-label">Moneda<!--Tipo Pago--></label>
             <div class="col-xs-7 col-sm-7">
-               <select class="form-control" id="idtipo_pago" name="idtipo_pago" > 
+               <select class="form-control" id="tipo_moneda" name="idtipo_pago" > 
                   <?php foreach($tipo_pagos as $tp) {
                     echo "<option value='{$tp->id}' > {$tp->descripcion} </option>";
                   }

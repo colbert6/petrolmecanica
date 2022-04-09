@@ -63,6 +63,25 @@ class Producto extends CI_Model {
 
                 return $query->result();
         }
+
+        public function get_print_etiqueta_qr($id)
+        {       
+                
+                $where = "pro.estado = 'Activo' ";
+                if($id != ""){
+                    $where .="and pro.idproducto = '{$id}' ";
+                }
+                $this->db->select("pro.idproducto as id,  pro.codbarras as codbarra, CONCAT(cat.nombre,' ',mar.nombre,' ',pro.nombre) as nombre_completo,pro.presentacion_minima, COALESCE(med.precio_venta,0) as precio_venta,COALESCE(med.precio_compra,0) as precio_compra,med.fecha_modificacion");
+                $this->db->from('producto as  pro');
+                $this->db->join('marca as mar', 'mar.idmarca = pro.marca_idmarca', 'LEFT');
+                $this->db->join('categoria as cat', 'cat.idcategoria = pro.categoria_idcategoria', 'LEFT');
+                $this->db->join('unidad_medida as med',"med.producto_idproducto = pro.idproducto AND med.presentacion_idpresentacion = pro.presentacion_minima AND med.estado = 'Activo' ","LEFT");
+                $this->db->where($where);
+                
+                $query = $this->db->get();
+
+                return $query->row_array();
+        }
         
        
 

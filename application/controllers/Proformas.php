@@ -67,7 +67,7 @@ class Proformas extends MY_Controller {
         $this->load->js('assets/myjs/genericos/calculos.js');//genericos
         $this->load->js('assets/myjs/genericos/get_data.js');//genericos
         $this->load->js('assets/myjs/genericos/set_data.js');//genericos
-        $this->load->js('assets/myjs/proformas_.js');
+        $this->load->js('assets/myjs/proformas.js');
         
         $this->load->js('assets/js/bootbox.min.js');
         $this->load->js('assets/js/typeahead/typeahead.min.js');
