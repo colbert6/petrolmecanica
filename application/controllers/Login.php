@@ -62,6 +62,9 @@ class Login extends MY_Controller {
         $this->db->where('clave',$password);
         $acceso = $this->db->get();
 
+        //print_r($this->db->last_query());  
+        //exit();
+
         if($acceso->num_rows()==1){
 
             $datos = $acceso->row();
