@@ -55,6 +55,7 @@ class Get_datas extends MY_Controller {
 
     public function get_datos_default_documentacion()
     {   
+        // get datos configurados para cada tipo de documentacion
         $result = array();
         $idserie = $this->input->get('idserie');
         $this->load->model('get_data');
@@ -90,9 +91,6 @@ class Get_datas extends MY_Controller {
         $this->load->model('get_data');
         print json_encode($this->get_data->get_proforma_documento($tipo_doc, $numero_doc) );
     }
-
-
-
 
 
 

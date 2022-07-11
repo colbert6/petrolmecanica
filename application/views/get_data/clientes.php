@@ -1,9 +1,9 @@
 <style type="text/css">
 
-	.typeahead{
-	        font-size: 16px;
-	        width: 100%;
-	    }
+    .typeahead{
+            font-size: 16px;
+            width: 100%;
+        }
     .dropdown-menu>li>a {
         white-space: normal !important;
     }    
@@ -11,18 +11,18 @@
         background-color:#fbfbfb;
     }
     .typeahead, .tt-query, .tt-hint {
-		width: 100%;	
-	}
+        width: 100%;    
+    }
 
 </style>
 
 <?php
-	
-	$dni = isset($cliente_base[0]->dni)? $cliente_base[0]->dni: '';
-	$idcliente = isset($cliente_base[0]->idcliente)? $cliente_base[0]->idcliente: '';
-	$ruc = isset($cliente_base[0]->ruc)? $cliente_base[0]->ruc: '';
-	$razon_social = isset($cliente_base[0]->razon_social)? $cliente_base[0]->razon_social: '';
-	$direccion = isset($cliente_base[0]->direccion)? $cliente_base[0]->direccion: '';
+    
+    $dni = isset($cliente_base[0]->dni)? $cliente_base[0]->dni: '';
+    $idcliente = isset($cliente_base[0]->idcliente)? $cliente_base[0]->idcliente: '';
+    $ruc = isset($cliente_base[0]->ruc)? $cliente_base[0]->ruc: '';
+    $razon_social = isset($cliente_base[0]->razon_social)? $cliente_base[0]->razon_social: '';
+    $direccion = isset($cliente_base[0]->direccion)? $cliente_base[0]->direccion: '';
 
     $flag_show_btn_importar_proforma = isset($flag_show_btn_importar_proforma)? $flag_show_btn_importar_proforma: false;
     $list_btns_info =  isset($list_btns_info)? $list_btns_info: array();
@@ -55,7 +55,7 @@
  <div class="form-group" style="margin-bottom: 0px;">
     <label for="ruc_cliente" class="col-xs-3 col-sm-4 control-label" style="text-align: left;">Ruc </label>
     <div class="col-xs-9 col-sm-8" >
-     	<input type="text" class="form-control" id="ruc_cliente" name="ruc_cliente" placeholder="Ruc" value="<?php echo $ruc; ?>" onkeypress="soloNumeros(event,'ruc')" maxlength="11"> 
+        <input type="text" class="form-control" id="ruc_cliente" name="ruc_cliente" placeholder="Ruc" value="<?php echo $ruc; ?>" onkeypress="soloNumeros(event,'ruc')" maxlength="11"> 
     </div>    
  </div>
 
@@ -81,8 +81,8 @@
   
   $(document).ready(function () {   
 
-  	$('#cliente').typeahead({
-  		source: function (query, process) {
+    $('#cliente').typeahead({
+        source: function (query, process) {
             $.ajax({
                 url: base_url + 'get_datas/get_clientes',
                 type: 'GET',
@@ -103,15 +103,15 @@
         items: 10,
         minLength:3,
         updater: function (item ) {
-        	obj = map[item];
+            obj = map[item];
             $('#idcliente').val(obj.idcliente);
-        	$('#dni_cliente').val(obj.dni);
-			$('#ruc_cliente').val(obj.ruc);
-			$('#direccion_cliente').val(obj.direccion);
+            $('#dni_cliente').val(obj.dni);
+            $('#ruc_cliente').val(obj.ruc);
+            $('#direccion_cliente').val(obj.direccion);
             return item;
         }
 
-  	}); 
+    }); 
 
   });
 

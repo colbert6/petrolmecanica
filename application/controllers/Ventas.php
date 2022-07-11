@@ -67,10 +67,10 @@ class Ventas extends MY_Controller {
 
         $this->load->js('assets/myjs/genericos/calculos.js');//genericos
         $this->load->js('assets/myjs/genericos/get_data.js');//genericos
-        $this->load->js('assets/myjs/genericos/set_data.js');//genericos
+        $this->load->js('assets/myjs/genericos/set_data_v2.js');//genericos
         $this->load->js('assets/myjs/movimientos.js');
 
-        $this->load->js('assets/myjs/ventas.js');
+        $this->load->js('assets/myjs/ventas_.js');
         $this->load->js('assets/js/bootbox.min.js');
 
         $this->load->js('assets/js/shortcut.js');//activación de teclas 
@@ -127,17 +127,19 @@ class Ventas extends MY_Controller {
         $return = array( 'estado_validacion' => true , 'estado' => false, 'msj' => '' , 'error'=> '' , 'idsave' => '' , 'enlace' => '');  
 
         //VALIDACIONES
-
         $this->load->model('get_data');
         $idserie = '16';
         $serie = $this->get_data->get_correlativo($idserie);
         $validar_envio_cpe =  $serie->correlativo_solo;
+
+	
 
         //Guardar movimiento
         $this->db->trans_start();//Inicio de transaccion        
 
         try{
 
+        //$this->load->model('get_data');
         $idserie = $this->input->post('idserie');
         $serie = $this->get_data->get_correlativo($idserie);//Obtener correlativo actual
 
@@ -217,9 +219,9 @@ class Ventas extends MY_Controller {
         $this->load->model('kardex');      
         $this->kardex->codmotivo = $idventa;
         $this->kardex->insert_kardex("S","venta");
+	
         
         $return['idsave'] = $idventa;
-       
         if ($this->db->trans_status() === FALSE) { 
 
             $error = $this->db->error();
@@ -418,7 +420,7 @@ class Ventas extends MY_Controller {
         $venta = $this->venta->get_print_venta($this->input->get('idventa'));
         $det_venta = $this->det_venta->det_venta_byId($this->input->get('idventa'));
 
-        if( count($venta) == 0 OR count($det_venta) == 0 ){ die('<h3>NO SE ENCONTRARON RESULTADOS</h3>'); exit();};
+        if( count($venta) == 0 OR count($det_venta) == 0 ){ die('NO SE ENCONTRARON RESULTADOS'); exit();};
 
         //$orientation = ())? $this->input->get('orientation') : 'P' ;
         //$format = (isset($this->input->get('format')))? $this->input->get('format'):'A4';
@@ -475,17 +477,20 @@ class Ventas extends MY_Controller {
 
         $data_resumen = $this->ruc.'|'.$venta['codsunat'].'|'.$comprobante[0].'|'.$comprobante[1].'|'.$venta['Igv'].'|'.$venta['Total'].'|'.$venta['Fecha'].'|'.$cod_documento_client.'|'.$venta['RUC/DNI'].'|' ;
         $qr_code = $this->crear_qr($data_resumen); 
-
-
-
-        $descripcion_moneda = strtoupper($venta['moneda']);
+	
+	$descripcion_moneda = strtoupper($venta['moneda']);
         $simbolo_moneda =  $descripcion_moneda == 'DOLARES' ? '$ ' : 'S/ ';
 
-        $data_footer = array('monto_letra' => array( 'texto' => num_to_letras($venta['Total'],'',$descripcion_moneda) ),
+        /*$data_footer = array('monto_letra' => array( 'texto' => num_to_letras($venta['Total'])),
+                            'monto' => array('op_importe'=>$venta['Total'] ,  'op_gravada'=>$venta['Subtotal'] , 'op_igv'=>$venta['Igv'] , ) ,
+                            'qr_code' =>  $qr_code   );
+        $pdf->data_table_footer( 'monto_venta',  $data_footer , 'msj');*/
+	$data_footer = array('monto_letra' => array( 'texto' => num_to_letras($venta['Total'],'',$descripcion_moneda) ),
                             'monto' => array('op_importe'=>$simbolo_moneda.$venta['Total'] ,  
                                             'op_gravada'=>$simbolo_moneda.$venta['Subtotal'] , 
                                             'op_igv'=>$simbolo_moneda.$venta['Igv'] ) ,
                             'qr_code' =>  $qr_code   );
+
         $pdf->data_table_footer( 'monto_venta',  $data_footer , 'msj');
 
 
@@ -597,6 +602,8 @@ class Ventas extends MY_Controller {
         }
 
         //print_r($data_json);die();
+	
+	
 
         //Validación - Problema con data del cpe
         if(count($data_json) &&  $data_json != 'null' ){
@@ -609,7 +616,8 @@ class Ventas extends MY_Controller {
 
         $this->load->model('envio_cpe');
         $data_json["tipo_envio"] = $tipo_envio;
-        $data_json["idmaster"] = $idventa;
+        $data_json["idmaster"] = $idventa;	
+	
         
         if($result['respuesta'] == 'ok' &&  $result['cod_sunat'] == 0 ){ //Guardar
             $this->envio_cpe->set_envio($data_json, $result);//guardar registro envio
@@ -617,6 +625,7 @@ class Ventas extends MY_Controller {
 
 
         }else{ //No debería ingresar, ya que toda venta debe ser enviada  
+	    
             $result['codigo'] = isset($result['codigo'])? $result['codigo']:$result['cod_sunat'];
             $result['mensaje'] = isset($result['mensaje'])? $result['mensaje']:$result['msj_sunat'];
             $this->envio_cpe->set_error($data_json, $result);//guardar registro error envio

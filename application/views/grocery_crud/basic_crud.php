@@ -11,10 +11,6 @@
     color: green !important;
   }
 
-  .gc-container {
-   overflow: auto;
-}
-
 
 </style>
 

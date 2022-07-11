@@ -131,7 +131,7 @@ class Get_data extends CI_Model {
     public function get_correlativo($idserie)
     {
         //$query = $this->db->get('producto', 10);
-        $this->db->select(" CONCAT( serie.serie,'-',serie.correlativo ) as correlativo , serie.titulo , serie.correlativo as correlativo_solo  ");
+        $this->db->select(" CONCAT( serie.serie,'-',serie.correlativo ) as correlativo , serie.titulo , serie.correlativo as correlativo_solo ");
         $this->db->from('serie_comprobante as serie');
         $this->db->where('serie.idserie_comprobante',$idserie);
         $query = $this->db->get();
@@ -237,7 +237,7 @@ class Get_data extends CI_Model {
 
     }
 
-    public function find_datos_documentacion_existente($nro_documento) // para realizar importaciones
+        public function find_datos_documentacion_existente($nro_documento) // para realizar importaciones
     {
         
         $this->db->select(" dat.iddato, dat.descripcion, docu_det.orden as orden, dat.tipo, dat.abreviatura, dat.validacion, COALESCE(docu_det.valor,'') as valor ");
@@ -267,6 +267,7 @@ class Get_data extends CI_Model {
         return $query->row();
 
     }
+
 
 
 }

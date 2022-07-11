@@ -97,5 +97,7 @@ class Det_proforma extends CI_Model {
 
         return $query->result();
     }
+
+
 }
 

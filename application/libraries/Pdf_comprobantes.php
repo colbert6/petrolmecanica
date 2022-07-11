@@ -55,8 +55,7 @@ class Pdf_comprobantes extends TCPDF
     public $tipo_documento;
     public $nro_documento;
   
-    public $cuentas_bancarias = "Cuenta corriente BCP : 245-2459385-0-18 <br>Cuenta CCI BCP : 00224500245938501893 <br>Cuenta de detracciones BN : 00761153560<br> <br>Cuenta DÓLARES BCP: 395-9405242-1-51<br>Cuenta DÓLARES CCI BCP : 00239500940524215121 ";
-            
+    public $cuentas_bancarias = "Cuenta corriente BCP : 245-2459385-0-18 <br>Cuenta CCI BCP : 00224500245938501893 <br>Cuenta de detracciones BN : 00761153560<br> <br>Cuenta DÓLARES BCP: 395-9405242-1-51<br>Cuenta DÓLARES CCI BCP : 00239500940524215121 ";        
 
     /* ---Sectores del comprobante ---*/
 
@@ -119,7 +118,7 @@ class Pdf_comprobantes extends TCPDF
         switch ($this->tipo_documento) {
             case 'proforma':
                 $text.=" {$this->direccion}<br>" ;
-                $text.=" {$this->direccion_adicional}<br>" ;
+                $text.=" {$this->direccion_adicional}<br>";
                 break;            
             default:
                 $text.=" {$this->direccion}<br>" ;
@@ -217,14 +216,14 @@ class Pdf_comprobantes extends TCPDF
         foreach ($data as $key => $value) {
 
             if(!$rd['max_col']){
-                $text.='<th colspan="'.$value[1].'" > '.$key.' : '.$value[0].'</th>' ;
+                $text.="<th colspan='".$value[1]."' > ".$key." : ".$value[0]."</th>" ;
                 $colspan += $value[1];
                 if($colspan % $n_col == 0  &&  $colspan < $max_colspan ) {
                     $text.= '</tr><tr>';
                 }
             }else if($rd['max_col']){
                 $i_row++;
-                $text.='<th> '.$key.' : '.$value[0].'</th>' ;
+                $text.="<th> ".$key." : ".$value[0]."</th>" ;
                 if( $i_row < $max_rows ) {
                     $text.= '</tr><tr>';
                 }
@@ -233,9 +232,6 @@ class Pdf_comprobantes extends TCPDF
 
         $text.='</tr>';
         $text.='</table>';
-
-
-
         
         $this->SetFont('helvetica', '', $rd['font_h']);
         $this->MultiCell( $rd['w'], '', $text, $rd['border'], 'L', 0,$rd['ln'], '', '', false, 0,true );      
@@ -798,7 +794,7 @@ class Pdf_comprobantes extends TCPDF
         $this->Ln($salto_linea );
     }
 
-     public function anexo_informacion( $data, $flag_nro_item = false ) {//suma de $widthcols = 200 - $flag_nro_item
+    public function anexo_informacion( $data, $flag_nro_item = false ) {//suma de $widthcols = 200 - $flag_nro_item
         /*$this->SetAutoPageBreak(TRUE, 10);
         $this->AddPage();*/
         

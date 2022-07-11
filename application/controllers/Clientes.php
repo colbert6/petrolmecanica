@@ -21,6 +21,7 @@ class Clientes extends MY_Controller {
         $crud->columns('razon_social','ruc','dni'); //,'nombre_comercial'
 
 
+        //$crud->required_fields('ruc','razon_social');//Requeridos
         $crud->required_fields('ruc','razon_social', 'ubigeo');//Requeridos
         $crud->unique_fields(array('razon_social','ruc','dni'));//unicos
         
@@ -34,7 +35,8 @@ class Clientes extends MY_Controller {
         $this->load->view('grocery_crud/basic_crud', (array)$output ) ;
     }
 
-    public function add_cliente_from_info_sunat()
+
+	public function add_cliente_from_info_sunat()
     {   
         $this->db->trans_start();
 
@@ -64,7 +66,5 @@ class Clientes extends MY_Controller {
         print json_encode($return);
         
     }
-
-	
 
 }

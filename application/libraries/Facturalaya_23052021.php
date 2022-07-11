@@ -61,46 +61,6 @@ class Facturalaya{
 		return $data_emisor;
     }
 
-    public function get_client_info_sunat($tipo_documento, $numero_documento) {
-
-        $data_emisor = $this->get_token_cliente();
-        $token_cliente = $data_emisor['token_cliente'];
-
-        if($tipo_documento == 'dni') {
-            $ruta = "https://facturalahoy.com/api/persona/".$numero_documento.'/'.$token_cliente;    
-        } elseif ($tipo_documento == 'ruc') {
-            $ruta = "https://facturalahoy.com/api/empresa/".$numero_documento.'/'.$token_cliente;
-        }
-
-        $curl = curl_init();
-        curl_setopt_array($curl, array(
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_URL => $ruta,
-            CURLOPT_USERAGENT => 'Consulta Datos',
-            CURLOPT_CONNECTTIMEOUT => 0,
-            CURLOPT_TIMEOUT => 400,
-            CURLOPT_FAILONERROR => true
-        ));
-
-        $respuesta = curl_exec($curl);
-        if (curl_error($curl)) {
-            $error_msg = curl_error($curl);
-        }
-
-        if (isset($error_msg)) {
-            $resp['respuesta'] = 'error';
-            $resp['titulo'] = 'Error';
-            $resp['data'] = '';
-            $resp['encontrado'] = false;
-            $resp['mensaje'] = 'Error en Api de Búsqueda';
-            $resp['errores_curl'] = $error_msg;
-            
-            $respuesta = json_encode($resp);
-        }
-    
-        return $respuesta;
-    }
-
     public function builder_cpe($data_cpe, $tipo){
 
     	switch ($tipo) {
@@ -165,14 +125,14 @@ class Facturalaya{
   
   public function generar_cuotas($data_venta){
 
-    	if($data_venta['forma_de_pago'] == 'credito'){
+    	if($data_venta['forma_pago'] == 'credito'){
 
     		$nro_cuotas = $nro_cuotas_cont = $data_venta["nro_cuotas"];	
 			$monto_venta = $data_venta["total"];
 			$monto_cuota_promedio = round($monto_venta / $nro_cuotas, 2);
 			$monto_amortizado = 0;
 
-    		$fecha_vencimiento = $data_venta['fecha_comprobante'];
+    		$fecha_vencimiento = $data_venta['forma_pago'];
     		$detalle_cuotas = array();
 
     		while ( $nro_cuotas_cont >= 1) {
@@ -192,9 +152,7 @@ class Facturalaya{
     		$data_venta['monto_deuda_total'] = $monto_venta;
     		$data_venta['detalle_cuotas'] = $detalle_cuotas;
 
-    	}else{
-            $data_venta['detalle_cuotas'] =  array();
-        }
+    	}
 
     	unset($data_venta["nro_cuotas"]);    	
 

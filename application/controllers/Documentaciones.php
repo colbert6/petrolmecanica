@@ -161,10 +161,11 @@ class Documentaciones extends MY_Controller {
         $this->load->model('get_data');
         $this->load->model('cliente');
 
-        $list_btns_info = array( array('value' =>'- Importar documento -' ,'onclick_function' =>'input_key_value_import_documento()' ));
-        $output = array('flag_show_btn_importar_proforma'=> false, 
-                        'list_btns_info' =>  $list_btns_info  
-                ); 
+        $list_btns_info = array( 
+                            array('value' =>'- Importar documento -' ,'onclick_function' =>'input_key_value_import_documento()' )
+        );
+        $output = array('flag_show_btn_importar_proforma'=> false, 'list_btns_info' =>  $list_btns_info
+        ); 
         $get_clientes = $this->load->view('get_data/clientes', $output,true) ;
 
         /*$output = array( 'onSelected' => 'add_detalle(obj);' ); //cuando se seleccione el valor

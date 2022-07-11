@@ -22,9 +22,17 @@ class Envio_cpe extends CI_Model {
         }else{
             $this->codigo = "-";
         }
+	
+	
 
         $this->usuario_envio =  0;
-        $this->data_result =  json_encode($data_result);
+        $this->data_result =  '';//json_encode($data_result);
+	
+
+	
+	//$this->db->insert('error_envio_electronico', $this);
+	//$error = $this->db->error();
+	//echo $error['message'];
 
         return  $this->db->insert('error_envio_electronico', $this);
     }

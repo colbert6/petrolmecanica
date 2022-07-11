@@ -17,7 +17,7 @@ function add_detalle(obj){
 
 	}else{
 
-    idp = obj.idproducto;   
+	idp = obj.idproducto;   
     cant = obj.cantproducto? obj.cantproducto : 1;
     item_subtotal = obj.subtotal? obj.subtotal : obj.precio_venta;
 

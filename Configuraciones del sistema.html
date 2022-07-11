@@ -6,12 +6,16 @@ Configuraciones del sistema
 -------------------------------
 
 1. en core/MY_controller.php :
-
--Se encuentra los datos de la empresa usuaria
+	-Se encuentra los datos de la empresa usuaria
 
 2. en config/config.php :
+	-Se debe actualizar el parametro de ser necesario $config['base_url'] = 'https://'.$_SERVER["SERVER_NAME"].'/sistem/';
 
--Se debe actualizar el parametro de ser necesario $config['base_url'] = 'http://localhost/trebloc/';
+2. en config/database.php :
+	-Se debe actualizar el parametro de ser necesario $active_group  = 'server';
+
+2. en application/libraries/Facturalaya.php :
+	-Se debe actualizar el parametro "tipo_proceso" => "produccion", //prueba
 
 3. en assets/img :
 -Cambiar la imagen de logo_empresa.jpg según corresponda
@@ -36,31 +40,5 @@ Configuraciones del sistema
 	TRUNCATE TABLE kardex;
 	TRUNCATE TABLE stock;
 	SET FOREIGN_KEY_CHECKS = 1;
-
-
-5. Acceso FTP
-http://petrolmecanicajc.com
-admin_petrolmecanicajc
-20602440908
-
-
-http://localhost/sistem/ejemplos/php/ejemplo_factura.php
-http://localhost/sistem/Envio_cpes/envio_cpe/?id=1&tipo_envio=generar_comprobante
-
----
-
-
-LINKS PARA CONSULTAR SUNAT
--------------------------------
-
-Consultas Factura, Nota de Crédito y Débito Electrónicas
-https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm?pestana=*&agrupacion=*
-
-
-Consulta de comprobantes de pago electrónicos
-
-Facturación Electronica
-	Consultar Factura. Boletas y Notas
-https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm?pestana=*&agrupacion=*
 
 

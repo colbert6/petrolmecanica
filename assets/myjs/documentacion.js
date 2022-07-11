@@ -5,7 +5,7 @@ $(document).ready(function () {
     shortcut.add("F9",function() {
         save();
     });
-   	 	
+        
 
 });
 
@@ -106,7 +106,7 @@ var save = function(){
     }      
             
     if(!fallas){
-    	
+        
 
         var obj = new Object();
 
@@ -138,10 +138,10 @@ var save = function(){
                                     
                                 };
 
-	
+    
 
         set_data(obj);
-    	
+        
     }else{
         $("#btn_save").removeAttr('disabled');
     }

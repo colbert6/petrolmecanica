@@ -90,7 +90,7 @@ class Productos extends MY_Controller {
         $pdf->AddPage();
 
 
-        $data_resumen = "http://petrolmecanicajc.website/sistem/login";//.$producto['nombre_completo'];
+        $data_resumen = "https://www.petrolmecanicajc.com";//.$producto['nombre_completo'];
         $qr_code = $this->crear_qr($data_resumen); 
 
 
@@ -172,6 +172,6 @@ class Productos extends MY_Controller {
     }
 
 
-	
+    
 
 }

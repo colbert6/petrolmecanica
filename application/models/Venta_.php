@@ -41,12 +41,6 @@ class Venta extends CI_Model {
         
         $this->cliente_direccion = $this->input->post('direccion_cliente');
         $this->colaborador_idcolaborador = $this->session->userdata('id_user');//FALTA
-
-        $this->idtipo_moneda = $this->input->post('tipo_moneda');
-        $this->idforma_pago = $this->input->post('forma_pago');
-        $this->idperiodo_pago = $this->input->post('condicion_pago');
-        $this->nro_cuotas = $this->input->post('numero_cuotas');
-        $this->cliente_direccion = $this->input->post('direccion_cliente');
         
         $this->observacion = $this->input->post('observacion');     
         
@@ -137,25 +131,17 @@ class Venta extends CI_Model {
                 col.nombre as Usuario,
                 tc.descripcion Comprobante, 
                 tc.codsunat codsunat, 
-                fp.descripcion as forma_pago,
-                tm.descripcion as moneda,
-                pp.descripcion as condicion_pago,
                 vent.nro_documento as Nro_documento, 
                 vent.total as Total,
                 vent.subtotal as Subtotal,
                 vent.igv as Igv,
                 vent.observacion as Observacion,
-                vent.nro_guia_remision as Nro_guia,
-                vent.nro_cuotas as Nro_cuotas,
-                vent.idperiodo_pago as Idperiodo_pago  ");
+                vent.nro_guia_remision as Nro_guia  ");
 
         $this->db->from('venta vent');
         $this->db->join('tienda tt', 'tt.idtienda = vent.tienda_idtienda');
         $this->db->join('tipo_comprobante tc', 'tc.idtipo_comprobante = vent.tipo_comprobante_idtipo_comprobante');
         $this->db->join('colaborador col', 'col.idcolaborador = vent.colaborador_idcolaborador');
-        $this->db->join('forma_pago fp', 'fp.idforma_pago = vent.idforma_pago','left');
-        $this->db->join('tipo_moneda tm', 'tm.idtipo_moneda = vent.idtipo_moneda','left');
-        $this->db->join('periodo_pago pp', 'pp.idperiodo_pago = vent.idperiodo_pago','left');
         $this->db->where('vent.idventa',$idventa);
         $query = $this->db->get();
 
@@ -223,11 +209,8 @@ class Venta extends CI_Model {
             "" as total_letras,
             "" as nro_otr_comprobante,
             "" as transporte_nro_placa,
-            tm.cod_tipo_moneda as cod_moneda ,
+            "PEN" as cod_moneda ,
             "0000" as cod_sucursal_sunat , 
-            pp.codigo_facturalaya as forma_de_pago,
-            0 as monto_deuda_total,
-            nro_cuotas as nro_cuotas, 
             DATE_FORMAT( vent.fecha_venta,"%Y-%m-%d") as fecha_comprobante, 
             DATE_FORMAT( vent.fecha_venta,"%Y-%m-%d") as fecha_vto_comprobante,
 
@@ -240,12 +223,6 @@ class Venta extends CI_Model {
         $this->db->join('tienda tt', 'tt.idtienda = vent.tienda_idtienda');
         $this->db->join('cliente cli', 'cli.idcliente = vent.cliente_idcliente', 'left');
         $this->db->join('tipo_comprobante tc', 'tc.idtipo_comprobante = vent.tipo_comprobante_idtipo_comprobante');
-
-
-        $this->db->join('forma_pago fp', 'fp.idforma_pago = vent.idforma_pago');
-        $this->db->join('tipo_moneda tm', 'tm.idtipo_moneda = vent.idtipo_moneda');
-        $this->db->join('periodo_pago pp', 'pp.idperiodo_pago = vent.idperiodo_pago');
-
         $this->db->where('vent.idventa',$idventa);
 
         $query = $this->db->get();

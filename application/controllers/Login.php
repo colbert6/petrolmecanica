@@ -16,11 +16,6 @@ class Login extends MY_Controller {
         $this->load->view('login/index',$parametros) ;
 	}
 
-    public function hola()
-    {      
-        echo "Hola";
-    }
-
     public function verificar() 
     {
         if ($this->input->post('token') == $this->session->flashdata('token') ) {
@@ -61,9 +56,6 @@ class Login extends MY_Controller {
         $this->db->where('usuario',$username);
         $this->db->where('clave',$password);
         $acceso = $this->db->get();
-
-        //print_r($this->db->last_query());  
-        //exit();
 
         if($acceso->num_rows()==1){
 

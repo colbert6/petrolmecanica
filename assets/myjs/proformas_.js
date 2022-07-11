@@ -18,9 +18,6 @@ function add_detalle(obj){
 	}else{
 
 	idp = obj.idproducto;	
-    cant = obj.cantproducto? obj.cantproducto : 1;
-    item_subtotal = obj.subtotal? obj.subtotal : obj.precio_venta;
-
 	html = "<div class='col-xs-12 col-md-6 item' style='padding-right: 0px;padding-bottom: 4px;' id_prod=\'"+idp+"\'>";
 	html += "<div class='input-group'>";
 	html += "<span class='input-group-btn'>";	
@@ -35,7 +32,7 @@ function add_detalle(obj){
 	html += "</div>  ";
 
 	html += "<div class='col-xs-4 col-md-2 item_cantidad' style='padding-right: 0px;padding-bottom: 4px;' id_prod=\'"+idp+"\'>";
-	html += "<input type='number' name='cant[]' class='form-control' placeholder='Cantidad'   value=\'"+cant+"\'  onkeyup=\'calcular_subtotal("+idp+")\' onchange=\'calcular_subtotal("+idp+")\'>";
+	html += "<input type='number' name='cant[]' class='form-control' placeholder='Cantidad'   value=\'1\'  onkeyup=\'calcular_subtotal("+idp+")\' onchange=\'calcular_subtotal("+idp+")\'>";
 	html += "</div>";
 
 	html += "<div class='col-xs-4 col-md-2 item_precio' style='padding-right: 0px;padding-bottom: 4px;' id_prod=\'"+idp+"\'>";
@@ -43,7 +40,7 @@ function add_detalle(obj){
 	html += "</div>";
 
 	html += "<div class='col-xs-4 col-md-2 item_subtotal' style='padding-right: 0px;padding-bottom: 4px;' id_prod=\'"+idp+"\'>";
-	html += "<input type='number' class='form-control' readonly tabindex='-1'  value=\'"+item_subtotal+"\'>";
+	html += "<input type='number' class='form-control' readonly tabindex='-1'  value=\'"+obj.precio_venta+"\'>";
 	html += "</div>";
 
   html += "<div class='col-xs-12 col-md-12 item_info ocultar_info_item' style='padding-bottom: 4px;' id_prod=\'"+idp+"\'>";
