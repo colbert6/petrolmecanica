@@ -24,26 +24,32 @@
 	$razon_social = isset($cliente_base[0]->razon_social)? $cliente_base[0]->razon_social: '';
 	$direccion = isset($cliente_base[0]->direccion)? $cliente_base[0]->direccion: '';
 
+    $flag_show_btn_importar_proforma = isset($flag_show_btn_importar_proforma)? $flag_show_btn_importar_proforma: false;
+    $list_btns_info =  isset($list_btns_info)? $list_btns_info: array();
 ?>
 
-<!--div class="form-group" style="margin-bottom: 0px;">
-    <label for="dni_cliente" class="col-xs-3 col-sm-4 control-label" style="text-align: left;">Dni </label>
-    <div class="col-xs-9 col-sm-8">
-			<input type="text" class="form-control" id="dni_cliente" name="dni_cliente" placeholder="Dni" value="<?php echo $dni; ?>" onkeypress="soloNumeros(event,'dni')" maxlength="8">
-			<span class="input-group-btn">
-              <button type="button" class="btn btn-info btn-flat" onclick="buscar_cliente()"><i class="fa fa-plus"></i></button>
-            </span>
-
-    </div>
- </div-->
 
  <div class="form-group" >
+    
+    
+
+    <?php if($flag_show_btn_importar_proforma ){  ?>
     <div class="col-xs-6 col-sm-6" >
         <input type="button" value="- Importar Proforma -" class="btn btn-primary" onclick="get_correlativo_proforma_info()">
     </div>
+    <?php } // endif -> $flag_show_btn_importar_proforma  ?>
+
+    <?php foreach ($list_btns_info as $clave => $valor){  ?>
+    <div class="col-xs-6 col-sm-6" >
+        <input type="button" value="<?php echo $valor['value']; ?>" class="btn btn-primary" 
+        onclick="<?php echo $valor['onclick_function']; ?>" >
+    </div>
+    <?php } // foreach -> $list_btns_info  ?>
+
     <div class="col-xs-6 col-sm-6" >
         <input type="button" value="- Nuevo cliente -" class="btn btn-info" onclick="get_cliente_document_info_sunat()">
     </div>
+    
  </div>
 
  <div class="form-group" style="margin-bottom: 0px;">

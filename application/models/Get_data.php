@@ -237,6 +237,37 @@ class Get_data extends CI_Model {
 
     }
 
+    public function find_datos_documentacion_existente($nro_documento) // para realizar importaciones
+    {
+        
+        $this->db->select(" dat.iddato, dat.descripcion, docu_det.orden as orden, dat.tipo, dat.abreviatura, dat.validacion, COALESCE(docu_det.valor,'') as valor ");
+
+        $this->db->from('documentacion as docu');
+        $this->db->join('detalle_documentacion as docu_det', 'docu.iddocumentacion = docu_det.documentacion_iddocumentacion');
+        $this->db->join('dato as dat', 'dat.iddato = docu_det.dato_iddato');
+        $this->db->where('docu.nro_documento',$nro_documento);
+
+        $this->db->order_by(' orden ASC');
+
+        $query = $this->db->get();
+
+        return $query->result();
+    }
+
+
+        public function get_basic_info_documento_existente($tipo_doc, $numero_doc)
+    {
+        
+        $this->db->select(" docu.serie_comprobante_idserie_comprobante ");
+        $this->db->from('documentacion as docu');
+        $this->db->where('docu.'.$tipo_doc,$numero_doc);
+
+        $query = $this->db->get();
+
+        return $query->row();
+
+    }
+
 
 }
 

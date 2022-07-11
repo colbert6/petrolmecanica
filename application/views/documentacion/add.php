@@ -27,7 +27,7 @@
             <label for="idserie" class="col-sm-2 control-label">Comp.</label>
 
             <div class="col-sm-10">
-              <select class="form-control" id="idserie" name="idserie" onchange="load_datos();"> 
+              <select class="form-control" id="idserie" name="idserie" onchange="update_contenido_segun_serie();"> 
                   <?php foreach($series as $tc) {
                     echo "<option value='{$tc->idserie}' > {$tc->tipo_comprobante} </option>";
                   }
