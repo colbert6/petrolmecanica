@@ -98,6 +98,25 @@ class Det_proforma extends CI_Model {
         return $query->result();
     }
 
+    public function get_exportar_det_comprobante_como_proforma($idproforma)
+    {        
+        
+         $this->db->select("
+            pro.idproducto as idproducto, 
+            CONCAT(pro.nombre) as producto, 
+            detp.precioxpresentacion as precio_venta,
+            detp.cantidad as cantproducto,
+            detp.subtotal as subtotal
+               ");
+        $this->db->from('detalle_venta as  detp');
+        $this->db->join('producto as pro',"detp.producto_idproducto = pro.idproducto ","INNER");
+        $this->db->where('detp.venta_idventa',$idproforma);
+        
+        $query = $this->db->get();
+
+        return $query->result();
+    }
+
 
 }
 

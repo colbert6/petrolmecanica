@@ -24,7 +24,7 @@
     $razon_social = isset($cliente_base[0]->razon_social)? $cliente_base[0]->razon_social: '';
     $direccion = isset($cliente_base[0]->direccion)? $cliente_base[0]->direccion: '';
 
-    $flag_show_btn_importar_proforma = isset($flag_show_btn_importar_proforma)? $flag_show_btn_importar_proforma: false;
+    $flag_show_btn_importar_proforma = isset($flag_show_btn_importar_proforma)? $flag_show_btn_importar_proforma: true;
     $list_btns_info =  isset($list_btns_info)? $list_btns_info: array();
 ?>
 
@@ -252,7 +252,7 @@
     function get_correlativo_proforma_info(){
         //10730319342
         bootbox.prompt({
-            title: "Ingrese el ID PROFORMA a buscar", 
+            title: "Ingrese el ID PROFORMA o NRO DOC COMPROBANTE a buscar", 
             //inputType: 'number',
             callback: function(result){ 
                 identificador_proforma='correlativo_proforma';
@@ -315,18 +315,18 @@
                     $('#tipo_moneda').val(obj_client_info.idtipo_moneda);
                     $('#condicion_pago').val(obj_client_info.idperiodo_pago);
                     get_cliente_document('ruc');
-                    buscar_importar_proforma(obj_client_info.idproforma)
+                    buscar_importar_proforma(obj_client_info.idproforma, obj_client_info.Nro_documento)
                     
                 }
             }
         });
     }
 
-    function buscar_importar_proforma(idproforma){
+    function buscar_importar_proforma(idproforma, nro_documento){
         $.ajax({
             url: base_url + 'proformas/exportar_proforma_detalle',
             type: 'GET',
-            data: 'idproforma='+idproforma,
+            data: 'idproforma='+idproforma+'&nro_documento='+nro_documento,
             dataType: 'JSON',
             success: function (obj) {                            
                 

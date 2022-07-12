@@ -208,6 +208,37 @@ class Get_data extends CI_Model {
         return $query->result();
     }
 
+        public function find_datos_documentacion_existente($nro_documento) // para realizar importaciones
+    {
+        
+        $this->db->select(" dat.iddato, dat.descripcion, docu_det.orden as orden, dat.tipo, dat.abreviatura, dat.validacion, COALESCE(docu_det.valor,'') as valor ");
+
+        $this->db->from('documentacion as docu');
+        $this->db->join('detalle_documentacion as docu_det', 'docu.iddocumentacion = docu_det.documentacion_iddocumentacion');
+        $this->db->join('dato as dat', 'dat.iddato = docu_det.dato_iddato');
+        $this->db->where('docu.nro_documento',$nro_documento);
+
+        $this->db->order_by(' orden ASC');
+
+        $query = $this->db->get();
+
+        return $query->result();
+    }
+
+
+        public function get_basic_info_documento_existente($tipo_doc, $numero_doc)
+    {
+        
+        $this->db->select(" docu.serie_comprobante_idserie_comprobante ");
+        $this->db->from('documentacion as docu');
+        $this->db->where('docu.'.$tipo_doc,$numero_doc);
+
+        $query = $this->db->get();
+
+        return $query->row();
+
+    }
+
     public function get_proforma_documento($tipo_doc, $numero_doc)
     {
         
@@ -237,31 +268,29 @@ class Get_data extends CI_Model {
 
     }
 
-        public function find_datos_documentacion_existente($nro_documento) // para realizar importaciones
+    public function get_comprobante_como_proforma_documento($tipo_doc, $numero_doc)
     {
         
-        $this->db->select(" dat.iddato, dat.descripcion, docu_det.orden as orden, dat.tipo, dat.abreviatura, dat.validacion, COALESCE(docu_det.valor,'') as valor ");
+        $this->db->select(" pro.idventa as idproforma,
+                pro.estado as Estado,
+                pro.fecha_creacion as Fecha, 
+                pro.cliente_razon_social as Cliente, 
+                pro.cliente_documento as 'Ruc',
+                pro.cliente_direccion as Direccion,
+                pp.descripcion as Periodo_pago,
+                pp.idperiodo_pago as idperiodo_pago,
+                tp.descripcion as Tipo_pago,
+                tp.idtipo_pago as idtipo_moneda,
+                tc.descripcion Comprobante, 
+                pro.nro_documento as Nro_documento, 
+                pro.total as Total,
+                ' --- COMPROBANTE usado como proforma. --- ' as Observacion ");
 
-        $this->db->from('documentacion as docu');
-        $this->db->join('detalle_documentacion as docu_det', 'docu.iddocumentacion = docu_det.documentacion_iddocumentacion');
-        $this->db->join('dato as dat', 'dat.iddato = docu_det.dato_iddato');
-        $this->db->where('docu.nro_documento',$nro_documento);
-
-        $this->db->order_by(' orden ASC');
-
-        $query = $this->db->get();
-
-        return $query->result();
-    }
-
-
-        public function get_basic_info_documento_existente($tipo_doc, $numero_doc)
-    {
-        
-        $this->db->select(" docu.serie_comprobante_idserie_comprobante ");
-        $this->db->from('documentacion as docu');
-        $this->db->where('docu.'.$tipo_doc,$numero_doc);
-
+        $this->db->from('venta pro');
+        $this->db->join('tipo_comprobante tc', 'tc.idtipo_comprobante = pro.tipo_comprobante_idtipo_comprobante');
+        $this->db->join('tipo_pago tp', 'tp.idtipo_pago = pro.idtipo_moneda');
+        $this->db->join('periodo_pago pp', 'pp.idperiodo_pago = pro.idperiodo_pago');
+        $this->db->where('pro.'.$tipo_doc,$numero_doc);
         $query = $this->db->get();
 
         return $query->row();

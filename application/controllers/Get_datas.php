@@ -87,9 +87,17 @@ class Get_datas extends MY_Controller {
     {
         $tipo_doc = 'nro_documento';//$this->input->get('tipo');
         $numero_doc = trim($this->input->get('numero'));
-
         $this->load->model('get_data');
-        print json_encode($this->get_data->get_proforma_documento($tipo_doc, $numero_doc) );
+        
+
+        if(substr($numero_doc, 0,4) == "F001"){
+            //obtener un comprobante ya existen como proforma
+            print json_encode($this->get_data->get_comprobante_como_proforma_documento($tipo_doc, $numero_doc) );
+        } else {
+            print json_encode($this->get_data->get_proforma_documento($tipo_doc, $numero_doc) );
+        }
+
+        
     }
 
 

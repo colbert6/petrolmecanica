@@ -157,7 +157,14 @@ class Proformas extends MY_Controller {
     {   
 
         $this->load->model('det_proforma');
-        $det_proforma = $this->det_proforma->get_exportar_det_proforma($this->input->get('idproforma'));
+
+        if(substr($this->input->get('nro_documento'), 0,4) == "F001"){
+            //obtener un comprobante ya existente como proforma
+           $det_proforma = $this->det_proforma->get_exportar_det_comprobante_como_proforma($this->input->get('idproforma'));
+        } else {
+            $det_proforma = $this->det_proforma->get_exportar_det_proforma($this->input->get('idproforma'));
+        }
+
         print json_encode($det_proforma);
     }
 
