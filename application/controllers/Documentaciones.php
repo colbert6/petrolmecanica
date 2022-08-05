@@ -285,7 +285,7 @@ class Documentaciones extends MY_Controller {
         if(isset($_GET['format'])){
             $format = $this->input->get('format');
         }
-        
+
         $documentacion = $this->documentacion->get_print_documentacion($this->input->get('iddocumentacion'));
         $det_documentacion = $this->det_documentacion->get_print_det_documentacion($this->input->get('iddocumentacion'));
         //echo '<pre>';print_r($documentacion);print_r($det_documentacion);exit();
@@ -303,8 +303,8 @@ class Documentaciones extends MY_Controller {
         $pdf = new Pdf_documentacion($orientation, 'mm', $format , true, 'UTF-8', false);
 
         $pdf->tipo_documento = $documentacion['Comprobante'];
-        $pdf->nro_documento = $documentacion['Nro_documento'];       
-
+        $pdf->nro_documento = $documentacion['Nro_documento'];
+        
         //Parametros del PDF
         $pdf->SetTitle($nombrepdf);
         
@@ -318,47 +318,7 @@ class Documentaciones extends MY_Controller {
         
         $pdf->comprobante_data($det_documentacion);
 
-
-
-        //$pdf->comprobante_data_title('El que suscribe Gerente General de la empresa PETROLMECANICA JC SAC   CON RUC  N° 20602440908.');
-
-        /*$data_usuario_receptor = array('Cliente' => array($venta['Cliente'],'4'),
-                                  'RUC/DNI' => array($venta['RUC/DNI'],'1'),
-                                  'Dirección' => array($venta['Direccion'],'5')  );
-        $pdf->receptor_data( 5 ,$data_usuario_receptor);
-
-        $data_comprobante = array('Emitido' => array($venta['Fecha'],'1'),
-                                  'Tienda' => array($venta['Tienda'],'1'),  
-                                  'Vendedor' => array($venta['Usuario'],'1'),
-                                  'Observacion' => array($venta['Observacion'],'3')  );
-        $pdf->comprobante_data( 3 ,$data_comprobante);
-
-        $width_cols = array(  array('Descripcion',40 ,'L') , array('Cant.',20, 'R'),array('P.unit',20,'R'),array('Subtotal',20,'R') );
-        $pdf->data_table( $det_venta ,  $width_cols, true);       
-        
-
-       
-
-
-        $cod_documento_client = '0';
-        if( strlen($venta['RUC/DNI']) == 11 ){
-            $cod_documento_client = '6';
-        }else if( strlen($venta['RUC/DNI']) ==8) {
-            $cod_documento_client = '1';
-        }
-
-
-        $comprobante = explode("-", $venta['Nro_documento']); // Separamos serie de correlativo
-
-        $data_resumen = $this->ruc.'|'.$venta['codsunat'].'|'.$comprobante[0].'|'.$comprobante[1].'|'.$venta['Igv'].'|'.$venta['Total'].'|'.$venta['Fecha'].'|'.$cod_documento_client.'|'.$venta['RUC/DNI'].'|' ;
-        $qr_code = $this->crear_qr($data_resumen); 
-
-
-        $data_footer = array('monto_letra' => array( 'texto' => num_to_letras($venta['Total'])),
-                            'monto' => array('op_importe'=>$venta['Total'] ,  'op_exonerados'=>$venta['Total'] , 'op_igv'=>$venta['Igv'] , ) ,
-                            'qr_code' =>  $qr_code   );
-        $pdf->data_table_footer( 'monto_venta',  $data_footer , 'msj');
-
+        $pdf->add_firma_digital(); 
 
          /* Limpiamos la salida del búfer y lo desactivamos */
         ob_end_clean();

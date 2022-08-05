@@ -20,7 +20,7 @@ class MY_Controller extends CI_Controller {
     public $ruc = '20602440908';
     public $direccion = 'Pj. La Amistad nro. 145 Bar. Mollepampa - Cajamarca - Cajamarca';//'Jr. Alfonso ugarte Nro. 1800, Bar. Shucapampa - CAJAMARCA';
     public $direccion_adicional = 'Calle San francisco nro. 435 - urb. las palmeras - Jaen - Cajamarca';
-    public $contacto = 'Telf.76622268 - cel.978833002 - petrolmecanica.jc@gmail.com';
+    public $contacto = 'Cel.978833002 | Correos: edinson@petrolmecanicajc.com,  petrolmecanica.jc@gmail.com';
     public $rubro = 'Venta al por mayor de otros tipos de maquinaria y equipo <br> Fabricación de productos metalicos para uso estructural';
 
     public $id_ticket = 1;
