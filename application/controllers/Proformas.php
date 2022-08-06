@@ -240,6 +240,9 @@ class Proformas extends MY_Controller {
         if( count($det_proforma_info)){
           $pdf->anexo_informacion( $det_proforma_info, true);//data , headers, data añadir a columna, indice
         }
+
+        $pdf->add_firma_digital(); 
+        
         ob_end_clean();
         $pdf->Output($nombrepdf.'.pdf', 'I');
     }

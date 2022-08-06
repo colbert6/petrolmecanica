@@ -756,6 +756,33 @@ class Pdf_comprobantes extends TCPDF
 
     }
 
+    public function add_firma_digital() {
+        
+        $certificate = 'file://'.realpath('assets/key/cert.crt');
+        $primaryKey = 'file://'.realpath('assets/key/key.pem');
+
+        $certificate = 'file://'.realpath('assets/key/C22080467303.crt');
+        $primaryKey = 'file://'.realpath('assets/key/C22080467303.pem');    
+
+        $import_key = 'Edinjigue03109001';//'colbert1234';    
+
+        $firma_array_info = array(        );
+        
+        $sello_firma_path = 'assets/img/firma_petrolmecanicajc.png';
+        
+        $sello_firma_tamanio_porcentaje = 0.13;
+        $sello_firma_ancho_tamanio = 497 * $sello_firma_tamanio_porcentaje;
+        $sello_firma_altura_tamanio = 159 * $sello_firma_tamanio_porcentaje;
+        $sello_firma_pos_x = 130;
+        $sello_firma_pos_y = 255;//$this->GetY();
+        
+
+        $this->Image($sello_firma_path, $sello_firma_pos_x , $sello_firma_pos_y,  $sello_firma_ancho_tamanio, $sello_firma_altura_tamanio, 'PNG');
+        $this->setSignature($certificate, $primaryKey, $import_key, '', 2, $firma_array_info);
+        $this->setSignatureAppearance($sello_firma_pos_x , $sello_firma_pos_y,  $sello_firma_ancho_tamanio, $sello_firma_altura_tamanio);
+        
+    }
+
     public function add_imagen(){
         $this->Ln(1);
         
