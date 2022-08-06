@@ -32,12 +32,19 @@ class Pdf_servicios extends TCPDF
         $this->direccion = $MY_controller->direccion;
         $this->direccion_adicional = $MY_controller->direccion_adicional;
         $this->contacto = $MY_controller->contacto ;
+
+        $this->certificate_path = $MY_controller->certificate_path;
+        $this->primaryKey_path = $MY_controller->primaryKey_path;
+        $this->import_key = $MY_controller->import_key;
+        $this->sello_firma_path = $MY_controller->sello_firma_path; 
     }
 
-    public $motivo = 'venta';
+    public $motivo = 'servicio';
     public $max_width = 200;
     public $max_heigth = 287;
     public $h_footer = -15;
+    public $pos_y=3.5;
+    public $pos_x=5;
 
     public $orientation ;
     public $format  ;
@@ -74,9 +81,9 @@ class Pdf_servicios extends TCPDF
     public $comprobante_codigo_qr = array( 'align'=> 'C','w' => 25,'border'=>0 ,'ln'=>0 , 'h'=>25);    
     public $comprobante_mensaje = array( 'align'=> 'L','w' =>  90,'border'=>1 ,'ln'=>0 ,'font_h'=> 9 , 'pos_x' => 5  );         
     
-
-    public $pos_y=3.5;
-    public $pos_x=5;
+    /* -- Firma digital parametros -- */
+    public $certificate_path , $primaryKey_path, $import_key, $sello_firma_path ; 
+    
 
     public function Header() {        
 
@@ -432,30 +439,23 @@ class Pdf_servicios extends TCPDF
     }
 
     public function add_firma_digital() {
-        
-        $certificate = 'file://'.realpath('assets/key/cert.crt');
-        $primaryKey = 'file://'.realpath('assets/key/key.pem');
 
-        $certificate = 'file://'.realpath('assets/key/C22080467303.crt');
-        $primaryKey = 'file://'.realpath('assets/key/C22080467303.pem');    
-
-        $import_key = 'Edinjigue03109001';//'colbert1234';    
-
-        $firma_array_info = array(        );
+        $certificate = 'file://'.realpath($this->certificate_path);
+        $primaryKey = 'file://'.realpath($this->primaryKey_path);
+        $import_key = $this->import_key; //'Edinjigue03109001';//'colbert1234';
+        $sello_firma_path = $this->sello_firma_path;// 'assets/img/firma_petrolmecanicajc.png';
         
-        $sello_firma_path = 'assets/img/firma_petrolmecanicajc.png';
-        
-        $sello_firma_tamanio_porcentaje = 0.13;
+        $sello_firma_tamanio_porcentaje = 0.14;
         $sello_firma_ancho_tamanio = 497 * $sello_firma_tamanio_porcentaje;
         $sello_firma_altura_tamanio = 159 * $sello_firma_tamanio_porcentaje;
-        $sello_firma_pos_x = 130;
-        $sello_firma_pos_y = 255;//$this->GetY();
-        
+        $sello_firma_pos_x = 110;        
+        $sello_firma_pos_y = $this->GetY() >= 245 ? 255 : $this->GetY() + 5;
+
+        $firma_array_info = array();        
 
         $this->Image($sello_firma_path, $sello_firma_pos_x , $sello_firma_pos_y,  $sello_firma_ancho_tamanio, $sello_firma_altura_tamanio, 'PNG');
         $this->setSignature($certificate, $primaryKey, $import_key, '', 2, $firma_array_info);
-        $this->setSignatureAppearance($sello_firma_pos_x , $sello_firma_pos_y,  $sello_firma_ancho_tamanio, $sello_firma_altura_tamanio);
-        
+        $this->setSignatureAppearance($sello_firma_pos_x , $sello_firma_pos_y,  $sello_firma_ancho_tamanio, $sello_firma_altura_tamanio);        
     }
 
     public function data_table_footer( $formato, $data ,$msj) {

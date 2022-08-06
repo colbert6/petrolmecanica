@@ -23,6 +23,11 @@ class MY_Controller extends CI_Controller {
     public $contacto = 'Cel.978833002 | Correos: edinson@petrolmecanicajc.com,  petrolmecanica.jc@gmail.com';
     public $rubro = 'Venta al por mayor de otros tipos de maquinaria y equipo <br> Fabricación de productos metalicos para uso estructural';
 
+    public $certificate_path = 'assets/key/C22080467303.crt';
+    public $primaryKey_path = 'assets/key/C22080467303.pem';
+    public $import_key = 'Edinjigue03109001';
+    public $sello_firma_path = 'assets/img/firma_petrolmecanicajc.png';
+
     public $id_ticket = 1;
     public $id_boleta = 3;
     public $id_factura = 2;

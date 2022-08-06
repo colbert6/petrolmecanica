@@ -19,7 +19,6 @@ class Pdf_documentacion extends TCPDF
             $this->max_width = 50;   
         }
 
-
         parent::__construct($orientation, $unit, $format, $unicode, $encoding, $diskcache, $pdfa);
 
         $MY_controller = & get_instance();
@@ -31,30 +30,30 @@ class Pdf_documentacion extends TCPDF
         $this->rubro = $MY_controller->rubro ;
         $this->direccion = $MY_controller->direccion;
         $this->contacto = $MY_controller->contacto ;
+
+        $this->certificate_path = $MY_controller->certificate_path;
+        $this->primaryKey_path = $MY_controller->primaryKey_path;
+        $this->import_key = $MY_controller->import_key;
+        $this->sello_firma_path = $MY_controller->sello_firma_path; 
     }
 
-    public $motivo = 'venta';
+    public $motivo = 'documentacion';
     public $max_width = 200;
     public $max_heigth = 287;
     public $h_footer = -15;
+    public $pos_y=8;
+    public $pos_x=10;
 
-    public $orientation ;
-    public $format  ;
+    public $orientation, $format  ;
 
     public $sistema;
 
-    public $logo_empresa;
-    public $razon_social;
-    public $ruc;
-    public $rubro;
-    public $direccion;
-    public $contacto;
+    public $logo_empresa, $razon_social, $ruc;
+    public $rubro, $direccion, $contacto;
 
-    public $tipo_documento;
-    public $nro_documento;
+    public $tipo_documento, $nro_documento;
 
     /* ---Sectores del comprobante ---*/
-
     public $logo_data = array ( 'mostrar'=> true , 'w'=> 40 , 'y' => 20);
     public $empresa_data = array ( 'align'=> 'J', 'w'=> 100 , 'ln' => 0 , 'font_h'=> 9 );
     public $comprobante_id = array ( 'border' => 1,'w' => 50, 'ln'=> 1, 'font_h'=> 10 );       
@@ -67,11 +66,11 @@ class Pdf_documentacion extends TCPDF
     public $comprobante_table_footer_letras =array('w'=> 130 , 'border'=>1 , 'h'=>5 , 'ln' => false);           
     public $comprobante_table_footer_totales =array( 'align'=> 'R','w' => 70,'border'=>1 , 'h'=>5 , 'ln'=> 1 );  
     public $comprobante_codigo_qr = array( 'align'=> 'C','w' => 25,'border'=>0 ,'ln'=>0 , 'h'=>25);    
-    public $comprobante_mensaje = array( 'align'=> 'L','w' =>  90,'border'=>1 ,'ln'=>0 ,'font_h'=> 10 , 'pos_x' => 5  );         
-    
+    public $comprobante_mensaje = array( 'align'=> 'L','w' =>  90,'border'=>1 ,'ln'=>0 ,'font_h'=> 10 , 'pos_x' => 5  );
 
-    public $pos_y=8;
-    public $pos_x=10;
+    /* -- Firma digital parametros -- */
+    public $certificate_path , $primaryKey_path, $import_key, $sello_firma_path ;  
+
 
     public function Header() {        
 
@@ -119,14 +118,8 @@ class Pdf_documentacion extends TCPDF
 
 
         switch ($this->motivo) {
-            case 'venta':
+            case 'documentacion':
                 $text="<strong> R.U.C {$this->ruc} </strong><br>";
-                $text.=" {$this->tipo_documento}<br>" ;
-                $text.=" {$this->nro_documento} " ;
-                break;
-
-            case 'compra':
-                $text="<strong> DOC. DE COMPRA </strong><br>";
                 $text.=" {$this->tipo_documento}<br>" ;
                 $text.=" {$this->nro_documento} " ;
                 break;
@@ -175,30 +168,24 @@ class Pdf_documentacion extends TCPDF
     }
 
     public function add_firma_digital() {
-        
-        $certificate = 'file://'.realpath('assets/key/cert.crt');
-        $primaryKey = 'file://'.realpath('assets/key/key.pem');
 
-        $certificate = 'file://'.realpath('assets/key/C22080467303.crt');
-        $primaryKey = 'file://'.realpath('assets/key/C22080467303.pem');    
-
-        $import_key = 'Edinjigue03109001';//'colbert1234';    
-
-        $firma_array_info = array(        );
+        $certificate = 'file://'.realpath($this->certificate_path);
+        $primaryKey = 'file://'.realpath($this->primaryKey_path);
+        $import_key = $this->import_key; //'Edinjigue03109001';//'colbert1234';
+        $sello_firma_path = $this->sello_firma_path;// 'assets/img/firma_petrolmecanicajc.png';
         
-        $sello_firma_path = 'assets/img/firma_petrolmecanicajc.png';
-        
-        $sello_firma_tamanio_porcentaje = 0.13;
+        $sello_firma_tamanio_porcentaje = 0.14;
         $sello_firma_ancho_tamanio = 497 * $sello_firma_tamanio_porcentaje;
         $sello_firma_altura_tamanio = 159 * $sello_firma_tamanio_porcentaje;
-        $sello_firma_pos_x = 130;
-        $sello_firma_pos_y = 255;//$this->GetY();
-        
+        $sello_firma_pos_x = 110;        
+        $sello_firma_pos_y = $this->GetY() >= 245 ? 255 : $this->GetY() + 5;
+
+
+        $firma_array_info = array();        
 
         $this->Image($sello_firma_path, $sello_firma_pos_x , $sello_firma_pos_y,  $sello_firma_ancho_tamanio, $sello_firma_altura_tamanio, 'PNG');
         $this->setSignature($certificate, $primaryKey, $import_key, '', 2, $firma_array_info);
-        $this->setSignatureAppearance($sello_firma_pos_x , $sello_firma_pos_y,  $sello_firma_ancho_tamanio, $sello_firma_altura_tamanio);
-        
+        $this->setSignatureAppearance($sello_firma_pos_x , $sello_firma_pos_y,  $sello_firma_ancho_tamanio, $sello_firma_altura_tamanio);        
     }
 
     public function comprobante_data_title($title) {         
