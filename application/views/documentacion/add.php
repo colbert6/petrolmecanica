@@ -29,7 +29,7 @@
             <div class="col-sm-10">
               <select class="form-control" id="idserie" name="idserie" onchange="update_contenido_segun_serie();"> 
                   <?php foreach($series as $tc) {
-                    echo "<option value='{$tc->idserie}' > {$tc->tipo_comprobante} </option>";
+                    echo "<option value='{$tc->idserie}' > {$tc->titulo_serie} </option>";
                   }
                 ?>
               </select>

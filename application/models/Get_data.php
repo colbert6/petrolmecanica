@@ -74,7 +74,7 @@ class Get_data extends CI_Model {
 
     public function get_series($idtipocomprobante = '%')//segun el tipo de comprobante
     {
-        $this->db->select("serie.idserie_comprobante as idserie, tipo_comp.idtipo_comprobante, tipo_comp.abreviatura, tipo_comp.descripcion as tipo_comprobante, CONCAT( serie.serie,'-',serie.correlativo ) as correlativo ");
+        $this->db->select("serie.idserie_comprobante as idserie, tipo_comp.idtipo_comprobante, tipo_comp.abreviatura, tipo_comp.descripcion as tipo_comprobante, CONCAT( serie.serie,'-',serie.correlativo ) as correlativo, coalesce(serie.titulo, tipo_comp.descripcion) as titulo_serie ");
         $this->db->from('tipo_comprobante as tipo_comp');
          $this->db->join('serie_comprobante as serie', 'tipo_comp.idtipo_comprobante = serie.tipo_comprobante_idtipocomprobante');
         $this->db->where('serie.estado','Activo');

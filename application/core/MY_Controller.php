@@ -42,6 +42,7 @@ class MY_Controller extends CI_Controller {
     public $id_certificado_trabajo = 12;
     public $id_contrato = 13;
     public $id_servicio_correctivo = 14;
+    public $id_certificado_operatividad_tablero_electrico = 16;
 
     public function __construct()
     {
