@@ -171,7 +171,7 @@ class Documentaciones extends MY_Controller {
         /*$output = array( 'onSelected' => 'add_detalle(obj);' ); //cuando se seleccione el valor
         $get_productos = $this->load->view('get_data/productos', $output,true) ;*/
         $output = array('title' => 'Documentacion', 
-                        'series' => $this->get_data->get_series(array($this->id_certificado,$this->id_garantia, $this->id_certificado_operatividad_tablero_electrico) ),                        
+                        'series' => $this->get_data->get_series(array($this->id_certificado,$this->id_constancia, $this->id_acta,$this->id_garantia,$this->id_certificado_trabajo, $this->id_certificado_operatividad_tablero_electrico) ),                        
                         'get_clientes' =>  $get_clientes,
                         /*'get_productos' =>  $get_productos,
                         'tipo_pagos' =>  $this->get_data->get_tipo_pagos('%'),//'%' es todos
