@@ -20,7 +20,7 @@ class Compras extends MY_Controller {
         $crud = new grocery_CRUD();
 
         $crud->set_table('compra');
-        $crud->columns('fecha_creacion','colaborador_registro','proveedor_idproveedor', 'tipo_comprobante_idtipo_comprobante', 'nrocomprobante','total','estado');
+        $crud->columns('fecha_creacion', 'proveedor_idproveedor', 'nrocomprobante', 'fecha_compra', 'total', 'estado');
 
         $crud->display_as('colaborador_registro','Registrado');
         $crud->display_as('proveedor_idproveedor','Proveedor');
@@ -33,17 +33,29 @@ class Compras extends MY_Controller {
         $crud->set_relation('colaborador_registro','colaborador','nombre');
         $crud->set_relation('tipo_comprobante_idtipo_comprobante','tipo_comprobante','descripcion');
 
-        $crud->unset_add();
-        $crud->unset_edit();
+        //$crud->unset_add();
+        //$crud->unset_edit();
         $crud->unset_clone();
         $crud->unset_delete();
 
+        $crud->add_fields(array('colaborador_registro','colaborador_recepcion', 'proveedor_idproveedor','tipo_comprobante_idtipo_comprobante', 'nrocomprobante','fecha_compra', 'total', 'igv',  'observacion'));
+        $crud->edit_fields(array('proveedor_idproveedor','tipo_comprobante_idtipo_comprobante', 'nrocomprobante','fecha_compra', 'total', 'igv',  'observacion','estado'));
+
+        $crud->unset_texteditor(array('observacion','full_text'));
+
+        //$crud->add_action('Detalle', '', base_url('compras/detalle/'),'fa fa-tasks');
+        //$crud->add_action('Imprimir', '', base_url('compras/print_compra?idcompra='),'fa fa-print imprimir');
+
+         $crud->callback_add_field('colaborador_registro', function () {
+            $session_user_activo_id = $this->session->userdata('id_user');
+            $session_user_activo_name = $this->session->userdata('username');
+            return ' <input type="hidden" value="'.$session_user_activo_id.'" name="colaborador_registro"> '.$session_user_activo_name;
+        });
+
         $crud->order_by('fecha_creacion','desc');
-        $crud->add_action('Detalle', '', base_url('compras/detalle/'),'fa fa-tasks');
-        $crud->add_action('Imprimir', '', base_url('compras/print_compra?idcompra='),'fa fa-print imprimir');
         
         $output = $crud->render();
-        $output->title = "Compras :: <a href='".base_url('compras/add')."'> Crear nueva Compra</a>";
+        $output->title = "Compras :: <a href='".base_url('compras/lista/add')."'> Crear nueva Compra </a>";
 
         $this->_init(true,true,true);//Carga el tema ( $cargar_menu, $cargar_url, $cargar_template )
         $this->load->view('grocery_crud/basic_crud', (array)$output ) ;
