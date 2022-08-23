@@ -100,6 +100,13 @@ class Get_datas extends MY_Controller {
         
     }
 
+    public function get_busqueda_general($table)
+    {
+        $get_query = $this->input->get('query');
+        $this->load->model('get_data');
+        print json_encode($this->get_data->get_busqueda_general($table, $get_query) );
+    }
+
 
 
 	

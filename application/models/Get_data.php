@@ -297,6 +297,31 @@ class Get_data extends CI_Model {
 
     }
 
+    public function get_busqueda_general($table, $valor)
+    {   
+        $where_filtro = " ( tab.razon_social LIKE '%{$valor}%' OR tab.nombre_comercial LIKE '%{$valor}%' ) ";
+        $id_result = " tab.idcliente as id_result ";
+        $text_result = " tab.razon_social as texto_result ";
+
+        if($table == "proveedor"){
+             $id_result = " tab.idproveedor as id_result ";  
+        }
+
+        if($table == "colaborador"){
+            $where_filtro = " ( tab.nombre LIKE '%{$valor}%' ) ";
+            $id_result = " tab.idcolaborador as id_result ";
+            $text_result = " tab.nombre as texto_result ";  
+        }
+
+        //$query = $this->db->get('producto', 10);
+        $this->db->select($id_result.",".$text_result);
+        $this->db->from($table.' as tab');
+        $this->db->where($where_filtro);
+        $this->db->order_by(' texto_result ');
+        $query = $this->db->get();
+        return $query->result();
+    }
+
 
 
 }
