@@ -64,6 +64,10 @@ function generate_select_form( $name_input, $label_input, $array_value_input, $o
 
           <?php generate_input_form( "nro_operacion_desembolso", "Nro_operacion desembolso", "text", "", "placeholder='BCP 1002456.. '" ); ?>
 
+          <?php generate_input_form( "comprobantes_a_pagar", "Comprobantes a pagar", "text", "", "placeholder='F001-123, B001-567'" ); ?>
+
+          <?php generate_input_form( "importe_total", "Importe total", "number", 0.00, "" ); ?> 
+
           <?php generate_input_form( "pago_desembolso", "Pago", "number", 0.00, "" ); ?> 
 
           <?php generate_input_form( "saldo_a_cuenta", "Saldo", "number", 0.00, "" ); ?>

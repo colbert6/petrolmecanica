@@ -24,8 +24,8 @@ class Desembolsos extends MY_Controller {
 
         $crud->unset_texteditor(array('concepto_desembolso','full_text'));
 
-        $crud->add_fields(array('tipo_beneficiario','idbeneficiario', 'nombre_beneficiario', 'fecha_pago_desembolso' ,'metodo_pago', 'nro_operacion_desembolso', 'pago_desembolso', 'saldo_a_cuenta', 'saldo_a_cuenta_inicial', 'comprobantes_a_pagar',  'concepto_desembolso', 'iddesembolso_principal'));
-        $crud->edit_fields(array('tipo_beneficiario','idbeneficiario', 'nombre_beneficiario', 'fecha_pago_desembolso' ,'metodo_pago', 'nro_operacion_desembolso', 'pago_desembolso', 'saldo_a_cuenta', 'saldo_a_cuenta_inicial', 'comprobantes_a_pagar',  'concepto_desembolso', 'iddesembolso_principal','estado'));
+        $crud->add_fields(array('tipo_beneficiario','idbeneficiario', 'nombre_beneficiario', 'fecha_pago_desembolso' ,'metodo_pago', 'nro_operacion_desembolso', 'importe_total', 'pago_desembolso', 'saldo_a_cuenta', 'saldo_a_cuenta_inicial', 'comprobantes_a_pagar',  'concepto_desembolso', 'iddesembolso_principal'));
+        $crud->edit_fields(array('tipo_beneficiario','idbeneficiario', 'nombre_beneficiario', 'fecha_pago_desembolso' ,'metodo_pago', 'nro_operacion_desembolso', 'importe_total', 'pago_desembolso', 'saldo_a_cuenta', 'saldo_a_cuenta_inicial', 'comprobantes_a_pagar',  'concepto_desembolso', 'iddesembolso_principal','estado'));
 
         $crud->order_by('fecha_registro','desc');
 

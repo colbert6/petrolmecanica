@@ -11,10 +11,10 @@ var save = function(){
         $("#btn_save").attr({'disabled':'disabled'});
     }
     
-    if( parseFloat($("#pago_desembolso").val()) <= 0   ){
-        alerta("Monto invalido","Pago desembolso debe ser mayor a cero",'warning');
+    if( parseFloat($("#importe_total").val()) <= 0   ){
+        alerta("Monto invalido","Importe total debe ser mayor a cero",'warning');
 
-    }else if( $("#pago_desembolso").val() == ''   ){
+    }else if( $("#input_busqueda_general").val() == ''   ){
         alerta("Campo en Blanco","Nombre de beneficiario debe tener valor ",'warning');
 
     }else{

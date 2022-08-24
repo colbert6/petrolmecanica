@@ -28,6 +28,8 @@ class Desembolso extends CI_Model {
         $this->metodo_pago = $this->input->post('metodo_pago');
 
         $this->nro_operacion_desembolso = $this->input->post('nro_operacion_desembolso');
+        $this->comprobantes_a_pagar = $this->input->post('comprobantes_a_pagar');
+        $this->importe_total = $this->input->post('importe_total');
         $this->pago_desembolso = $this->input->post('pago_desembolso');
         $this->saldo_a_cuenta = $this->input->post('saldo_a_cuenta');
         $this->saldo_a_cuenta_inicial = $this->input->post('saldo_a_cuenta');
