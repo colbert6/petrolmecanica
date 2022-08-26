@@ -11,7 +11,7 @@ class Desembolso extends CI_Model {
         $this->db->select("de.iddesembolso as Id ,de.nombre_beneficiario as Beneficiario, de.fecha_pago_desembolso as Fecha_pago, de.pago_desembolso as Pago, de.saldo_a_cuenta as Deuda ");
         $this->db->from('desembolso as de');
         $this->db->where('de.estado','vigente');
-        $this->db->where('de.saldo_a_cuenta > 0 ');
+        $this->db->where('de.importe_total - de.pago_desembolso > 0 ');
         $this->db->where($where_filtro);
         $this->db->order_by('de.fecha_pago_desembolso');
         $query = $this->db->get();
