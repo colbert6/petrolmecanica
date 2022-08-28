@@ -12,7 +12,7 @@ function generate_input_form( $name_input, $label_input, $type_input, $value_inp
 </div>
 
 <?php 
-} // -- end function create_box
+} // -- end function generate_input_form
 
 function generate_select_form( $name_input, $label_input, $array_value_input, $other_options  ) {
 ?>
@@ -33,7 +33,7 @@ function generate_select_form( $name_input, $label_input, $array_value_input, $o
 </div>
 
 <?php 
-} // -- end function create_box
+} // -- end function select form
 
 
 
@@ -46,6 +46,9 @@ function generate_select_form( $name_input, $label_input, $array_value_input, $o
 
       <form class="form-horizontal">
         <div class="box-body">
+
+
+
           <?php //generate_input_form( $name_input, $label_input, $type_input, $value_input, $other_options  ) ?>
           
           <?php generate_input_form( "tipo_beneficiario", "Tipo", "text", $tipo_beneficiario_default, "readonly" ); ?> 
@@ -54,13 +57,7 @@ function generate_select_form( $name_input, $label_input, $array_value_input, $o
 
           <?php generate_input_form( "fecha_pago_desembolso","Fecha pago", "date", date('Y-m-d'), "" ); ?> 
 
-          <?php 
-          $options_metodo_pago =  array(
-            array('id'=>'deposito_bancario','texto'=>'deposito_bancario'),
-            array('id'=>'efectivo','texto'=>'efectivo'),
-            array('id'=>'otro','texto'=>'otro')
-          );
-          generate_select_form( "metodo_pago","Metodo", $options_metodo_pago,"" ); ?>  
+          <?php generate_select_form( "metodo_pago","Metodo", $options_metodo_pago,"" ); ?>  
 
           <?php generate_input_form( "nro_operacion_desembolso", "Nro_operacion desembolso", "text", "", "placeholder='BCP 1002456.. '" ); ?>
 
@@ -69,9 +66,7 @@ function generate_select_form( $name_input, $label_input, $array_value_input, $o
           <?php generate_input_form( "importe_total", "Importe total", "number", 0.00, "" ); ?> 
 
           <?php generate_input_form( "pago_desembolso", "Pago", "number", 0.00, "" ); ?> 
-
-          <?php generate_input_form( "saldo_a_cuenta", "Saldo", "number", 0.00, "" ); ?>
-
+          
           <textarea class="form-control" rows="2" placeholder="Tareas a realizar o Comprobantes..." id="concepto_desembolso" name="concepto_desembolso"></textarea>
 
         </div>
@@ -87,9 +82,9 @@ function generate_select_form( $name_input, $label_input, $array_value_input, $o
 
   </div>  
 
-  
 
 </div>
+
 
 <script type="text/javascript"> base_url = "<?php echo base_url();  ?>"</script>
 

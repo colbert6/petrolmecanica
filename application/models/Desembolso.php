@@ -8,14 +8,14 @@ class Desembolso extends CI_Model {
         
         $where_filtro = " ( de.tipo_beneficiario = '{$tipo_beneficiario}' ) ";
 
-        $this->db->select("de.iddesembolso as Id ,de.nombre_beneficiario as Beneficiario, de.fecha_pago_desembolso as Fecha_pago, de.pago_desembolso as Pago, de.saldo_a_cuenta as Deuda ");
+        $this->db->select("de.iddesembolso as Id ,de.nombre_beneficiario as Beneficiario, de.fecha_pago_desembolso as Fecha_pago, de.importe_total as Importe, de.pago_acumulado as Pago, de.saldo_a_cuenta as Deuda ");
         $this->db->from('desembolso as de');
         $this->db->where('de.estado','vigente');
-        $this->db->where('(de.importe_total - de.pago_desembolso) > 0 ');
+        $this->db->where('(de.importe_total - de.pago_acumulado) > 0 ');
         $this->db->where($where_filtro);
         $this->db->order_by('de.fecha_pago_desembolso');
         $query = $this->db->get();
-        return $query->result();
+        return $query->result_array();
     }
 
     public function insert_desembolso()
@@ -31,15 +31,39 @@ class Desembolso extends CI_Model {
         $this->comprobantes_a_pagar = $this->input->post('comprobantes_a_pagar');
         $this->importe_total = $this->input->post('importe_total');
         $this->pago_desembolso = $this->input->post('pago_desembolso');
-        $this->saldo_a_cuenta = $this->input->post('saldo_a_cuenta');
-        $this->saldo_a_cuenta_inicial = $this->input->post('saldo_a_cuenta');
+        $this->pago_acumulado = $this->input->post('pago_desembolso');
+        $this->saldo_a_cuenta = $this->input->post('importe_total') - $this->input->post('pago_desembolso');
+        $this->saldo_a_cuenta_inicial = $this->input->post('importe_total') - $this->input->post('pago_desembolso');;
         $this->concepto_desembolso = $this->input->post('concepto_desembolso');
         
         $this->fecha_registro = date('Y-m-d H:i:s');
+        $this->iduser_registro = $this->session->userdata('id_user');
         $this->estado = 'vigente';
 
         return  $this->db->insert('desembolso', $this);
     }
+
+    public function insert_desembolso_pago()
+    {   
+        $this->metodo_pago = $this->input->post('metodo_pago');
+        $this->iddesembolso_a_pagar = $this->input->post('iddesembolso_a_pagar');
+        $this->monto_pago = $this->input->post('monto_pago');   
+        $this->nro_operacion_pago = $this->input->post('nro_operacion_pago');
+        $this->observacion_pago = $this->input->post('observacion_pago');        
+        $this->fecha_registro = date('Y-m-d H:i:s');
+        $this->iduser_registro = $this->session->userdata('id_user');
+
+        return  $this->db->insert('desembolso_pago', $this);
+    }
+
+    public function update_add_pago_desembolso($iddesembolso_a_pagar, $monto_pago){
+        
+        $this->db->set('saldo_a_cuenta', 'importe_total - (pago_acumulado + '.$monto_pago.")",FALSE);
+        $this->db->set('pago_acumulado', 'pago_acumulado + '.$monto_pago,FALSE);
+        $this->db->where('iddesembolso', $iddesembolso_a_pagar);
+        $this->db->update('desembolso');  
+    }
+
 
 }
 
