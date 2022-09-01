@@ -121,6 +121,14 @@ function create_data_td_tr_tbody_string( $data_cuerpo) {
     ?>
 </div>
 
+<div>
+  <form method='post' action='/image-upload/post' enctype='multipart/form-data'>
+   
+      <input type='file' name='files[]' multiple=""> <br/><br/>
+      <input type='submit' value='Upload' name='upload' />
+   
+    </form>
+</div>
 
 
 <div class="modal fade" id="modal-pago_desembolso" style="display: none;">

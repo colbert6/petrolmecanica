@@ -62,7 +62,7 @@ class Pdf_comprobantes extends TCPDF
     public $tipo_documento;
     public $nro_documento;
   
-    public $cuentas_bancarias = "Cuenta corriente BCP : 245-2459385-0-18 <br>Cuenta CCI BCP : 00224500245938501893 <br>Cuenta de detracciones BN : 00761153560<br> <br>Cuenta DÓLARES BCP: 395-9405242-1-51<br>Cuenta DÓLARES CCI BCP : 00239500940524215121 ";        
+    public $cuentas_bancarias = "Cuenta corriente BCP : 245-2459385-0-18 <br>Cuenta CCI BCP : 00224500245938501893 <br>Cuenta de detracciones BN : 00761153560<br> <br>Cuenta DÓLARES BCP: 395-9405242-1-51<br>Cuenta DÓLARES CCI BCP : 00239500940524215121<br>Cuenta SOLES Interbank : 7653004235004<br>Cuenta SOLES CCI Interbank : 003-765003004235004-58 ";        
 
     /* ---Sectores del comprobante ---*/
 
