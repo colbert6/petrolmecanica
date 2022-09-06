@@ -137,9 +137,6 @@ class Documentaciones extends MY_Controller {
         $this->load->view('grocery_crud/basic_crud', (array)$output ) ;
     }
 
-
-
-
     public function add()
     {
         
@@ -171,7 +168,7 @@ class Documentaciones extends MY_Controller {
         /*$output = array( 'onSelected' => 'add_detalle(obj);' ); //cuando se seleccione el valor
         $get_productos = $this->load->view('get_data/productos', $output,true) ;*/
         $output = array('title' => 'Documentacion', 
-                        'series' => $this->get_data->get_series(array($this->id_certificado,$this->id_constancia, $this->id_contrato, $this->id_acta,$this->id_garantia,$this->id_certificado_trabajo, $this->id_certificado_operatividad_tablero_electrico) ),                        
+                        'series' => $this->get_data->get_series(array($this->id_certificado,$this->id_constancia, $this->id_contrato, $this->id_acta,$this->id_garantia, $this->id_certificado_operatividad_tablero_electrico) ),                        
                         'get_clientes' =>  $get_clientes,
                         /*'get_productos' =>  $get_productos,
                         'tipo_pagos' =>  $this->get_data->get_tipo_pagos('%'),//'%' es todos
@@ -182,8 +179,143 @@ class Documentaciones extends MY_Controller {
         $this->load->view('documentacion/add', $output ) ;
     }
 
+    public function add_calibracion_tanque(){
+        
+        $this->metodo = 'Nueva calibracion tanques';//Siempre define las migagas de pan
+
+        $this->_init(true,false,true);//Carga el tema ( $cargar_menu, $cargar_url, $cargar_template )
+
+        //Cargando js y css
+        $this->load->js('assets/myjs/genericos/get_data.js');//genericos
+        $this->load->js('assets/myjs/genericos/set_data.js');//genericos
+        //$this->load->js('assets/myjs/documentacion_calibracion_tanque.js');
+        
+        $this->load->js('assets/js/bootbox.min.js');
+        $this->load->js('assets/js/typeahead/typeahead.min.js');
+        $this->load->js('assets/js/shortcut.js');//actiacion de teclasv
+        
+
+        //$this->load->model('almacen');
+        $this->load->model('get_data');
+        $this->load->model('cliente');
+
+        $list_btns_info = array();
+
+        $output = array('flag_show_btn_importar_proforma'=> false, 'list_btns_info' =>  $list_btns_info); 
+        $get_clientes = $this->load->view('get_data/clientes', $output,true) ;
+
+        
+        $idserie = 18;
+        $output = array('title' => 'Nueva calibracion tanques', 
+                        'idserie' => $idserie,
+                        'serie_data' => $this->get_data->get_correlativo($idserie),                        
+                        'get_clientes' =>  $get_clientes, 
+                        'idcalibracion_tanque' => 'nuevo',
+                        'msj_return_save'=> ''
+        ); 
+        //Cargando ultima
+        $this->load->view('documentacion/add_calibracion_tanque', $output ) ;
+    }
+
+
+    public function save_calibracion_tanque($idcalibracion_tanque = 'nuevo'){
+
+        $iddocumentacion = $idcalibracion_tanque;
+        $msj_return_save = "Documento Guardado con éxito.";
+        $iddato = 59;
+        $data = [];
+   
+        $count = count($_FILES['files']['name']);
+    
+        for($i=0;$i<$count;$i++){
+    
+            if(!empty($_FILES['files']['name'][$i])){
+    
+            $_FILES['file']['name'] = $_FILES['files']['name'][$i];
+            $_FILES['file']['type'] = $_FILES['files']['type'][$i];
+            $_FILES['file']['tmp_name'] = $_FILES['files']['tmp_name'][$i];
+            $_FILES['file']['error'] = $_FILES['files']['error'][$i];
+            $_FILES['file']['size'] = $_FILES['files']['size'][$i];
+
+            $config['upload_path'] = 'assets/uploads/calibracion/'; 
+            $config['allowed_types'] = 'jpg|jpeg|png|gif';
+            $config['max_size'] = '5000';
+            $config['file_name'] = $this->input->post('serie_correlativo')."_".time();
+
+            $_POST['iddato'][$i] = $iddato;
+            $_POST['dato'][$i] = $this->input->post('serie_correlativo')."_".time(); //valor de dato
+   
+            $this->load->library('upload',$config); 
+    
+                if($this->upload->do_upload('file')){
+                    $uploadData = $this->upload->data();
+                    $filename = $uploadData['file_name'];
+
+                    $data['totalFiles'][] = $filename;
+                }
+            }
+   
+        }
+
+        if($idcalibracion_tanque == 'nuevo'){            
+
+            $this->db->trans_start();//Inicio de transaccion
+
+            $this->load->model('get_data');
+            $idserie = $this->input->post('idserie');
+            $serie = $this->get_data->get_correlativo($idserie);//Obtener correlativo actual
+
+            $this->load->model('comprobante');  
+            $tipo_comprobante = $this->comprobante->get_tipo_serie($idserie);//Obtener tipo de comprobante         
+            $this->comprobante->update_serie_correlativo($idserie,'correlativo','correlativo + 1' );//idserie , campo , valor //Actualizar el correlativo de la serie 
+
+            $ruc_cliente = $this->input->post('ruc_cliente');
+            $dni_cliente = $this->input->post('dni_cliente');
+
+            if( $ruc_cliente != '00000000000' AND strlen($ruc_cliente) == 11 ){
+                $nro_documento_cliente = $ruc_cliente;
+            }else if($dni_cliente != '00000000' AND strlen($dni_cliente) == 8){
+                $nro_documento_cliente = $dni_cliente;                          
+            }else{
+                $nro_documento_cliente = '-' ;    
+            }        
+
+            //Guardar Venta
+            $this->load->model('documentacion');        
+            $this->documentacion->tipo_comprobante_idtipo_comprobante = $tipo_comprobante; 
+            $this->documentacion->nro_documento = $serie->correlativo;   
+            $this->documentacion->serie_comprobante_idserie_comprobante = $idserie;          
+            $this->documentacion->cliente_documento = $nro_documento_cliente;
+            
+            $this->documentacion->insert_documentacion();
+            $iddocumentacion = $this->db->insert_id();
+
+            //Guardar Detalle Venta
+            $this->load->model('det_documentacion');   
+            $this->det_documentacion->documentacion_iddocumentacion = $iddocumentacion;     
+            $this->det_documentacion->insert_det_documentacion();
+
+            if ($this->db->trans_status() === FALSE) { 
+                $error = $this->db->error();
+                $msj_return_save = "Error._". $error['message'];
+                $this->db->trans_rollback();
+
+            } else {
+                $this->db->trans_commit();//$this->db->trans_rollback(); 
+                $msj_return_save = "Documento de Calibración guardado con éxito.";
+            }
+
+        
+        }
+        
+        //$this->lista();
+    }
+
     public function save()
     {   
+        // la tabla datos_documentacion es la tabla intermedia entrre la relacion entre datos (tipos de datos ) y la tabla serie_comproante
+        // debido a que la tabla serie_comprobante, representa a cada tipo de documento que se puede crear
+
         
         //print_r($_POST);exit();
         $return = array( 'estado_validacion' => true , 'estado' => false, 'msj' => '' , 'error'=> '' , 'idsave' => '' , 'enlace' => '');  

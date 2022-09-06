@@ -41,8 +41,8 @@ class Pdf_documentacion extends TCPDF
     public $max_width = 200;
     public $max_heigth = 287;
     public $h_footer = -15;
-    public $pos_y=8;
-    public $pos_x=10;
+    public $pos_y=8; //posicion inicial y
+    public $pos_x=10; //posicion inicial X
 
     public $orientation, $format  ;
 
@@ -222,6 +222,7 @@ class Pdf_documentacion extends TCPDF
 
     public function comprobante_data($data) {
         $ln = true;//Salto de linea pdebajo del cuadro receptor data
+        $salto_linea_despues_img = 0;
 
         if( $this->format == 'A4'){
             if($this->orientation == 'L'){
@@ -245,6 +246,10 @@ class Pdf_documentacion extends TCPDF
         }         
         
         foreach ($data as $key => $val) {
+
+            if($salto_linea_despues_img){
+                $this->AddPage();
+            }
                     
             $this->SetFont('helvetica', '', 11);
             $w_aux = $cd['w'];
@@ -280,7 +285,23 @@ class Pdf_documentacion extends TCPDF
             }
 
             $eje_XY = "X=".$this->GetX().",Y=".$this->GetY();
-            $this->MultiCell($w_aux, $new_h, $val['valor'], $borde_aux, $cd['align'], 0,$cd['ln'], '', '' );
+            if ($val['tipo']=='img') {
+
+                $x = $this->pos_x;
+                $y = 25;//$this->GetY() + 10;
+                $w = 150;
+                $h = 215; 
+
+                //$this->Image($this->logo_empresa, $this->pos_x, $this->pos_y, $ld['w'], $ld['y'], 'JPG', '', 'T', false, 300, '', false, false, 0, false, false, false);   
+                $img_calibra = 'assets/uploads/calibracion/'.$val['valor'];
+
+                $this->Image($img_calibra, $x, $y, $w, $h, 'JPG', '', 'T', false, 300, '', false, false, 0, false, false, false);
+                $this->SetY($y + $h);
+
+            }else{
+                $this->MultiCell($w_aux, $new_h, $val['valor'], $borde_aux, $cd['align'], 0,$cd['ln'], '', '' );
+            }
+            
 
             if($val['salto_linea'] > 0){
                 $salto = $val['salto_linea'] * 1; 
@@ -289,8 +310,6 @@ class Pdf_documentacion extends TCPDF
              
         }
         //echo $text;      exit();     
-
-
     }
 
     public function data_table( $data, $head_cols, $flag_nro_item = false ) {//suma de $widthcols = 200 - $flag_nro_item
@@ -412,8 +431,7 @@ class Pdf_documentacion extends TCPDF
 
         $this->Cell($th['max_w'] + $nro_item_w, 2, '', 'T',0); 
         $this->Ln(1); 
-             
-//        
+                    
     }
 
     public function data_table_footer( $formato, $data ,$msj) {

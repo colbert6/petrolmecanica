@@ -1,11 +1,3 @@
-<style type="text/css">
-  #div_detalle_venta{
-    max-height: 350px;
-    overflow-y: scroll;  
-  }
-
-
-</style>
 
 
 <div class="row" id="form">
