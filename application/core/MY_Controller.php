@@ -65,6 +65,18 @@ class MY_Controller extends CI_Controller {
            
     }
 
+    public function show_status( $msj_return_save, $id_documento )
+    {       
+        $this->metodo = 'Mostrar resultado';//Siempre define las migagas de pan
+        $this->_init(true,false,true);//Carga el tema ( $cargar_menu, $cargar_url, $cargar_template )
+
+        $output = array( 'msj'=> $msj_return_save , 'idsave' => $id_documento ); 
+
+        $this->load->js('assets/js/bootbox.min.js');
+        $this->load->view('principal/show_status', $output ) ;
+           
+    }
+
     private function _request_url()
     {
         $url = $this->input->server('REQUEST_URI'); 

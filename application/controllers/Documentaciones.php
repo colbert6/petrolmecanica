@@ -8,6 +8,9 @@ class Documentaciones extends MY_Controller {
         parent::__construct();
         $this->controller = 'Documentacion';//Siempre define las migagas de pan
         $this->load->library('grocery_CRUD');
+
+        $this->id_dato_img = 33; //importante no modificar
+        $this->id_serie_mantenimiento_calibracion = 18; //importante no modificar
     }
 
     public function lista()
@@ -49,7 +52,8 @@ class Documentaciones extends MY_Controller {
 
         $output = $crud->render();
 
-        $output->title = "Documentacion :: <a href='".base_url('documentaciones/add')."'> crear nuevo documento</a>";
+        $output->title = "Documentacion :: <a href='".base_url('documentaciones/add')."'> crear nuevo documento</a>"; 
+        $output->title .= "<br> <br> <a href='".base_url('documentaciones/add_calibracion_tanque')."'> Crear calibracion_tanque</a>";
 
         $this->_init(true,true,true);//Carga el tema ( $cargar_menu, $cargar_url, $cargar_template )
         $this->load->view('grocery_crud/basic_crud', (array)$output ) ;
@@ -205,7 +209,7 @@ class Documentaciones extends MY_Controller {
         $get_clientes = $this->load->view('get_data/clientes', $output,true) ;
 
         
-        $idserie = 18;
+        $idserie = $this->id_serie_mantenimiento_calibracion;
         $output = array('title' => 'Nueva calibracion tanques', 
                         'idserie' => $idserie,
                         'serie_data' => $this->get_data->get_correlativo($idserie),                        
@@ -214,6 +218,7 @@ class Documentaciones extends MY_Controller {
                         'msj_return_save'=> ''
         ); 
         //Cargando ultima
+        
         $this->load->view('documentacion/add_calibracion_tanque', $output ) ;
     }
 
@@ -222,7 +227,7 @@ class Documentaciones extends MY_Controller {
 
         $iddocumentacion = $idcalibracion_tanque;
         $msj_return_save = "Documento Guardado con éxito.";
-        $iddato = 59;
+        $iddato = $this->id_dato_img;
         $data = [];
    
         $count = count($_FILES['files']['name']);
@@ -237,13 +242,16 @@ class Documentaciones extends MY_Controller {
             $_FILES['file']['error'] = $_FILES['files']['error'][$i];
             $_FILES['file']['size'] = $_FILES['files']['size'][$i];
 
+            $extension_file = substr($_FILES['files']['name'][$i], -4);
+            if(  in_array($extension_file, array('jpeg') ) ){
+                $extension_file = ".".$extension_file;
+            }
+            $name_file_formated = $this->input->post('serie_correlativo')."_".strval($i).$extension_file; 
+
             $config['upload_path'] = 'assets/uploads/calibracion/'; 
             $config['allowed_types'] = 'jpg|jpeg|png|gif';
-            $config['max_size'] = '5000';
-            $config['file_name'] = $this->input->post('serie_correlativo')."_".time();
-
-            $_POST['iddato'][$i] = $iddato;
-            $_POST['dato'][$i] = $this->input->post('serie_correlativo')."_".time(); //valor de dato
+            $config['max_size'] = '5000';            
+            $config['file_name'] = $name_file_formated;
    
             $this->load->library('upload',$config); 
     
@@ -254,8 +262,12 @@ class Documentaciones extends MY_Controller {
                     $data['totalFiles'][] = $filename;
                 }
             }
-   
+
+            $_POST['iddato'][$i] = $iddato;
+            $_POST['dato'][$i] = $filename; //valor de dato
+
         }
+        //print_r($_POST['iddato']);// print_r($_POST['dato']);
 
         if($idcalibracion_tanque == 'nuevo'){            
 
@@ -297,19 +309,26 @@ class Documentaciones extends MY_Controller {
 
             if ($this->db->trans_status() === FALSE) { 
                 $error = $this->db->error();
-                $msj_return_save = "Error._". $error['message'];
+                $msj_return_save = "ERROR => ". $error['message'];
                 $this->db->trans_rollback();
+                $iddocumentacion = 0;
 
             } else {
                 $this->db->trans_commit();//$this->db->trans_rollback(); 
-                $msj_return_save = "Documento de Calibración guardado con éxito.";
+                $msj_return_save = "EXITO => Documento de Calibración guardado con éxito.";
             }
 
         
         }
+
         
+        $id_documento = 109;
+        $msj_return_save = "EXITO => Documento de Calibración guardado con éxito.";
+        $this->show_status($msj_return_save, $iddocumentacion);
         //$this->lista();
     }
+
+
 
     public function save()
     {   

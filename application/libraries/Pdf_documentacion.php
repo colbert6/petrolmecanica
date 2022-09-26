@@ -249,6 +249,7 @@ class Pdf_documentacion extends TCPDF
 
             if($salto_linea_despues_img){
                 $this->AddPage();
+                $salto_linea_despues_img = 0;
             }
                     
             $this->SetFont('helvetica', '', 11);
@@ -287,10 +288,11 @@ class Pdf_documentacion extends TCPDF
             $eje_XY = "X=".$this->GetX().",Y=".$this->GetY();
             if ($val['tipo']=='img') {
 
-                $x = $this->pos_x;
-                $y = 25;//$this->GetY() + 10;
-                $w = 150;
-                $h = 215; 
+                $x = $this->pos_x ;
+                $y = 45;//$this->GetY() + 10;
+                $w = 170;
+                $h = 200;
+                $salto_linea_despues_img = 1; 
 
                 //$this->Image($this->logo_empresa, $this->pos_x, $this->pos_y, $ld['w'], $ld['y'], 'JPG', '', 'T', false, 300, '', false, false, 0, false, false, false);   
                 $img_calibra = 'assets/uploads/calibracion/'.$val['valor'];

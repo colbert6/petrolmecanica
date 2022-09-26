@@ -64,6 +64,19 @@ class Desembolso extends CI_Model {
         $this->db->update('desembolso');  
     }
 
+    public function get_desembolso_pagos($iddesembolso){
+        
+        $where_filtro = " ( dp.iddesembolso_a_pagar = '{$iddesembolso}' ) ";
+
+        $this->db->select("dp.fecha_registro, dp.metodo_pago, dp.monto_pago, dp.nro_operacion_pago, dp.observacion_pago ");
+        $this->db->from('desembolso_pago dp');
+        $this->db->where($where_filtro);
+        $this->db->order_by('dp.fecha_registro', 'desc');
+        $query = $this->db->get();
+        
+        return $query->result_array();  
+    }
+
 
 }
 

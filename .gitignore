@@ -32,6 +32,8 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 
 /public/qr_code/*
 
+assets/uploads/calibracion/*
+
 application/config/config.php
 application/config/database.php
 application/libraries/Facturalaya.php

@@ -22,6 +22,10 @@ class Desembolsos extends MY_Controller {
         $this->metodo = 'Lista';//Siempre define las migagas de pan
 
         $crud = new grocery_CRUD();
+
+        $this->load->js('assets/js/bootbox.min.js');
+        $this->load->js('assets/myjs/groceryCRUD.js');
+        
         $crud->set_table('desembolso');
         
         $crud->columns('fecha_registro','fecha_pago_desembolso', 'tipo_beneficiario', 'nombre_beneficiario', 'importe_total', 'pago_acumulado', 'saldo_a_cuenta');
@@ -32,6 +36,8 @@ class Desembolsos extends MY_Controller {
 
         $crud->add_fields(array('tipo_beneficiario','idbeneficiario', 'nombre_beneficiario', 'fecha_pago_desembolso' ,'metodo_pago', 'nro_operacion_desembolso', 'importe_total', 'pago_desembolso', 'pago_acumulado', 'saldo_a_cuenta', 'saldo_a_cuenta_inicial', 'comprobantes_a_pagar',  'concepto_desembolso', 'iddesembolso_principal'));
         $crud->edit_fields(array('tipo_beneficiario','idbeneficiario', 'nombre_beneficiario', 'fecha_pago_desembolso' ,'metodo_pago', 'nro_operacion_desembolso', 'importe_total', 'pago_desembolso', 'pago_acumulado', 'saldo_a_cuenta', 'saldo_a_cuenta_inicial', 'comprobantes_a_pagar',  'concepto_desembolso', 'iddesembolso_principal','estado'));
+
+        $crud->add_action('ver Pagos', '', base_url('desembolsos/get_desembolso_pagos?iddesembolso='),'fa fa-money consulta_servidor');
 
         $crud->order_by('fecha_registro','desc');
 
@@ -155,7 +161,16 @@ class Desembolsos extends MY_Controller {
         
     }
 
+    public function get_desembolso_pagos(){
 
+        $this->load->model('desembolso');        
+        $data = $this->desembolso->get_desembolso_pagos($this->input->get('iddesembolso'));
+
+        $data_json = json_encode($data);   
+
+        print_r($data_json);
+
+    }
 	
 
 }
