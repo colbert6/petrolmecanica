@@ -34,6 +34,13 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 
 assets/uploads/calibracion/*
 
+/assets/uploads/calibracion_tanque/*.jpg
+/assets/uploads/calibracion_tanque/*.jpeg
+/assets/uploads/calibracion_tanque/*.png
+/assets/uploads/calibracion_tanque/*.gif
+!/assets/uploads/calibracion_tanque/*.txt
+
+
 application/config/config.php
 application/config/database.php
 application/libraries/Facturalaya.php
