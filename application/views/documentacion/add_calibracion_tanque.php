@@ -80,7 +80,7 @@
         <div class="form-group" >
           <label for="texto" class="col-xs-4 col-sm-2 control-label">Titulo</label>
           <div class="col-xs-8 col-sm-10">
-            <input type="text" class="form-control" id="texto" name="texto" >
+            <input type="text" class="form-control" id="texto" name="texto" value="CALIBRACIÓN DE TANQUE" >
           </div>
         </div>  
       </div>

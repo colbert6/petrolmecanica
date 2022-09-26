@@ -248,7 +248,7 @@ class Documentaciones extends MY_Controller {
             }
             $name_file_formated = $this->input->post('serie_correlativo')."_".strval($i).$extension_file; 
 
-            $config['upload_path'] = 'assets/uploads/calibracion/'; 
+            $config['upload_path'] = 'assets/uploads/calibracion_tanque/'; 
             $config['allowed_types'] = 'jpg|jpeg|png|gif';
             $config['max_size'] = '5000';            
             $config['file_name'] = $name_file_formated;
