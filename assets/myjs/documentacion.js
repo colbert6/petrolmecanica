@@ -9,6 +9,18 @@ $(document).ready(function () {
 
 });
 
+/*
+*/
+
+function replace_variables_in_datos(){
+
+   /* $("[name='dato[]']").each(function(){
+        console.log($(this).text());
+        //$(this).text( $(this).text().replace('SAC', 'monkey') )
+    });*/
+    console.log("hola0");
+}
+
 function input_key_value_import_documento(){
         //10730319342
         bootbox.prompt({

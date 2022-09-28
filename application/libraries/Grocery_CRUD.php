@@ -2969,6 +2969,7 @@ class grocery_CRUD_Layout extends grocery_CRUD_Model_Driver
 
 	protected function _get_ajax_results()
 	{
+		
 		//This is a $_POST request rather that $_GET request , because
 		//Codeigniter doesn't like the $_GET requests so much!
 		if ($this->_is_ajax()) {

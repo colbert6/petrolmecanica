@@ -23,8 +23,8 @@ class Desembolsos extends MY_Controller {
 
         $crud = new grocery_CRUD();
 
-        $this->load->js('assets/js/bootbox.min.js');
-        $this->load->js('assets/myjs/groceryCRUD.js');
+        //$this->load->js('assets/js/bootbox.min.js');
+        //$this->load->js('assets/myjs/groceryCRUD.js');
         
         $crud->set_table('desembolso');
         
@@ -39,9 +39,15 @@ class Desembolsos extends MY_Controller {
 
         $crud->add_action('ver Pagoss', '', base_url('desembolsos/get_desembolso_pagos?iddesembolso='),'fa fa-money consulta_servidor');
 
+      
         $crud->order_by('fecha_registro','desc');
 
+        $crud->set_js_lib('/assets/js/bootbox.min.js');
+        $crud->set_js_lib('/assets/myjs/groceryCRUD.js');
+
         $output = $crud->render();
+        
+
         $output->title = 'Desembolsos';
 
         $this->_init(true,true,true);//Carga el tema ( $cargar_menu, $cargar_url, $cargar_template )
