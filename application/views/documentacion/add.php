@@ -38,6 +38,8 @@
         <!-- /.box-body -->
         <div class="box-footer">
           <a href="<?php echo base_url('documentaciones/lista'); ?>">ir a Lista documentos</a>
+          <button type="button" class="btn btn-info pull-right" id="btn_save" onclick="replace_variables_in_datos()">Replace</button>
+          
           <button type="button" class="btn btn-success pull-right" id="btn_save" onclick="save()">Generar</button>
 
         </div>

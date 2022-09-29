@@ -14,11 +14,49 @@ $(document).ready(function () {
 
 function replace_variables_in_datos(){
 
-   /* $("[name='dato[]']").each(function(){
-        console.log($(this).text());
-        //$(this).text( $(this).text().replace('SAC', 'monkey') )
-    });*/
-    console.log("hola0");
+    cont_variable_nombre_cliente  = 0;
+    cont_variable_RUC_cliente  = 0;
+    cont_variable_direccion_cliente  = 0;
+
+    variable_nombre_cliente = "${VARIABLE_NOMBRE_CLIENTE}";
+    valor_variable_nombre_cliente = $("#cliente").val();
+
+    variable_RUC_cliente = "${VARIABLE_RUC_CLIENTE}";
+    valor_variable_RUC_cliente = $("#ruc_cliente").val();
+
+    variable_direccion_cliente = "${VARIABLE_DIRECCION_CLIENTE}";
+    valor_variable_direccion_cliente = $("#direccion_cliente").val();
+
+    $("[name='dato[]']").each(function(){
+        campo_dato = $(this); 
+        cadena_texto = campo_dato.text()
+
+        if(campo_dato.is("input")){
+            cadena_texto = campo_dato.val();            
+        }
+
+        if(cadena_texto.indexOf(variable_nombre_cliente) > 0 & valor_variable_nombre_cliente!=''){
+            cont_variable_nombre_cliente = cont_variable_nombre_cliente + 1;
+            campo_dato.text( campo_dato.text().replace(variable_nombre_cliente, valor_variable_nombre_cliente) );
+        }
+
+        if(cadena_texto.indexOf(variable_RUC_cliente) > 0 & valor_variable_RUC_cliente!=''){
+            cont_variable_RUC_cliente = cont_variable_RUC_cliente + 1;
+            campo_dato.text( campo_dato.text().replace(variable_RUC_cliente, valor_variable_RUC_cliente) );
+        }
+
+        if(cadena_texto.indexOf(variable_direccion_cliente) > 0 & valor_variable_direccion_cliente!=''){
+            cont_variable_direccion_cliente = cont_variable_direccion_cliente + 1;
+            campo_dato.text( campo_dato.text().replace(variable_direccion_cliente, valor_variable_direccion_cliente) );
+        }
+        
+    });
+
+    msj_alerta = " Se encontró "+cont_variable_nombre_cliente+" para nombre_cliente, ";
+    msj_alerta += " se encontró "+cont_variable_nombre_cliente+" para RUC_cliente y ";
+    msj_alerta += " se encontró "+cont_variable_nombre_cliente+" para direccion_cliente";
+
+    alert(msj_alerta);
 }
 
 function input_key_value_import_documento(){
