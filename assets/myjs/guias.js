@@ -95,7 +95,7 @@ var save = function(){
                                       className: 'btn-info',
                                       callback: function() {
                                             //open_imprimir('ventas/print_venta?idventa=', idsave); 
-                                            open_imprimir('ventas/print_documento?idguia=', idsave); 
+                                            open_imprimir('guias/print_documento?idguia=', idsave); 
                                       }
                                     },
                                     
