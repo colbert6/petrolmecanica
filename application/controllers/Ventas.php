@@ -39,7 +39,7 @@ class Ventas extends MY_Controller {
         //acciones js revisar groceryCRUD.js
         $crud->add_action('Anular venta', '', base_url('ventas/anular?idventa='),'fa fa-close anular');
         $crud->add_action('Imprimir', '', base_url('ventas/print_venta?idventa='),'fa fa-print imprimir');
-        $crud->add_action('Guia', '', base_url('ventas/print_guia?idventa='),'fa fa-bus guia');
+        //$crud->add_action('Guia', '', base_url('ventas/print_guia?idventa='),'fa fa-bus guia');
 
         $crud->unset_add();
         $crud->unset_edit();
@@ -476,14 +476,14 @@ class Ventas extends MY_Controller {
         $data_resumen = $this->ruc.'|'.$venta['codsunat'].'|'.$comprobante[0].'|'.$comprobante[1].'|'.$venta['Igv'].'|'.$venta['Total'].'|'.$venta['Fecha'].'|'.$cod_documento_client.'|'.$venta['RUC/DNI'].'|' ;
         $qr_code = $this->crear_qr($data_resumen); 
 	
-	$descripcion_moneda = strtoupper($venta['moneda']);
+		$descripcion_moneda = strtoupper($venta['moneda']);
         $simbolo_moneda =  $descripcion_moneda == 'DOLARES' ? '$ ' : 'S/ ';
 
         /*$data_footer = array('monto_letra' => array( 'texto' => num_to_letras($venta['Total'])),
                             'monto' => array('op_importe'=>$venta['Total'] ,  'op_gravada'=>$venta['Subtotal'] , 'op_igv'=>$venta['Igv'] , ) ,
                             'qr_code' =>  $qr_code   );
         $pdf->data_table_footer( 'monto_venta',  $data_footer , 'msj');*/
-	$data_footer = array('monto_letra' => array( 'texto' => num_to_letras($venta['Total'],'',$descripcion_moneda) ),
+		$data_footer = array('monto_letra' => array( 'texto' => num_to_letras($venta['Total'],'',$descripcion_moneda) ),
                             'monto' => array('op_importe'=>$simbolo_moneda.$venta['Total'] ,  
                                             'op_gravada'=>$simbolo_moneda.$venta['Subtotal'] , 
                                             'op_igv'=>$simbolo_moneda.$venta['Igv'] ) ,

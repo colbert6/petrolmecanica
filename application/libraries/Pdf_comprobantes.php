@@ -694,9 +694,9 @@ class Pdf_comprobantes extends TCPDF
             //$text.="<br>".$this->cuentas_bancarias;
             $this->MultiCell( $cm['w'], '', $text,  $cm['border'],  $cm['align'],false, 1,$cm['pos_x'], $cm['pos_y'] ,true,0,true );
 			
-			$eje_x_cta_bca_img = $this->GetX();
+			$eje_x_cta_bca_img = $cm['pos_x'];
 			$eje_y_cta_bca_img = $this->GetY() + 1;
-			//$this->Image($cta_bcas["file_path"], $eje_x_cta_bca_img, $eje_y_cta_bca_img, $cta_bcas["w"], $cta_bcas["h"], 'JPG', '', 'T', false, 300, '', false, false, 0, false, false, false);
+			$this->Image($cta_bcas["file_path"], $eje_x_cta_bca_img, $eje_y_cta_bca_img, $cta_bcas["w"], $cta_bcas["h"], 'JPG', '', 'T', false, 300, '', false, false, 0, false, false, false);
 			
 
         }elseif($formato =='pie_movimiento'){
