@@ -22,13 +22,9 @@ class Envio_cpe extends CI_Model {
         }else{
             $this->codigo = "-";
         }
-	
-	
 
         $this->usuario_envio =  0;
         $this->data_result =  '';//json_encode($data_result);
-	
-
 	
 	//$this->db->insert('error_envio_electronico', $this);
 	//$error = $this->db->error();
@@ -70,26 +66,32 @@ class Envio_cpe extends CI_Model {
 
     public function update_envio_cpe($idventa, $tipo)
     {   
-
+		$tabla_nombre = "venta";
+		$campo_llave_nombre = "idventa";
         switch ($tipo) {
             case 'generar_comprobante':
-                $campo = 'envio_cpe_emision';
+                $campo_update_nombre = 'envio_cpe_emision';
                 break;
 
              case 'generar_anulacion':
-                $campo = 'envio_cpe_baja';
+                $campo_update_nombre = 'envio_cpe_baja';
+                break;
+				
+			case 'generar_guia_remision':
+				$tabla_nombre = "guia_remision";
+				$campo_llave_nombre = "idguia_remision";
+                $campo_update_nombre = 'envio_cpe_emision';
                 break;
             
             default:
-                $campo = '';
+                $campo_update_nombre = '';
                 break;
         }
         if($campo != '' ){
-            $this->db->set($campo, 1);
-            $this->db->where('idventa',$idventa);
-            $this->db->update('venta');
-        }
-        
+            $this->db->set($campo_update_nombre, 1);
+            $this->db->where($campo_llave_nombre,$idventa);
+            $this->db->update($tabla_nombre);
+        }       
 
         return  1;
     }    

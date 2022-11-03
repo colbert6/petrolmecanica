@@ -132,8 +132,6 @@ class Ventas extends MY_Controller {
         $serie = $this->get_data->get_correlativo($idserie);
         $validar_envio_cpe =  $serie->correlativo_solo;
 
-	
-
         //Guardar movimiento
         $this->db->trans_start();//Inicio de transaccion        
 
@@ -147,7 +145,7 @@ class Ventas extends MY_Controller {
         $tipo_comprobante = $this->comprobante->get_tipo_serie($idserie);//Obtener tipo de comprobante         
         $this->comprobante->update_serie_correlativo($idserie,'correlativo','correlativo + 1' );//idserie , campo , valor //Actualizar el correlativo de la serie 
 
-        $this->comprobante->update_serie_correlativo($this->id_guia_remision,'correlativo','correlativo + 1' );//
+        //$this->comprobante->update_serie_correlativo($this->id_guia_remision,'correlativo','correlativo + 1' );//
 
         //VALIDACIONES
         $total_venta = ($this->input->post('subtotales') - $this->input->post('descuento')+$this->input->post('igv'));
@@ -200,7 +198,7 @@ class Ventas extends MY_Controller {
         $this->venta->tipo_comprobante_idtipo_comprobante = $tipo_comprobante; 
         $this->venta->nro_documento = $serie->correlativo;   
 
-        $this->venta->nro_guia_remision = $this->input->post('nro_guia_remision');   
+        $this->venta->nro_guia_remision = "-";   
         
         $this->venta->cliente_documento = $nro_documento_cliente;// ($tipo_comprobante == $this->id_factura ) ? $this->input->post('ruc_cliente') : $this->input->post('dni_cliente');    
         $this->venta->insert_venta();
@@ -499,7 +497,7 @@ class Ventas extends MY_Controller {
         $pdf->Output($nombrepdf.'.pdf', 'I');
     }
 
-     public function print_guia()
+     public function print_guia() //copia de venta
     {   
 
         $this->load->model('venta');

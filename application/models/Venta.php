@@ -189,6 +189,16 @@ class Venta extends CI_Model {
 
         return $query->row_array();
     }
+	
+	public function get_data_venta_buscado_nro_comprobante ($nro_comprobante_venta)
+    {	
+		$this->db->select(" vent.* ");
+        $this->db->from('venta vent');
+        $this->db->where('vent.nro_documento',$nro_comprobante_venta);
+        $query = $this->db->get();
+		
+		return $query->row_array();
+	}
 
     public function cpe_venta($idventa)
     {        

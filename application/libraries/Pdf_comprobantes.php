@@ -77,7 +77,8 @@ class Pdf_comprobantes extends TCPDF
     public $comprobante_table_footer_letras =array('w'=> 130 , 'border'=>1 , 'h'=>5 , 'ln' => false);           
     public $comprobante_table_footer_totales =array( 'align'=> 'R','w' => 70,'border'=>1 , 'h'=>5 , 'ln'=> 1 );  
     public $comprobante_codigo_qr = array( 'align'=> 'C','w' => 25,'border'=>0 ,'ln'=>0 , 'h'=>25);    
-    public $comprobante_mensaje = array( 'align'=> 'L','w' =>  90,'border'=>1 ,'ln'=>0 ,'font_h'=> 10 , 'pos_x' => 5  );         
+    public $comprobante_mensaje = array( 'align'=> 'L','w' =>  90,'border'=>1 ,'ln'=>0 ,'font_h'=> 10 , 'pos_x' => 5  );public $cuentas_bancarias_pie_pagina = array("file_path"=> "assets/img/petrolmecanicajc_cuentas_bancarias.jpg", 
+							 "w" => 150 , "h" => 60 , "pos_x" => 5	);
     /* -- Firma digital parametros -- */
     public $certificate_path , $primaryKey_path, $import_key, $sello_firma_path ; 
     
@@ -626,8 +627,6 @@ class Pdf_comprobantes extends TCPDF
             $this->comprobante_mensaje['pos_y'] = $pos_y_footer + 8;
             $this->comprobante_mensaje['pos_x'] = $pos_x_footer +  $this->comprobante_codigo_qr['w'] + 10;
 
-
-
         }elseif ( $this->format == 'Ticket_A' ){
             $this->comprobante_table_footer_letras['w'] = $this->max_width;
             $this->comprobante_table_footer_letras['h'] = 4;
@@ -740,20 +739,18 @@ class Pdf_comprobantes extends TCPDF
             $text.="<br>".$this->cuentas_bancarias;
             $this->MultiCell( $ctfl['w'] + $ctft['w'], '', $text,  $cm['border'],  $cm['align'],false,1,'', '',true,0,true );
 
-
         }   elseif( $formato == 'pie_guia'){
-            
-            $cm['border'] = 1;
-
-
-            $this->SetFont('', '', 10);            
-
+			
+            $cta_bcas = $this->cuentas_bancarias_pie_pagina;
+			
             $observacion = (isset($data['observacion']['texto'])) ? $data['observacion']['texto'] : '  '  ;
-
             $this->SetFont('', '', $cm['font_h']);
-            $text= "Obs : ".$observacion." <br>";
-            $text.="<br>".$this->cuentas_bancarias;
-            $this->MultiCell( $ctfl['w'] + $ctft['w'], '', $text,  $cm['border'],  $cm['align'],false,0,'', '',true,0,true );
+            $text= "Observaciones .: ".$observacion." <br>";
+			$this->MultiCell( $this->max_width, '', $text,  $cm['border'],  $cm['align'],false,1,'', '',true,0,true );
+			
+			$eje_x_cta_bca_img = $this->GetX();
+			$eje_y_cta_bca_img = $this->GetY() + 1;
+			$this->Image($cta_bcas["file_path"], $eje_x_cta_bca_img, $eje_y_cta_bca_img, $cta_bcas["w"], $cta_bcas["h"], 'JPG', '', 'T', false, 300, '', false, false, 0, false, false, false);    
 
 
         }    
@@ -783,7 +780,7 @@ class Pdf_comprobantes extends TCPDF
         $this->setSignatureAppearance($sello_firma_pos_x , $sello_firma_pos_y,  $sello_firma_ancho_tamanio, $sello_firma_altura_tamanio);        
     }
 
-    public function add_imagen(){
+    public function add_imagen(){ //add_imagenes de logos de empresa en cabecera
         $this->Ln(1);
         
         $imags = array( array('img' => 'aile.jpg', 'w'=> 20, 'h' => 10, 'esp' => 1  ),

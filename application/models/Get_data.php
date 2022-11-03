@@ -207,6 +207,28 @@ class Get_data extends CI_Model {
 
         return $query->result();
     }
+	
+	public function get_data_ubigeo($nivel = 'distrito')
+    {	
+		$length_codigo_ubigeo = 0;
+		
+		if($nivel = 'distrito'){
+			$length_codigo_ubigeo = 6;
+		}else if($nivel = 'provincia'){
+			$length_codigo_ubigeo = 4;
+		}else if($nivel = 'departamento'){
+			$length_codigo_ubigeo = 2;
+		}
+		
+        $this->db->select(" ubi.* ");
+        $this->db->from('sunat_ubigeo as ubi');
+        if( $length_codigo_ubigeo > 0){
+            $this->db->where('LENGTH(ubi.codigo_ubigeo)',$length_codigo_ubigeo);
+        }
+		$this->db->order_by(" ubi.descripcion_ubigeo","asc");
+        $query = $this->db->get();
+        return $query->result_array();
+    }
 
         public function find_datos_documentacion_existente($nro_documento) // para realizar importaciones
     {

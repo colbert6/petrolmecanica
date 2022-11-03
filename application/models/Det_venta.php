@@ -127,6 +127,17 @@ class Det_venta extends CI_Model {
 
         return $det_venta_cpe;
     }
+	
+	public function get_data_venta_buscado_nro_comprobante($nro_comprobante_venta)
+    {	
+		$this->db->select(" det_vent.* ");
+        $this->db->from('venta vent');
+		$this->db->join('detalle_venta det_vent', 'vent.idventa = det_vent.venta_idventa');
+        $this->db->where('vent.nro_documento',$nro_comprobante_venta);
+        $query = $this->db->get();
+		
+		return $query->result_array();
+	}
 
 }
 
