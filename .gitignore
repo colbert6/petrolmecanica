@@ -30,9 +30,13 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 /tests/tests/
 /tests/results/
 
-/public/qr_code/*
 
-assets/uploads/calibracion/*
+/public/qr_code/*.jpg
+/public/qr_code/*.jpeg
+/public/qr_code/*.png
+/public/qr_code/*.gif
+!/public/qr_code/*.txt
+
 
 /assets/uploads/calibracion_tanque/*.jpg
 /assets/uploads/calibracion_tanque/*.jpeg

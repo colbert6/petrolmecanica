@@ -286,10 +286,11 @@ class Guias extends MY_Controller {
         $pdf->comprobante_data( 2 ,$data_comprobante);
 		
 		$peso = $data_guia['peso'];
-		$data_ruta = array('Ubigeo partida' => array($data_guia['partida_descripcion_ubigeo'],'1'),
-							'Punto de partida' => array($data_guia['dir_partida'],'1'),
-							'Ubigeo destino' => array($data_guia['destino_descripcion_ubigeo'],'1'),
-                            'Punto de destino' => array($data_guia['dir_destino'],'1'),
+		
+		$dir_partida = $data_guia['dir_partida']." - ".$data_guia['partida_descripcion_ubigeo'];
+		$dir_destino = $data_guia['dir_destino']." - ".$data_guia['destino_descripcion_ubigeo'];
+		$data_ruta = array('Punto de partida' => array($dir_partida,'1'),
+							'Punto de destino' => array($dir_destino,'1'),
 							'Numero de Paquetes' => array($data_guia['numero_paquetes']." (Peso ".$peso.")" ,'1')
 
 							);
