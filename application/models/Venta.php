@@ -235,7 +235,7 @@ class Venta extends CI_Model {
             "" as transporte_nro_placa,
             tm.cod_tipo_moneda as cod_moneda ,
             "0000" as cod_sucursal_sunat , 
-            pp.codigo_facturalaya as forma_de_pago,
+            pp.codigo_facturalaya as forma_pago,
             0 as monto_deuda_total,
             nro_cuotas as nro_cuotas, 
             DATE_FORMAT( vent.fecha_venta,"%Y-%m-%d") as fecha_comprobante, 

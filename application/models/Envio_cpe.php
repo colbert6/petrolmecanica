@@ -87,7 +87,7 @@ class Envio_cpe extends CI_Model {
                 $campo_update_nombre = '';
                 break;
         }
-        if($campo != '' ){
+        if($campo_update_nombre != '' ){
             $this->db->set($campo_update_nombre, 1);
             $this->db->where($campo_llave_nombre,$idventa);
             $this->db->update($tabla_nombre);
