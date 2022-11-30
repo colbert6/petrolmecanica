@@ -242,12 +242,12 @@ class Ventas extends MY_Controller {
                     $msj_Venta_mas_CPE = 'VENTA GUARDADA <br> Envio comprobante electrónico EXITOSO';
                 }else{
                     $error = $this->db->error();
-                    /*$this->db->trans_rollback(); 
-                    $return['msj'] =  $return['error'] = 'ERROR: Envio electrónico. <br>- '.$result_envio_cpe['mensaje'].'<br>- '.$error['message'];  */
+                    $this->db->trans_rollback(); 
+                    $msj_Venta_mas_CPE = $return['msj'] =  $return['error'] = 'ERROR Envio comprobante electrónico: <br>- '.$result_envio_cpe['mensaje'].'<br>- '.$error['message']; 
 
-                    $this->db->trans_commit();//Para guardar la venta
+                    /*$this->db->trans_commit();//Para guardar la venta
                     $return['estado']=true; //Para guardar la venta
-                    $msj_Venta_mas_CPE = 'VENTA GUARDADA <br><br>  ERROR Envio comprobante electrónico: <br>- '.$result_envio_cpe['mensaje'].'<br>- '.$error['message'];
+                    $msj_Venta_mas_CPE = 'VENTA GUARDADA <br><br>  ERROR Envio comprobante electrónico: <br>- '.$result_envio_cpe['mensaje'].'<br>- '.$error['message'];*/
                 }
 
                 $return['msj_success_true'] = $msj_Venta_mas_CPE;
@@ -329,7 +329,8 @@ class Ventas extends MY_Controller {
 
                     $error = $this->db->error();
                     $this->db->trans_rollback(); 
-                    $return['msj'] = $return['error'] = 'ERROR: Envio electrónico. <br>- '.$result_envio_cpe['mensaje'].'<br>- '.$error['message'];    
+                    $return['msj'] = $return['error'] = 'ERROR: Envio electrónico. <br>- '.$result_envio_cpe['mensaje'].'<br>- '.$error['message']; 
+					$return['estado'] = false;					
                 }
             }
 
