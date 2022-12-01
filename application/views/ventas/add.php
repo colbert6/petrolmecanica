@@ -60,7 +60,7 @@
               <label for="tienda" class="control-label">Tienda</label>  
             </div>
             <div class="col-sm-10">
-              <input type="date" class="form-control" id="fecha_venta" name="fecha_venta" value="<?php echo date('Y-m-d');?>" readonly="readonly">
+              <input type="date" class="form-control" id="fecha_venta" name="fecha_venta" value="<?php echo date('Y-m-d');?>" >
               <select class="form-control" id="tienda" name="tienda">
            
                 <?php foreach ($tiendas as $tienda): ?>

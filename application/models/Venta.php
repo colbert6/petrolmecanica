@@ -23,7 +23,7 @@ class Venta extends CI_Model {
     
     public function insert_venta()
     {   
-        $this->fecha_venta = date('Y-m-d H:i:s');//$this->input->post('fecha_venta');
+        $this->fecha_venta = $this->input->post('fecha_venta'); //date('Y-m-d H:i:s');//
         $this->serie_comprobante_idserie_comprobante = $this->input->post('idserie');
         $this->tienda_idtienda = $this->input->post('tienda');
 
