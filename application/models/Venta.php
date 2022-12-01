@@ -130,7 +130,7 @@ class Venta extends CI_Model {
     {        
         $this->db->select(" vent.estado as Estado,
                 tt.descripcion as Tienda,
-                DATE_FORMAT(vent.fecha_creacion, '%Y-%m-%d') as Fecha, 
+                DATE_FORMAT(vent.fecha_venta, '%Y-%m-%d') as Fecha, 
                 vent.cliente_razon_social as Cliente, 
                 vent.cliente_documento as 'RUC/DNI',
                 vent.cliente_direccion as Direccion,
