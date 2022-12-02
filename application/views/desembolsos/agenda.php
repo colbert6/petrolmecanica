@@ -40,7 +40,7 @@ function create_box( $title_box_text, $th_thead_string, $td_tr_tbody_string ) {
 
 ?>
 
-<div class="col-md-6">
+<div class="col-md-12">
   <div class="box">
     <div class="box-header">
         <h3 class="box-title"> <?php echo $title_box_text; ?> </h3>
