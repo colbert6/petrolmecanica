@@ -96,10 +96,10 @@ $db['default'] = array(
 
 $db['server'] = array(
 	'dsn'	=> '',
-	'hostname' => '35.188.181.162',
-	'username' => 'admin_petrol',
-	'password' => '20602440908',
-	'database' => 'admin_petromelcanica',
+	'hostname' => '158.106.138.138',
+	'username' => 'petrol_db_admin',
+	'password' => 'jc20602440908',
+	'database' => 'petrol_jc_database',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,

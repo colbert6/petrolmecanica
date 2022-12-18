@@ -195,7 +195,7 @@ class Guias extends MY_Controller {
 			$this->db->trans_rollback();			
 			$mensaje_error .= isset($result_curl['codigo'])? $result_curl['codigo']:$result_curl['cod_sunat'];
 			$mensaje_error .= "<br>";
-			$mensaje_error .= isset($result_curl['errores_curl'])? $result_curl['errores_curl']:$result_curl['msj_sunat'];
+			$mensaje_error .= isset($result_curl['errores_curl'])? $result_curl['errores_curl']:$result_curl['mensaje'];
 			
 			$return['error']= 'ERROR en ENVIO SUNAT :: '.$mensaje_error.".<br>";
 			$result['respuesta'] = 'error';			
