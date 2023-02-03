@@ -616,6 +616,8 @@ class Ventas extends MY_Controller {
         $this->load->model('envio_cpe');
         $data_json["tipo_envio"] = $tipo_envio;
         $data_json["idmaster"] = $idventa;	
+		$cod_sunat = isset($result['cod_sunat'])? $result['cod_sunat']:999;
+		$msj_sunat = isset($result['msj_sunat'])? $result['msj_sunat']:'error';
 	
         
         if($result['respuesta'] == 'ok' &&  $result['cod_sunat'] == 0 ){ //Guardar
@@ -624,9 +626,9 @@ class Ventas extends MY_Controller {
 
 
         }else{ //No debería ingresar, ya que toda venta debe ser enviada  
-	    
-            $result['codigo'] = isset($result['codigo'])? $result['codigo']:$result['cod_sunat'];
-            $result['mensaje'] = isset($result['mensaje'])? $result['mensaje']:$result['msj_sunat'];
+			
+            $result['codigo'] = isset($result['codigo'])? $result['codigo']:$cod_sunat;
+            $result['mensaje'] = isset($result['mensaje'])? $result['mensaje']:$msj_sunat;
             $this->envio_cpe->set_error($data_json, $result);//guardar registro error envio
             $result['respuesta'] = 'error';
 
