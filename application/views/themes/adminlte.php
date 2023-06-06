@@ -34,7 +34,7 @@
 	<script src="<?php echo base_url('assets/themes/adminlte/dist/js/adminlte.min.js')?>"></script>
     <script src="<?php echo base_url('assets/js/toast/js/jquery.toast.js')?>"></script>
 
-    <link rel='shortcut icon' type='image/png' href="<?php echo base_url('assets/img/logo_sistema.png')?>"/>
+    <link rel='shortcut icon' type='image/png' href="<?php echo base_url($this->icono_sistema)?>"/>
 	
 
 <?php

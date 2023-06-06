@@ -54,7 +54,7 @@ class Pdf_documentacion extends TCPDF
     public $tipo_documento, $nro_documento;
 
     /* ---Sectores del comprobante ---*/
-    public $logo_data = array ( 'mostrar'=> true , 'w'=> 40 , 'y' => 20);
+    public $logo_data = array ( 'mostrar'=> true , 'w'=> 45 , 'y' => 20);
     public $empresa_data = array ( 'align'=> 'J', 'w'=> 100 , 'ln' => 0 , 'font_h'=> 9 );
     public $comprobante_id = array ( 'border' => 1,'w' => 50, 'ln'=> 1, 'font_h'=> 10 );       
     public $receptor_data = array ( 'max_col'=>0,'border' => 1, 'ln' => 1 ,'w' => 200, 'font_h'=> 10);       
@@ -105,7 +105,8 @@ class Pdf_documentacion extends TCPDF
         
         if($this->logo_data['mostrar']){
             $ld = $this->logo_data ;
-            $this->Image($this->logo_empresa, $this->pos_x, $this->pos_y, $ld['w'], $ld['y'], 'JPG', '', 'T', false, 300, '', false, false, 0, false, false, false);    
+			$type_imagen = strtoupper(substr($this->logo_empresa, -3));
+            $this->Image($this->logo_empresa, $this->pos_x, $this->pos_y, $ld['w'], $ld['y'], $type_imagen, '', 'T', false, 300, '', false, false, 0, false, false, false);    
         }         
 
 

@@ -15,7 +15,7 @@ class MY_Controller extends CI_Controller {
 
     public $nombre_empresa = 'PETROLMECANICA JC';
     public $nombre_empresa_abreviado = 'PETROLMECANICA JC';
-    public $logo_empresa = 'assets/img/logo_empresa.jpg';
+    public $logo_empresa = 'assets/img/logo_empresa.png';
     public $razon_social = 'PETROLMECANICA JC S.A.C.';
     public $ruc = '20602440908';
     public $direccion = 'Pj. La Amistad nro. 145 Bar. Mollepampa - Cajamarca - Cajamarca';//'Jr. Alfonso ugarte Nro. 1800, Bar. Shucapampa - CAJAMARCA';
@@ -27,6 +27,7 @@ class MY_Controller extends CI_Controller {
     public $primaryKey_path = 'assets/key/C22080467303.pem';
     public $import_key = 'Edinjigue03109001';
     public $sello_firma_path = 'assets/img/firma_petrolmecanicajc.png';
+	public $icono_sistema = 'assets/img/icono_sistema.png';
 
     public $id_ticket = 1;
     public $id_boleta = 3;
