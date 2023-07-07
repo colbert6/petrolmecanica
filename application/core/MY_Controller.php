@@ -28,7 +28,8 @@ class MY_Controller extends CI_Controller {
     public $import_key = 'Edinjigue03109001';
     public $sello_firma_path = 'assets/img/firma_petrolmecanicajc.png';
 	public $icono_sistema = 'assets/img/icono_sistema.png';
-
+	
+	// codigos de tipo de comprobante
     public $id_ticket = 1;
     public $id_boleta = 3;
     public $id_factura = 2;

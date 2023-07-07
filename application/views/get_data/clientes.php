@@ -47,15 +47,26 @@
     <?php } // foreach -> $list_btns_info  ?>
 
     <div class="col-xs-6 col-sm-6" >
-        <input type="button" value="- Nuevo cliente -" class="btn btn-info" onclick="get_cliente_document_info_sunat()">
+        <input type="button" value="- Nuevo cliente -" class="btn btn-info" onclick="abrir_modal_busqueda_cliente()">
     </div>
     
  </div>
 
  <div class="form-group" style="margin-bottom: 0px;">
-    <label for="ruc_cliente" class="col-xs-3 col-sm-4 control-label" style="text-align: left;">Ruc </label>
-    <div class="col-xs-9 col-sm-8" >
+    <div class="col-sm-2">
+        <label for="ruc_cliente" class="control-label" >Ruc </label>
+    </div>
+    <div class="col-sm-10" >
         <input type="text" class="form-control" id="ruc_cliente" name="ruc_cliente" placeholder="Ruc" value="<?php echo $ruc; ?>" onkeypress="soloNumeros(event,'ruc')" maxlength="11"> 
+        </div>    
+ </div>
+
+ <div class="form-group" style="margin-bottom: 0px;">
+    <div class="col-sm-2">
+        <label for="dni_cliente" class="control-label" >Dni </label>
+    </div>
+    <div class="col-sm-10" >
+        <input type="text" class="form-control" id="dni_cliente" name="dni_cliente" placeholder="Dni" value="<?php echo $dni; ?>" onkeypress="soloNumeros(event,'dni')" maxlength="8"> 
     </div>    
  </div>
 
@@ -165,47 +176,44 @@
     //-----
 
     //---- Add new client ---- 
-    function get_cliente_document_info_sunat(){
+    function abrir_modal_busqueda_cliente(){
         //10730319342
         bootbox.prompt({
-            title: "Ingrese el RUC a buscar", 
+            title: "Ingrese el RUC/DNI del cliente a buscar", 
             inputType: 'number',
-            callback: function(result){ 
-                tipo_documento='ruc';
-                get_client_info_sunat(tipo_documento, result);  
+            callback: function(result){ //result = numero_documento
+                get_informacion_cliente(result);  
             }
         });
     }
 
-    function get_client_info_sunat(tipo_documento, numero_documento){
+    function get_informacion_cliente(numero_documento){
+        
+        cantidad_digitos_dni = 8;
+        cantidad_digitos_ruc = 11;
 
-        if( numero_documento.length != $('#'+tipo_documento+'_cliente').attr('maxlength')){
-            alerta("ALERTA","INCORRECTO: El número de digitos no corresponde al tipo de documento (11)", 'warning');
+        if( numero_documento.length != cantidad_digitos_dni &&  numero_documento.length != cantidad_digitos_ruc){
+            alerta("ALERTA", "ERROR: Cantidad de digitos del documento incorrecto, RUC=11 / DNI=8.", 'warning');
 
         }else{
             //String valor = $('#'+tipo+'_cliente').val();
             $.ajax({
                 url: base_url + 'get_datas/get_cliente_document_info_sunat',
                 type: 'GET',
-                data: 'tipo='+tipo_documento+'&numero='+numero_documento,
+                data: 'tipo=na&numero='+numero_documento,
                 dataType: 'JSON',
                 success: function (obj) {
-                    if(obj=== null){
-                        bootbox.alert("No se encontro cliente con el documento indicado");
-                    }if(obj.respuesta === "error"){
+                    if(obj === null){
+                        bootbox.alert("ERROR: No se encontro información para el número de documento indicado.");
+                    }else if(obj.estado === false){
                         bootbox.alert(obj.mensaje);
                     }else{
                         html = "DATA ENCONTRADA <br> ---------------<br>";
-                        html += "Condicion: "+obj.condicion+" <br>";
-                        html += "Estado: "+obj.estado+" <br>";
-                        html += "RUC: "+obj.ruc+" <br>";
-                        html += "Razon_social: "+obj.razon_social+" <br>";
-                        html += "Nombre_comercial: "+obj.nombre_comercial+" <br>";
-                        html += "Direccion: "+obj.direccion+" <br>";
-                        html += "telefono: "+obj.telefono+" <br>";
-                        html += "Codigo_ubigeo: "+obj.codigo_ubigeo+" <br>";
-                        html += "<br><br> Es correcto la información?  <br>";
-                        confirm_client_finded(html, obj);
+                        for (var campo in obj.data){
+                            html += "<br> <b>"+campo.toUpperCase()+":</b> "+obj.data[campo];
+                        }
+                        html += "<br><br> ¿Desea registrar como nuevo cliente?  <br>";
+                        confirm_client_finded(html, obj.data);
                     }
                     
                 }
@@ -218,11 +226,11 @@
             message: html_client_info,
             buttons: {
                 confirm: {
-                    label: 'Añadir CLIENTE',
+                    label: 'Registrar nuevo CLIENTE',
                     className: 'btn-success'
                 },
                 cancel: {
-                    label: 'NO',
+                    label: 'Cancelar',
                     className: 'btn-danger'
                 }
             },
@@ -234,10 +242,10 @@
                         data: obj_client_info,
                         dataType: 'JSON',
                         success: function (obj) {                            
-                            if(obj.estado){
-                                alerta("RESPUESTA","Se ha creado nuevo cliente",'success');
+                            if(obj.estado=== false){
+                                bootbox.alert(obj.mensaje);                               
                             }else{
-                                alerta("ERROR",obj.msj,'warning');
+                                alerta("RESPUESTA","Se ha registrado nuevo cliente",'success');
                             }
                         }
                     });

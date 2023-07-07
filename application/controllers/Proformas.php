@@ -49,7 +49,7 @@ class Proformas extends MY_Controller {
         $output = $crud->render();
 
 
-        $output->title = "Proforma :: <a href='".base_url('proformas/add')."'> crear nueva proforma</a>";
+        $output->title = "Proforma :: <a href='".base_url('proformas/add')."'> Crear nueva proforma</a>";
 
         $this->_init(true,true,true);//Carga el tema ( $cargar_menu, $cargar_url, $cargar_template )
         $this->load->view('grocery_crud/basic_crud', (array)$output ) ;

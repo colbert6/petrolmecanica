@@ -2,7 +2,7 @@
 <div class="row" id="form">
   <!-- left column -->
   <div class="col-md-8">
-    <div class="box box-success">
+    <div class="box box-info">
       <div class="box-header with-border">
         
         <?php echo $get_productos; ?>
@@ -54,6 +54,7 @@
 
       <form class="form-horizontal">
         <div class="box-body">
+		
           <div class="form-group">
             <div class="col-sm-2">
               <label for="fecha_venta" class="control-label">Fecha</label>
@@ -61,68 +62,55 @@
             </div>
             <div class="col-sm-10">
               <input type="date" class="form-control" id="fecha_venta" name="fecha_venta" value="<?php echo date('Y-m-d');?>" >
-              <select class="form-control" id="tienda" name="tienda">
-           
-                <?php foreach ($tiendas as $tienda): ?>
-                <option value="<?= $tienda->idtienda ?>"><?= $tienda->descripcion ?></option>
+              <select class="form-control" id="tienda" name="tienda">           
+                <?php foreach ($tiendas as $data): ?>
+                <option value="<?= $data['id'] ?>"><?= $data['descripcion'] ?></option>
                 <?php endforeach; ?>
               </select>
             </div>
           </div>
 
           <div class="form-group">
-            <div class="col-sm-4">
-              <label for="tipo_moneda" class="control-label">Tipo_moneda</label> 
-              <label for="forma_pago" class="control-label">Forma_pago</label>
-
-              <label for="condicion_pago" class="control-label">Condición_pago</label> 
-              <label for="numero_cuotas" class="control-label">Nro_cuotas</label>
-            </div>
-            <div class="col-sm-8">
-              <select class="form-control" id="tipo_moneda" name="tipo_moneda">
-           
-                <?php foreach ($tipo_moneda as $t_moneda): ?>
-                <option value="<?= $t_moneda->id ?>"><?= $t_moneda->descripcion ?></option>
+		  
+			<div class="col-sm-6">
+              <select class="form-control" id="forma_pago" name="forma_pago">           
+                <?php foreach ($forma_pago as $data): ?>
+                <option value="<?= $data['id'] ?>"><?= $data['descripcion'] ?></option>
                 <?php endforeach; ?>
               </select>
-              <select class="form-control" id="forma_pago" name="forma_pago">
-           
-                <?php foreach ($forma_pago as $f_pago): ?>
-                <option value="<?= $f_pago->id ?>"><?= $f_pago->descripcion ?></option>
-                <?php endforeach; ?>
-              </select>
-              
-              <select class="form-control" id="condicion_pago" name="condicion_pago">
-           
-                <?php foreach ($condicion_pago as $c_pago): ?>
-                <option value="<?= $c_pago->id ?>"><?= $c_pago->descripcion ?></option>
-                <?php endforeach; ?>
-              </select>
+            </div>			
+            <div class="col-sm-6">
+				<select class="form-control" id="tipo_moneda" name="tipo_moneda">           
+					<?php foreach ($tipo_moneda as $data): ?>
+					<option value="<?= $data['id'] ?>"><?= $data['descripcion'] ?></option>
+					<?php endforeach; ?>
+				</select>
+			</div>
+			
+            <div class="col-sm-6">             
+				<select class="form-control" id="condicion_pago" name="condicion_pago">           
+					<?php foreach ($condicion_pago as $data): ?>
+					<option value="<?= $data['id'] ?>"><?= $data['descripcion'] ?></option>
+					<?php endforeach; ?>
+				</select>
+			</div>
+			<div class="col-sm-6">	
               <input type="number" class="form-control" id="numero_cuotas" name="numero_cuotas" value="1" >
+            </div>
+          </div>
+
+          <div class="form-group">
+			
+            <div class="col-sm-8">
+				<select class="form-control" id="idserie" name="idserie"> 
+					<?php foreach ($series as $data): ?>
+					<option value="<?= $data['id'] ?>"><?= $data['descripcion'] ?></option>
+					<?php endforeach; ?>
+				</select>
+			</div>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" id="nro_guia_remision" name="nro_guia_remision" placeholder="Correlativo de Guia" readonly value="<?php echo $guia_remision; ?>">
               
-            </div>
-          </div>
-
-
-          <div class="form-group">
-            <label for="idserie" class="col-sm-2 control-label">Comp.</label>
-
-            <div class="col-sm-10">
-              <select class="form-control" id="idserie" name="idserie" onchange="get_correlativo();"> 
-                  <?php foreach($series as $tc) {
-                    echo "<option value='{$tc->idserie}' > {$tc->tipo_comprobante} </option>";
-                  }
-                ?>
-              </select>
-              <input type="text" class="form-control" id="correlativo" name="correlativo" placeholder="Correlativo" readonly="readonly" value="<?php echo $series[0]->correlativo; ?>">
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="idserie" class="col-sm-2 control-label">Guia</label>
-
-            <div class="col-sm-10">
-              <input type="text" class="form-control" id="nro_guia_remision" name="nro_guia_remision" placeholder="Correlativo" readonly="readonly" value="<?php echo $guia_remision[0]->correlativo; ?>">
             </div>
           </div>
 
@@ -160,4 +148,3 @@
 
 </div>
 
-<script type="text/javascript"> base_url = "<?php echo base_url();  ?>"</script>
