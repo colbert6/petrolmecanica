@@ -10,7 +10,6 @@ class Kardex extends MY_Controller {
         
     }
 
-
     public function lista()
     {
         $this->metodo = 'Lista';//Siempre define las migagas de pan

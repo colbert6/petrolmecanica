@@ -190,6 +190,7 @@ class Movimientos extends MY_Controller {
                             'monto' => array('op_importe'=>$movimiento['Total'])   );
         $pdf->data_table_footer( 'monto_general',  $data_footer , 'msj');
         
+        ob_end_clean();
         $pdf->Output($nombrepdf, 'I');
     }
 

@@ -1,4 +1,4 @@
-    <?php
+<?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Ventas extends MY_Controller {
@@ -9,13 +9,11 @@ class Ventas extends MY_Controller {
         $this->controller = 'Ventas';//Siempre define las migagas de pan
     }
 
-
     public function lista()
     {
 
-        $this->metodo = 'Lista';//Siempre define las migagas de pan
+        $this->metodo = 'Listar ventas';//Siempre define las migagas de pan
         
-
         $this->load->library('grocery_CRUD');
         $this->load->js('assets/js/bootbox.min.js');
         $this->load->js('assets/myjs/groceryCRUD.js');
@@ -50,7 +48,7 @@ class Ventas extends MY_Controller {
 
         $output = $crud->render();
 
-        $output->title = "Ventas :: <a href='".base_url('ventas/add')."'> crear nueva venta</a>";
+        $output->title = "Ventas :: <a href='".base_url('ventas/add')."'> Crear nueva venta</a>";
 
         $this->_init(true,true,true);//Carga el tema ( $cargar_menu, $cargar_url, $cargar_template )
         $this->load->view('grocery_crud/basic_crud', (array)$output ) ;
@@ -59,9 +57,8 @@ class Ventas extends MY_Controller {
 
     public function add()
     {
-
         
-        $this->metodo = 'Nueva venta';//Siempre define las migagas de pan
+        $this->metodo = 'Crear venta';//Siempre define las migagas de pan
 
         $this->_init(true,false,true);//Carga el tema ( $cargar_menu, $cargar_url, $cargar_template )
 
@@ -70,7 +67,7 @@ class Ventas extends MY_Controller {
         $this->load->js('assets/myjs/genericos/set_data_v2.js');//genericos
         $this->load->js('assets/myjs/movimientos.js');
 
-        $this->load->js('assets/myjs/ventas_.js');
+        $this->load->js('assets/myjs/venta/ventas_crear.js');
         $this->load->js('assets/js/bootbox.min.js');
 
         $this->load->js('assets/js/shortcut.js');//activación de teclas 
@@ -78,7 +75,6 @@ class Ventas extends MY_Controller {
 
         //Cargando modelos
         $this->load->model('cliente');
-        $this->load->model('almacen');
         $this->load->model('get_data');
 
         $output = array('cliente_base' => $this->cliente->get_cliente('idcliente',1) ); 
@@ -86,190 +82,172 @@ class Ventas extends MY_Controller {
 
         $output = array( 'onSelected' => 'add_detalle(obj);' ); //cuando se seleccione el valor
         $get_productos = $this->load->view('get_data/productos', $output,true) ;
-
-        $output = array('title' => 'Venta', 
-
-            'tiendas' => $this->almacen->get_tienda(),  
-            'series' => $this->get_data->get_series(array( $this->id_factura,$this->id_boleta) ),
-            'guia_remision' => $this->get_data->get_series(array( $this->id_guia_remision) ), //$this->id_ticket,
+		
+		$serie_correlativo_guia = $this->get_data->get_series_correlativos("$this->id_guia_remision", "tipo_comprobante_idtipocomprobante" );
+	
+        $output = array( 
+            'tiendas' => $this->get_data->get_tiendas(),  
+			'tipo_moneda' => $this->get_data->get_tipos_monedas(),
+            'condicion_pago' => $this->get_data->get_periodos_pagos(),
+            'forma_pago' => $this->get_data->get_formas_pagos(False, '', 'idforma_pago desc'),			
+            'series' => $this->get_data->get_comprobantes_series_correlativo(
+			"$this->id_boleta, $this->id_factura", "tipo_comprobante_idtipocomprobante", 'tipo_comprobante_idtipocomprobante asc' ),
+			
+            'guia_remision' => $serie_correlativo_guia[0]['descripcion'], //correlativo actual de guia,
             'get_clientes' =>  $get_clientes,
-            'get_productos' =>  $get_productos,
-            'tipo_moneda' => $this->get_data->get_tipo_moneda(),
-            'condicion_pago' => $this->get_data->get_periodo_pagos(),
-            'forma_pago' =>$this->get_data->get_forma_pago()
-              ); 
+            'get_productos' =>  $get_productos            
+        ); 
 
         $this->load->view('ventas/add', $output ) ;
     }
 
-    public function control()
-    {
+	private function validar_guardado($nro_documento_cliente, $tipo_comprobante, $total_venta)
+	{
+		// Validaciones
+		$cantidad_digitos_ruc = 11;
+		$cantidad_digitos_dni = 8;
+		$monto_limite_para_identificacion = 700.00;
+		$array_documentos_dummy = array("00000000000", "99999999999", "00000000", "99999999");
+		
+		$return = array( 
+			'estado' => true, 'mensaje' => '' 
+		); 
+		
+        if( $tipo_comprobante == $this->id_factura){//validación para facturas
+			if( in_array($nro_documento_cliente, $array_documentos_dummy) ){
+                $return['mensaje']= 'ERROR: Número de documento incorrecto, cliente no identificado';
+                $return['estado'] = false;     
+            }
+			if( strlen($nro_documento_cliente) != $cantidad_digitos_ruc ){
+                $return['mensaje']= 'ERROR: Cantidad de digitos del documento incorrecto, RUC deben ser 11 digitos.';
+                $return['estado'] = false;     
+            }
+        }else if( $total_venta >= $monto_limite_para_identificacion ){//validación para comprobantes mayores a limite
+            if( $tipo_comprobante == $this->id_boleta){//validación para boletas
 
-        $this->metodo = 'Control';//Siempre define las migagas de pan
+                if( in_array($nro_documento_cliente, $array_documentos_dummy)){
+                    $return['mensaje']= "ERROR: Número de documento incorrecto, cliente no identificado para montos mayores a $monto_limite_para_identificacion soles.";
+					$return['estado'] = false;
+                }
+				if( !in_array(strlen($nro_documento_cliente), array(8,11) ) ){                    
+                    $return['mensaje']= "ERROR: Cantidad de digitos del documento incorrecto, para ventas mayores a $monto_limite_para_identificacion soles.";
+                    $return['estado'] = false;
+                }
+            }
+        }
+		
+		return $return;
+	}
 
-        $this->load->js('assets/myjs/ventas_control.js');
-        
-        $output = array('title' => "Ventas :: <a href='".base_url('ventas/lista')."'> listar ventas</a>");
+    public function save()  {	
+		
+		$return = array( 
+			'estado' => false, 
+			'mensaje' => '' , 
+			'id_transaccion' => '' , 
+			'enlace' => ''
+		);  
 
-        $this->_init(true,true,true);//Carga el tema ( $cargar_menu, $cargar_url, $cargar_template )
-        $this->load->view('ventas/control', (array)$output ) ;
-    }
-
-    private function check_venta($datos){
-
-        return false;
-    }
-
-    public function save()
-    {   
-        
-        $validar_envio_cpe = 1;
-        $return = array( 'estado_validacion' => true , 'estado' => false, 'msj' => '' , 'error'=> '' , 'idsave' => '' , 'enlace' => '');  
-
-        //VALIDACIONES
+        // Obtener parametros para crear venta - validar_envio_cpe
         $this->load->model('get_data');
-        $idserie = '16';
-        $serie = $this->get_data->get_correlativo($idserie);
-        $validar_envio_cpe =  $serie->correlativo_solo;
+		$serie_correlativo_envio_cpe = $this->get_data->get_series_correlativos(" 'E_CPE' ", "serie" );
+		$validar_envio_cpe = $serie_correlativo_envio_cpe[0]['correlativo'];
+		
+		// Obtener parametros para crear venta - tipo_comprobante
+		$this->load->model('comprobante');  
+		$idserie = $this->input->post('idserie');//id serie de la venta
+        $tipo_comprobante = $this->comprobante->get_tipo_serie($idserie); //Obtener tipo de comprobante 
+		
+		// Obtener parametros para crear venta - nro documento cliente
 
-        //Guardar movimiento
-        $this->db->trans_start();//Inicio de transaccion        
-
-        try{
-
-        //$this->load->model('get_data');
-        $idserie = $this->input->post('idserie');
-        $serie = $this->get_data->get_correlativo($idserie);//Obtener correlativo actual
-
-        $this->load->model('comprobante');  
-        $tipo_comprobante = $this->comprobante->get_tipo_serie($idserie);//Obtener tipo de comprobante         
-        $this->comprobante->update_serie_correlativo($idserie,'correlativo','correlativo + 1' );//idserie , campo , valor //Actualizar el correlativo de la serie 
-
-        //$this->comprobante->update_serie_correlativo($this->id_guia_remision,'correlativo','correlativo + 1' );//
-
-        //VALIDACIONES
-        $total_venta = ($this->input->post('subtotales') - $this->input->post('descuento')+$this->input->post('igv'));
-
-        $ruc_cliente = $this->input->post('ruc_cliente');
-        $dni_cliente = $this->input->post('dni_cliente');        
-        $nro_documento_cliente  ;
-
-        if( $tipo_comprobante == $this->id_factura){
-            if( $ruc_cliente != '00000000000' AND strlen($ruc_cliente) == 11 ){
-                $nro_documento_cliente = $ruc_cliente;
-            }else{
-                $return['error']= 'ERROR: Número de RUC incorrecto.';
-                $return['estado_validacion'] = false;     
-            }
-
-        }else if( $total_venta >= 700 ){
-
-            if( $tipo_comprobante == $this->id_boleta){
-
-                if( $ruc_cliente != '00000000000' AND strlen($ruc_cliente) == 11 ){
-                    $nro_documento_cliente = $ruc_cliente;
-                }else if($dni_cliente != '00000000' AND strlen($dni_cliente) == 8){
-                    $nro_documento_cliente = $dni_cliente;                          
-                }else{
-                    $return['error']= 'ERROR: Debe ingresar número de documento valido para ventas mayores a 700 soles.';
-                    $return['estado_validacion'] = false;
-                }
-            }
-
-        }else{
-
-            if( strlen($ruc_cliente) == 11 ){
-                $nro_documento_cliente = $ruc_cliente;
-            }else if( strlen($dni_cliente) == 8){
-                 $nro_documento_cliente = $dni_cliente;     
-            }else{
-                $nro_documento_cliente = '000000000';  
-            }
-
+		$nro_documento_cliente = $this->input->post('ruc_cliente');
+        if( $tipo_comprobante == $this->id_boleta){
+            $nro_documento_cliente = $this->input->post('dni_cliente');
         }
 
-        if(!$return['estado_validacion']){
-            print json_encode($return);
+		$total_venta = ($this->input->post('subtotales')-$this->input->post('descuento')+$this->input->post('igv'));
+		
+		// Validaciones de negocio
+		$result_validacion = self::validar_guardado($nro_documento_cliente, $tipo_comprobante, $total_venta);
+		if( $result_validacion['estado'] == false){ // No paso validacion
+			$return['estado'] = $result_validacion['estado'];
+			$return['mensaje'] = $result_validacion['mensaje'];
+			print json_encode($return);
             die('');
-        }  
+		}		
+		
+		try{		
+			// Guardar venta en Base de Datos
+			$this->db->trans_start(); //Inicio de transaccion 
+			
+			$serie_correlativo_venta = $this->get_data->get_series_correlativos("$idserie", "idserie_comprobante");
+			$correlativo_actual = $serie_correlativo_venta[0]['descripcion'];//Obtener serie + correlativo actual venta       
 
-        //Guardar Venta
-        $this->load->model('venta');        
-        $this->venta->tipo_comprobante_idtipo_comprobante = $tipo_comprobante; 
-        $this->venta->nro_documento = $serie->correlativo;   
+			//Guardar Venta
+			$this->load->model('venta');        
+			$this->venta->tipo_comprobante_idtipo_comprobante = $tipo_comprobante; 
+			$this->venta->nro_documento = $correlativo_actual;   
+			$this->venta->nro_guia_remision = "-";  
+			$this->venta->cliente_documento = $nro_documento_cliente;    
+			$this->venta->insert_venta();
+			$idventa = $this->db->insert_id();
 
-        $this->venta->nro_guia_remision = "-";   
-        
-        $this->venta->cliente_documento = $nro_documento_cliente;// ($tipo_comprobante == $this->id_factura ) ? $this->input->post('ruc_cliente') : $this->input->post('dni_cliente');    
-        $this->venta->insert_venta();
-        $idventa = $this->db->insert_id();
+			//Guardar Detalle Venta
+			$this->load->model('det_venta');   
+			$this->det_venta->venta_idventa = $idventa;     
+			$this->det_venta->insert_det_venta();
+		
+			//Modificar Stock
+			$this->load->model('stock');       
+			$this->stock->modificar_stock("-");
 
-        //Guardar Detalle Venta
-        $this->load->model('det_venta');   
-        $this->det_venta->venta_idventa = $idventa;     
-        $this->det_venta->insert_det_venta();
-    
-        //Modificar Stock
-        $this->load->model('stock');       
-        $this->stock->modificar_stock("-");
+			//Agregar Kardex
+			$this->load->model('kardex');      
+			$this->kardex->codmotivo = $idventa;
+			$this->kardex->insert_kardex("S","venta");
+			
+			//Actualizar correlativo de la serie de la venta       
+			$this->comprobante->update_serie_correlativo($idserie, 'correlativo', 'correlativo + 1' );//idserie , campo , valor 	
+			
+			$return['idsave'] = $idventa;
+			if ($this->db->trans_status() == false) { // Validaciones de inserción
+				$error = $this->db->error();
+				$return['estado'] = false;
+				$return['mensaje'] = 'ERROR: Fallo en peraciones de base de datos. <br> ('.$error['message'].') ';
+                $this->db->trans_rollback();
+				print json_encode($return);
+				die('');				
+			}
+			
+			if($validar_envio_cpe){//Flag para activar envio CPE
+ 
+				$tipo_envio = "generar_comprobante";   
+				$result_envio_cpe = $this->enviar_comprobante_proveedor_cpe($tipo_envio, $idventa);
 
-        //Agregar Kardex
-        $this->load->model('kardex');      
-        $this->kardex->codmotivo = $idventa;
-        $this->kardex->insert_kardex("S","venta");
-	
-        
-        $return['idsave'] = $idventa;
-        if ($this->db->trans_status() === FALSE) { 
+				if($result_envio_cpe['respuesta'] == 'ok' && $this->db->trans_status() !== false){
+					$this->db->trans_commit();
+					$return['estado'] = true;
+					$return['mensaje'] = 'VENTA GUARDADA <br> Envio comprobante electrónico EXITOSO';
+				}else{
+					$error = $this->db->error();
+					$return['estado'] = false;
+					$return['mensaje'] = 'ERROR: Envio comprobante electrónico. <br> ('.$result_envio_cpe['mensaje'].') ';
+					$this->db->trans_rollback();
+				}
 
-            $error = $this->db->error();
-            $return['msj'] = $return['error']= 'ERROR: Operaciones de Base de Datos. <br>'.$error['message'];           
-            $this->db->trans_rollback(); 
-
-        } else {
-
-            //Si $validar_envio_cpe = 1, la venta incluye el envio CPE
-            //OJO: no importa la rpta del envio CPE, la venta sera guardada
-            if($validar_envio_cpe){//Envio exitoso obligatorio para crear una venta
-
-                //Envio CPE
-                $tipo_envio="generar_comprobante";   
-                $result_envio_cpe = $this->primer_envio_cpe($tipo_envio,$idventa);
-
-                if($result_envio_cpe['respuesta'] == 'ok' && $this->db->trans_status() !== FALSE){
-                    $this->db->trans_commit();
-                    $return['estado']=true;
-                    $msj_Venta_mas_CPE = 'VENTA GUARDADA <br> Envio comprobante electrónico EXITOSO';
-                }else{
-                    $error = $this->db->error();
-                    $this->db->trans_rollback(); 
-                    $msj_Venta_mas_CPE = $return['msj'] =  $return['error'] = 'ERROR Envio comprobante electrónico: <br>- '.$result_envio_cpe['mensaje'].'<br>- '.$error['message']; 
-
-                    /*$this->db->trans_commit();//Para guardar la venta
-                    $return['estado']=true; //Para guardar la venta
-                    $msj_Venta_mas_CPE = 'VENTA GUARDADA <br><br>  ERROR Envio comprobante electrónico: <br>- '.$result_envio_cpe['mensaje'].'<br>- '.$error['message'];*/
-                }
-
-                $return['msj_success_true'] = $msj_Venta_mas_CPE;
-
-            }else{
-                //Si $validar_envio_cpe = 0, la venta NO incluye el envio CPE
-                //Si la venta se tiene exito localmente se guarda
-                $msj_Venta_sin_CPE = 'VENTA GUARDADA <br> Envio comprobante electrónico PENDIENTE';
-                $return['msj_success_true'] = $msj_Venta_sin_CPE;
-                $this->db->trans_commit(); 
-                $return['estado']=true;
-            }
-                
-        }
+			}else{
+				//Si $validar_envio_cpe = 0, la venta NO incluye el envio CPE
+				$this->db->trans_commit();
+				$return['estado']=true;				
+				$return['mensaje'] = 'VENTA GUARDADA <br> Envio comprobante electrónico PENDIENTE.';		
+			} 
 
         } catch (Exception $e) {
-
+			
             $this->db->trans_rollback(); 
-            $return['error']= "ERROR: Controller > ".$e->getMessage(); 
+			$return['mensaje'] = "ERROR: Error en codigo (".$e->getMessage().")";	
+			$return['estado']=true;
         }
-
-       
 
         print json_encode($return);
             
@@ -316,7 +294,7 @@ class Ventas extends MY_Controller {
 
                 //Envio anulacion CPE
                 $tipo_envio="generar_anulacion";   
-                $result_envio_cpe = $this->primer_envio_cpe($tipo_envio,$idventa); 
+                $result_envio_cpe = $this->enviar_comprobante_proveedor_cpe($tipo_envio,$idventa); 
 
                 if($result_envio_cpe['respuesta'] == 'ok' && $this->db->trans_status() !== FALSE){
 
@@ -343,6 +321,19 @@ class Ventas extends MY_Controller {
         
     }
 
+    public function control()
+    {
+
+        $this->metodo = 'Control de ventas por día';//Siempre define las migagas de pan
+
+        $this->load->js('assets/myjs/ventas_control.js');
+        
+        $output = array('title' => "<a href='".base_url('ventas/lista')."'> Ir a lista de ventas</a>");
+
+        $this->_init(true,false,true);//Carga el tema ( $cargar_menu, $cargar_url, $cargar_template )
+        $this->load->view('ventas/control', (array)$output ) ;
+    }
+    
     //--PEDIDOS AJAX
      
     public function control_ventas()
@@ -579,8 +570,7 @@ class Ventas extends MY_Controller {
 
     ///--------------------------CPE--------------------
 
-
-   public function primer_envio_cpe($tipo_envio,$idventa) {
+   public function enviar_comprobante_proveedor_cpe( $tipo_envio, $idventa) {
 
         //Parametros
         /*$idventa = $this->input->get('id');
@@ -589,15 +579,17 @@ class Ventas extends MY_Controller {
         $this->load->library('Facturalaya');
         $envio_cpe = new Facturalaya();
 
-        //Creamos el array con la data del cpe
-        if($tipo_envio == "generar_comprobante"){
-            $data_json = $envio_cpe->generar_comprobante_json($idventa, $this);
-            if (isset($data_json["numero_comprobante"])) {
-                $data_json["numero_comprobante"] = $data_json["numero_comprobante"] * 1;
-            }
+        switch ($tipo_envio) {
+            case "generar_comprobante":
+                $data_json = $envio_cpe->generar_comprobante_json($idventa, $this);
+                if (isset($data_json["numero_comprobante"])) {
+                    $data_json["numero_comprobante"] = $data_json["numero_comprobante"] * 1;
+                }
+                break;
             
-        }else if($tipo_envio =="generar_anulacion"){
-            $data_json = $envio_cpe->generar_anulacion_json($idventa, $this);
+            case "generar_anulacion":
+                $data_json = $envio_cpe->generar_anulacion_json($idventa, $this);
+                break;
         }
 
         //print_r($data_json);die();

@@ -36,8 +36,6 @@ class Venta extends CI_Model {
         
         $this->cliente_idcliente = $this->input->post('idcliente');//FALTA
         $this->cliente_razon_social = $this->input->post('cliente');
-
-
         
         $this->cliente_direccion = $this->input->post('direccion_cliente');
         $this->colaborador_idcolaborador = $this->session->userdata('id_user');//FALTA

@@ -14,18 +14,13 @@
       <div class="box-body" >
           <div class="row">
               <div class="form-group">
-                <label for="fecha_control" class="col-sm-2 control-label" id="fecha_consulta">Fecha</label>
-                <div class="col-sm-4">
-
-                  <div class="input-group input-lg">
-                    <input type="date" class="form-control input-lg" id="fecha_control" value="<?php echo date('Y-m-d');?>">
-                    <span class="input-group-addon">
-                      <button id="get_control_ventas" type="button" class="btn btn-info" onclick="get_control_ventas()"><i class="fa fa-refresh"></i></button>
-                    </span>
-                  </div>
-
-
+                <div class="col-sm-8">
+                  <label for="fecha_control" class="control-label" id="fecha_consulta">Seleccione una fecha para consultar el monto total de ventas en ese día</label>
+                  <input type="date" class="form-control" id="fecha_control" value="<?php echo date('Y-m-d');?>">
+                  <button type="button" class="btn btn-success pull-right" id="get_control_ventas" onclick="get_control_ventas()"><i class="fa fa-refresh"></i> Recargar</button>
                 </div>
+
+
               </div>
           </div>
       </div>
@@ -36,19 +31,19 @@
 
   <div class="row">
 
-    <div class="col-md-4 col-sm-6 col-xs-12">
+    <div class="col-md-6 col-sm-12 col-xs-12">
       <div class="info-box bg-green">
         <span class="info-box-icon"><i class="fa fa-money"></i></span>
 
         <div class="info-box-content">
-          <span class="info-box-text">monto en Ventas</span>
+          <span class="info-box-text">Monto venta día consultado</span>
           <span class="info-box-number" id="monto_fecha">S/ 0.00</span>
 
           <div class="progress">
             <div class="progress-bar" style="width: 100%"></div>
           </div>
               <span class="progress-description">
-                Del Mes : <span id="monto_fecha_mes"> S/ 0.00</span>
+                Monto total del Mes : <span id="monto_fecha_mes"> S/ 0.00</span>
               </span>
         </div>
         <!-- /.info-box-content -->
