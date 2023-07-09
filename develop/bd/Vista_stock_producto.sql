@@ -1,3 +1,4 @@
+CREATE VIEW producto_stock AS 
 SELECT pro.codbarras producto_codigo_barras,  
   CONCAT(cat.nombre,' ',mar.nombre,' ',pro.nombre ) as producto_descripcion, 
   pro.nombre as producto_nombre, 
@@ -12,5 +13,5 @@ LEFT JOIN tienda tie ON tie.idtienda = st.tienda_idtienda
 LEFT JOIN producto pro ON pro.idproducto = st.producto_idproducto
 LEFT JOIN marca mar ON mar.idmarca = pro.marca_idmarca
 LEFT JOIN categoria as cat ON cat.idcategoria = pro.categoria_idcategoria
-LEFT JOIN unidad_medida as med ON med.producto_idproducto = pro.idproducto AND med.presentacion_idpresentacion = pro.presentacion_minima AND  AND med.estado ='Activo'
+LEFT JOIN unidad_medida as med ON med.producto_idproducto = pro.idproducto AND med.presentacion_idpresentacion = pro.presentacion_minima AND  med.estado ='Activo'
 LEFT JOIN presentacion as pres ON pres.idpresentacion = pro.presentacion_minima

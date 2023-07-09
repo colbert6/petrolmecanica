@@ -28,18 +28,11 @@ class MY_Controller extends CI_Controller {
     public $contacto = 'Cel.973949944 | Correos: colbersiho@gmail.com';
     public $rubro = 'Sistema comercial Web';
 
-    public $certificate_path = 'assets/key/C22080467303.crt';
-    public $primaryKey_path = 'assets/key/C22080467303.pem';
+    public $certificate_path = 'assets/key/C22080467303.crt';//'assets/key/C22080467303.crt';
+    public $primaryKey_path = 'assets/key/C22080467303.crt';//'assets/key/C22080467303.pem';
     public $import_key = 'Edinjigue03109001';
     public $sello_firma_path = 'assets/img/firma_petrolmecanicajc.png';
     
-
-
-    public $certificate_path = 'assets/key/C22080467303.crt';
-    public $primaryKey_path = 'assets/key/C22080467303.pem';
-    public $import_key = 'Edinjigue03109001';
-    public $sello_firma_path = 'assets/img/firma_petrolmecanicajc.png';
-	public $icono_sistema = 'assets/img/icono_sistema.png';
 	
 	// codigos de tipo de comprobante
     public $id_ticket = 1;

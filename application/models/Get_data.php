@@ -55,6 +55,28 @@ class Get_data extends CI_Model {
 		}
 		return self::select_array($campos, $table, $condicion);
     }
+
+    public function get_colaboradores($valor_condicion = False, $campo_condicion= '')
+    {
+        $campos = " idcolaborador as id, nombre as descripcion ";
+        $table = "colaborador";
+        $condicion = " estado='Activo' "; 
+        if($valor_condicion){
+            $condicion .= " and $campo_condicion in ($valor_condicion) ";
+        }
+        return self::select_array($campos, $table, $condicion);
+    }
+
+    public function get_tipos_comprobantes($valor_condicion = False, $campo_condicion= '', $order_by= False)
+    {
+        $campos = " idtipo_comprobante as id, descripcion ";
+        $table = "tipo_comprobante";
+        $condicion = " estado='Activo' "; 
+        if($valor_condicion){
+            $condicion .= " and $campo_condicion in ($valor_condicion) ";
+        }
+        return self::select_array($campos, $table, $condicion, $order_by);
+    }
 	
 	public function get_comprobantes_series_correlativo($valor_condicion = False, $campo_condicion= '', $order_by= False)
     {

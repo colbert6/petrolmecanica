@@ -15,7 +15,7 @@
       </div>
       <div class="box-body" >
       <div class="row">
-        <div class="col-lg-2 col-xs-4">
+        <div class="col-lg-4 col-xs-4">
           <!-- small box -->
           <div class="small-box bg-aqua">
             <div class="inner">
@@ -31,11 +31,11 @@
         </div>
 
 
-        <div class="col-lg-2 col-xs-4">
+        <div class="col-lg-4 col-xs-4">
           <!-- small box -->
           <div class="small-box bg-green">
             <div class="inner">
-              <h3>Lista Compra </h3>
+              <h3>Listar Compras </h3>
 
               <p>Lista de compras</p>
             </div>
@@ -48,11 +48,11 @@
         </div>
 
       
-        <div class="col-lg-2 col-xs-4">
+        <div class="col-lg-4 col-xs-4">
           <!-- small box -->
           <div class="small-box bg-red">
             <div class="inner">
-              <h3>Stock  </h3>
+              <h3>Stocks  </h3>
 
               <p>Ver stock de Productos</p>
             </div>
@@ -64,7 +64,7 @@
         </div>
 
 
-        <div class="col-lg-2 col-xs-4">
+        <div class="col-lg-4 col-xs-4">
           <!-- small box -->
           <div class="small-box bg-yellow">
             <div class="inner">

@@ -1,7 +1,7 @@
 
-//Considerar el file flexigrid.js para no perder los eventos posterior a refresh ajax
+//IMPORTANTES Considerar el file flexigrid.js para no perder los eventos posterior a refresh ajax
 
-
+//assets/grocery_crud/themes/flexigrid/js/flexigrid.js
 
 $(document).ready(function () {
 
