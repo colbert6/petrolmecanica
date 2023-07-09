@@ -23,7 +23,7 @@ class Venta extends CI_Model {
     
     public function insert_venta()
     {   
-        $this->fecha_venta = date('Y-m-d H:i:s');//$this->input->post('fecha_venta');
+        $this->fecha_venta = $this->input->post('fecha_venta'); //date('Y-m-d H:i:s');//
         $this->serie_comprobante_idserie_comprobante = $this->input->post('idserie');
         $this->tienda_idtienda = $this->input->post('tienda');
 
@@ -130,7 +130,7 @@ class Venta extends CI_Model {
     {        
         $this->db->select(" vent.estado as Estado,
                 tt.descripcion as Tienda,
-                DATE_FORMAT(vent.fecha_creacion, '%Y-%m-%d') as Fecha, 
+                DATE_FORMAT(vent.fecha_venta, '%Y-%m-%d') as Fecha, 
                 vent.cliente_razon_social as Cliente, 
                 vent.cliente_documento as 'RUC/DNI',
                 vent.cliente_direccion as Direccion,
@@ -147,7 +147,7 @@ class Venta extends CI_Model {
                 vent.observacion as Observacion,
                 vent.nro_guia_remision as Nro_guia,
                 vent.nro_cuotas as Nro_cuotas,
-                vent.idperiodo_pago as Idperiodo_pago ");
+                vent.idperiodo_pago as Idperiodo_pago  ");
 
         $this->db->from('venta vent');
         $this->db->join('tienda tt', 'tt.idtienda = vent.tienda_idtienda');
@@ -189,6 +189,16 @@ class Venta extends CI_Model {
 
         return $query->row_array();
     }
+	
+	public function get_data_venta_buscado_nro_comprobante ($nro_comprobante_venta)
+    {	
+		$this->db->select(" vent.* ");
+        $this->db->from('venta vent');
+        $this->db->where('vent.nro_documento',$nro_comprobante_venta);
+        $query = $this->db->get();
+		
+		return $query->row_array();
+	}
 
     public function cpe_venta($idventa)
     {        
@@ -226,6 +236,7 @@ class Venta extends CI_Model {
             tm.cod_tipo_moneda as cod_moneda ,
             "0000" as cod_sucursal_sunat , 
             pp.codigo_facturalaya as forma_de_pago,
+			pp.codigo_facturalaya as forma_pago,
             0 as monto_deuda_total,
             nro_cuotas as nro_cuotas, 
             DATE_FORMAT( vent.fecha_venta,"%Y-%m-%d") as fecha_comprobante, 

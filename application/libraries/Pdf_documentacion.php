@@ -19,7 +19,6 @@ class Pdf_documentacion extends TCPDF
             $this->max_width = 50;   
         }
 
-
         parent::__construct($orientation, $unit, $format, $unicode, $encoding, $diskcache, $pdfa);
 
         $MY_controller = & get_instance();
@@ -31,31 +30,31 @@ class Pdf_documentacion extends TCPDF
         $this->rubro = $MY_controller->rubro ;
         $this->direccion = $MY_controller->direccion;
         $this->contacto = $MY_controller->contacto ;
+
+        $this->certificate_path = $MY_controller->certificate_path;
+        $this->primaryKey_path = $MY_controller->primaryKey_path;
+        $this->import_key = $MY_controller->import_key;
+        $this->sello_firma_path = $MY_controller->sello_firma_path; 
     }
 
-    public $motivo = 'venta';
+    public $motivo = 'documentacion';
     public $max_width = 200;
     public $max_heigth = 287;
     public $h_footer = -15;
+    public $pos_y=8; //posicion inicial y
+    public $pos_x=10; //posicion inicial X
 
-    public $orientation ;
-    public $format  ;
+    public $orientation, $format  ;
 
     public $sistema;
 
-    public $logo_empresa;
-    public $razon_social;
-    public $ruc;
-    public $rubro;
-    public $direccion;
-    public $contacto;
+    public $logo_empresa, $razon_social, $ruc;
+    public $rubro, $direccion, $contacto;
 
-    public $tipo_documento;
-    public $nro_documento;
+    public $tipo_documento, $nro_documento;
 
     /* ---Sectores del comprobante ---*/
-
-    public $logo_data = array ( 'mostrar'=> true , 'w'=> 40 , 'y' => 20);
+    public $logo_data = array ( 'mostrar'=> true , 'w'=> 45 , 'y' => 20);
     public $empresa_data = array ( 'align'=> 'J', 'w'=> 100 , 'ln' => 0 , 'font_h'=> 9 );
     public $comprobante_id = array ( 'border' => 1,'w' => 50, 'ln'=> 1, 'font_h'=> 10 );       
     public $receptor_data = array ( 'max_col'=>0,'border' => 1, 'ln' => 1 ,'w' => 200, 'font_h'=> 10);       
@@ -67,11 +66,11 @@ class Pdf_documentacion extends TCPDF
     public $comprobante_table_footer_letras =array('w'=> 130 , 'border'=>1 , 'h'=>5 , 'ln' => false);           
     public $comprobante_table_footer_totales =array( 'align'=> 'R','w' => 70,'border'=>1 , 'h'=>5 , 'ln'=> 1 );  
     public $comprobante_codigo_qr = array( 'align'=> 'C','w' => 25,'border'=>0 ,'ln'=>0 , 'h'=>25);    
-    public $comprobante_mensaje = array( 'align'=> 'L','w' =>  90,'border'=>1 ,'ln'=>0 ,'font_h'=> 10 , 'pos_x' => 5  );         
-    
+    public $comprobante_mensaje = array( 'align'=> 'L','w' =>  90,'border'=>1 ,'ln'=>0 ,'font_h'=> 10 , 'pos_x' => 5  );
 
-    public $pos_y=8;
-    public $pos_x=10;
+    /* -- Firma digital parametros -- */
+    public $certificate_path , $primaryKey_path, $import_key, $sello_firma_path ;  
+
 
     public function Header() {        
 
@@ -106,10 +105,9 @@ class Pdf_documentacion extends TCPDF
         
         if($this->logo_data['mostrar']){
             $ld = $this->logo_data ;
-            
-            $logo_extension = strtoupper(explode(".", $this->logo_empresa)[1]);
 
-            $this->Image($this->logo_empresa, $this->pos_x, $this->pos_y, $ld['w'], $ld['y'], $logo_extension, '', 'T', false, 300, '', false, false, 0, false, false, false);    
+			$type_imagen = strtoupper(substr($this->logo_empresa, -3));
+            $this->Image($this->logo_empresa, $this->pos_x, $this->pos_y, $ld['w'], $ld['y'], $type_imagen, '', 'T', false, 300, '', false, false, 0, false, false, false);  
         }         
 
 
@@ -122,14 +120,8 @@ class Pdf_documentacion extends TCPDF
 
 
         switch ($this->motivo) {
-            case 'venta':
+            case 'documentacion':
                 $text="<strong> R.U.C {$this->ruc} </strong><br>";
-                $text.=" {$this->tipo_documento}<br>" ;
-                $text.=" {$this->nro_documento} " ;
-                break;
-
-            case 'compra':
-                $text="<strong> DOC. DE COMPRA </strong><br>";
                 $text.=" {$this->tipo_documento}<br>" ;
                 $text.=" {$this->nro_documento} " ;
                 break;
@@ -177,6 +169,27 @@ class Pdf_documentacion extends TCPDF
         }
     }
 
+    public function add_firma_digital() {
+
+        $certificate = 'file://'.realpath($this->certificate_path);
+        $primaryKey = 'file://'.realpath($this->primaryKey_path);
+        $import_key = $this->import_key; //'Edinjigue03109001';//'colbert1234';
+        $sello_firma_path = $this->sello_firma_path;// 'assets/img/firma_petrolmecanicajc.png';
+        
+        $sello_firma_tamanio_porcentaje = 0.14;
+        $sello_firma_ancho_tamanio = 497 * $sello_firma_tamanio_porcentaje;
+        $sello_firma_altura_tamanio = 159 * $sello_firma_tamanio_porcentaje;
+        $sello_firma_pos_x = 110;        
+        $sello_firma_pos_y = $this->GetY() >= 245 ? 255 : $this->GetY() + 5;
+
+
+        $firma_array_info = array();        
+
+        $this->Image($sello_firma_path, $sello_firma_pos_x , $sello_firma_pos_y,  $sello_firma_ancho_tamanio, $sello_firma_altura_tamanio, 'PNG');
+        $this->setSignature($certificate, $primaryKey, $import_key, '', 2, $firma_array_info);
+        $this->setSignatureAppearance($sello_firma_pos_x , $sello_firma_pos_y,  $sello_firma_ancho_tamanio, $sello_firma_altura_tamanio);        
+    }
+
     public function comprobante_data_title($title) {         
 
         $ln = true;//Salto de linea pdebajo del cuadro receptor data
@@ -211,6 +224,7 @@ class Pdf_documentacion extends TCPDF
 
     public function comprobante_data($data) {
         $ln = true;//Salto de linea pdebajo del cuadro receptor data
+        $salto_linea_despues_img = 0;
 
         if( $this->format == 'A4'){
             if($this->orientation == 'L'){
@@ -234,6 +248,11 @@ class Pdf_documentacion extends TCPDF
         }         
         
         foreach ($data as $key => $val) {
+
+            if($salto_linea_despues_img){
+                $this->AddPage();
+                $salto_linea_despues_img = 0;
+            }
                     
             $this->SetFont('helvetica', '', 11);
             $w_aux = $cd['w'];
@@ -268,7 +287,25 @@ class Pdf_documentacion extends TCPDF
                 
             }
 
-            $this->MultiCell($w_aux, $new_h, $val['valor'], $borde_aux, $cd['align'], 0,$cd['ln'], '', '' );
+            $eje_XY = "X=".$this->GetX().",Y=".$this->GetY();
+            if ($val['tipo']=='img') {
+
+                $x = $this->pos_x ;
+                $y = 45;//$this->GetY() + 10;
+                $w = 170;
+                $h = 200;
+                $salto_linea_despues_img = 1; 
+
+                //$this->Image($this->logo_empresa, $this->pos_x, $this->pos_y, $ld['w'], $ld['y'], 'JPG', '', 'T', false, 300, '', false, false, 0, false, false, false);   
+                $img_calibra = 'assets/uploads/calibracion_tanque/'.$val['valor'];
+
+                $this->Image($img_calibra, $x, $y, $w, $h, 'JPG', '', 'T', false, 300, '', false, false, 0, false, false, false);
+                $this->SetY($y + $h);
+
+            }else{
+                $this->MultiCell($w_aux, $new_h, $val['valor'], $borde_aux, $cd['align'], 0,$cd['ln'], '', '' );
+            }
+            
 
             if($val['salto_linea'] > 0){
                 $salto = $val['salto_linea'] * 1; 
@@ -277,8 +314,6 @@ class Pdf_documentacion extends TCPDF
              
         }
         //echo $text;      exit();     
-
-
     }
 
     public function data_table( $data, $head_cols, $flag_nro_item = false ) {//suma de $widthcols = 200 - $flag_nro_item
@@ -400,8 +435,7 @@ class Pdf_documentacion extends TCPDF
 
         $this->Cell($th['max_w'] + $nro_item_w, 2, '', 'T',0); 
         $this->Ln(1); 
-             
-//        
+                    
     }
 
     public function data_table_footer( $formato, $data ,$msj) {

@@ -67,7 +67,7 @@ class Proformas extends MY_Controller {
         $this->load->js('assets/myjs/genericos/calculos.js');//genericos
         $this->load->js('assets/myjs/genericos/get_data.js');//genericos
         $this->load->js('assets/myjs/genericos/set_data.js');//genericos
-        $this->load->js('assets/myjs/proformas_.js');
+        $this->load->js('assets/myjs/proformas.js');
         
         $this->load->js('assets/js/bootbox.min.js');
         $this->load->js('assets/js/typeahead/typeahead.min.js');
@@ -157,7 +157,14 @@ class Proformas extends MY_Controller {
     {   
 
         $this->load->model('det_proforma');
-        $det_proforma = $this->det_proforma->get_exportar_det_proforma($this->input->get('idproforma'));
+
+        if(substr($this->input->get('nro_documento'), 0,4) == "F001"){
+            //obtener un comprobante ya existente como proforma
+           $det_proforma = $this->det_proforma->get_exportar_det_comprobante_como_proforma($this->input->get('idproforma'));
+        } else {
+            $det_proforma = $this->det_proforma->get_exportar_det_proforma($this->input->get('idproforma'));
+        }
+
         print json_encode($det_proforma);
     }
 
@@ -185,9 +192,8 @@ class Proformas extends MY_Controller {
         $det_proforma = $this->det_proforma->get_print_det_proforma($this->input->get('idproforma'));
         $det_proforma_info = $this->det_proforma->get_print_det_proforma_info($this->input->get('idproforma'));
 
-        //echo "<pre>";print_r($proforma);exit();
         //echo "<pre>";print_r($det_venta);exit();
-        $nombrepdf  = 'Proforma _ '.$proforma['Nro_documento']; 
+        $nombrepdf  = 'Proforma _ '.$proforma['Nro_documento']; ;
 
         $this->load->library('Pdf_comprobantes');
         $pdf = new Pdf_comprobantes($orientation, 'mm', $format , true, 'UTF-8', false);
@@ -223,20 +229,20 @@ class Proformas extends MY_Controller {
         $width_cols = array(  array('Descripcion',60 ,'L') , array('Cant.',10, 'R'),array('P.unit',15,'R'),array('Subtotal',15,'R') );
 
         $pdf->data_table( $det_proforma , $width_cols, true);//data , headers, data añadir a columna, indice
-
-        $descripcion_moneda = strtoupper($proforma['Tipo_pago']);
-        $simbolo_moneda =  $descripcion_moneda == 'DOLARES' ? '$ ' : 'S/ ';
+	$descripcion_moneda = strtoupper($proforma['Tipo_pago']);
+	$simbolo_moneda =  $descripcion_moneda == 'DOLARES' ? '$ ' : 'S/ ';
        
         $data_footer = array('monto_letra' => array( 'texto' => num_to_letras($proforma['Total'],'',$descripcion_moneda)),
-                            'monto' => array('op_importe'=> $simbolo_moneda.$proforma['Total']),
+                            'monto' => array('op_importe'=>$simbolo_moneda.$proforma['Total']),
                             'observacion' => array( 'texto' =>  $proforma['Observacion'])  
                                );
         $pdf->data_table_footer( 'pie_proforma',  $data_footer , 'msj');
-
         if( count($det_proforma_info)){
-            $pdf->anexo_informacion( $det_proforma_info, true);//data , headers, data añadir a columna, indice
+          $pdf->anexo_informacion( $det_proforma_info, true);//data , headers, data añadir a columna, indice
         }
 
+        $pdf->add_firma_digital(); 
+        
         ob_end_clean();
         $pdf->Output($nombrepdf.'.pdf', 'I');
     }

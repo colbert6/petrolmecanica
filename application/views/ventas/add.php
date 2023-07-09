@@ -60,7 +60,7 @@
               <label for="tienda" class="control-label">Tienda</label>  
             </div>
             <div class="col-sm-10">
-              <input type="date" class="form-control" id="fecha_venta" name="fecha_venta" value="<?php echo date('Y-m-d');?>" readonly="readonly">
+              <input type="date" class="form-control" id="fecha_venta" name="fecha_venta" value="<?php echo date('Y-m-d');?>" >
               <select class="form-control" id="tienda" name="tienda">
            
                 <?php foreach ($tiendas as $tienda): ?>
@@ -121,10 +121,9 @@
           <div class="form-group">
             <label for="idserie" class="col-sm-2 control-label">Guia</label>
 
-            <div class="col-sm-6">
+            <div class="col-sm-10">
               <input type="text" class="form-control" id="nro_guia_remision" name="nro_guia_remision" placeholder="Correlativo" readonly="readonly" value="<?php echo $guia_remision[0]->correlativo; ?>">
             </div>
-            
           </div>
 
           <?php echo $get_clientes; ?>

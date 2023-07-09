@@ -24,6 +24,7 @@
        folder instead of downloading all of them to reduce the load. -->
   <link rel="stylesheet" href="<?php echo base_url('assets/themes/adminlte/dist/css/skins/_all-skins.min.css')?>">
   <link rel="stylesheet" href="<?php echo base_url('assets/js/toast/css/jquery.toast.css')?>">
+  <link rel="stylesheet" href="<?php echo base_url('assets/mycss/trebloc.css')?>">
 
 	  <!-- jQuery 3 -->
 	<script src="<?php echo base_url('assets/themes/adminlte/bower_components/jquery/dist/jquery.min.js')?>"></script>
@@ -34,6 +35,7 @@
     <script src="<?php echo base_url('assets/js/toast/js/jquery.toast.js')?>"></script>
 
     <link rel='shortcut icon' type='image/png' href="<?php echo base_url($this->sistema_pestania_icono)?>"/>
+
 	
 
 <?php

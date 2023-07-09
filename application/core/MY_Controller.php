@@ -14,6 +14,7 @@ class MY_Controller extends CI_Controller {
     public $nombre_usuario = '';
     public $perfil_usuario = '';
 
+
     public $sistema_pestania_nombre = 'TrebloC'; 
     
     public $logo_empresa = 'assets/img/logo_empresa.png';
@@ -32,6 +33,13 @@ class MY_Controller extends CI_Controller {
     public $import_key = 'Edinjigue03109001';
     public $sello_firma_path = 'assets/img/firma_petrolmecanicajc.png';
     
+
+
+    public $certificate_path = 'assets/key/C22080467303.crt';
+    public $primaryKey_path = 'assets/key/C22080467303.pem';
+    public $import_key = 'Edinjigue03109001';
+    public $sello_firma_path = 'assets/img/firma_petrolmecanicajc.png';
+	public $icono_sistema = 'assets/img/icono_sistema.png';
 
     public $id_ticket = 1;
     public $id_boleta = 3;

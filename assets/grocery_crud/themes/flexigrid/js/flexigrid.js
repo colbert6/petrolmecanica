@@ -185,6 +185,15 @@ $(function(){
 		return false;
 	});
 
+	$('.ajax_list').on('click','.consulta_servidor', function(event){
+		event.preventDefault();
+		var consulta_servidor_url = $(this).attr('href');
+		var this_container = $(this).closest('.flexigrid');		
+		consulta_servidor(consulta_servidor_url);
+
+		return false;
+	});
+
 	$('.print-anchor').click(function(){
 		var print_url = $(this).attr('data-url');
 
@@ -267,3 +276,4 @@ function displaying_and_pages(this_container)
 		this_container.find('.page-ends-to').html( crud_page*per_page );
 	}
 }
+

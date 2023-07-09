@@ -8,6 +8,9 @@ class Documentaciones extends MY_Controller {
         parent::__construct();
         $this->controller = 'Documentacion';//Siempre define las migagas de pan
         $this->load->library('grocery_CRUD');
+
+        $this->id_dato_img = 33; //importante no modificar
+        $this->id_serie_mantenimiento_calibracion = 18; //importante no modificar
     }
 
     public function lista()
@@ -49,7 +52,8 @@ class Documentaciones extends MY_Controller {
 
         $output = $crud->render();
 
-        $output->title = "Documentacion :: <a href='".base_url('documentaciones/add')."'> crear nuevo documento</a>";
+        $output->title = "Documentacion :: <a href='".base_url('documentaciones/add')."'> crear nuevo documento</a>"; 
+        $output->title .= "<br> <br> <a href='".base_url('documentaciones/add_calibracion_tanque')."'> Crear calibracion_tanque</a>";
 
         $this->_init(true,true,true);//Carga el tema ( $cargar_menu, $cargar_url, $cargar_template )
         $this->load->view('grocery_crud/basic_crud', (array)$output ) ;
@@ -137,9 +141,6 @@ class Documentaciones extends MY_Controller {
         $this->load->view('grocery_crud/basic_crud', (array)$output ) ;
     }
 
-
-
-
     public function add()
     {
         
@@ -161,14 +162,17 @@ class Documentaciones extends MY_Controller {
         $this->load->model('get_data');
         $this->load->model('cliente');
 
-
-        $output = array(); 
+        $list_btns_info = array( 
+                            array('value' =>'- Importar documento -' ,'onclick_function' =>'input_key_value_import_documento()' )
+        );
+        $output = array('flag_show_btn_importar_proforma'=> false, 'list_btns_info' =>  $list_btns_info
+        ); 
         $get_clientes = $this->load->view('get_data/clientes', $output,true) ;
 
         /*$output = array( 'onSelected' => 'add_detalle(obj);' ); //cuando se seleccione el valor
         $get_productos = $this->load->view('get_data/productos', $output,true) ;*/
         $output = array('title' => 'Documentacion', 
-                        'series' => $this->get_data->get_series(array($this->id_certificado,$this->id_constancia, $this->id_acta,$this->id_garantia,$this->id_certificado_trabajo,$this->id_contrato) ),                        
+                        'series' => $this->get_data->get_series(array($this->id_certificado,$this->id_constancia, $this->id_contrato, $this->id_acta,$this->id_garantia, $this->id_certificado_operatividad_tablero_electrico) ),                        
                         'get_clientes' =>  $get_clientes,
                         /*'get_productos' =>  $get_productos,
                         'tipo_pagos' =>  $this->get_data->get_tipo_pagos('%'),//'%' es todos
@@ -179,8 +183,158 @@ class Documentaciones extends MY_Controller {
         $this->load->view('documentacion/add', $output ) ;
     }
 
+    public function add_calibracion_tanque(){
+        
+        $this->metodo = 'Nueva calibracion tanques';//Siempre define las migagas de pan
+
+        $this->_init(true,false,true);//Carga el tema ( $cargar_menu, $cargar_url, $cargar_template )
+
+        //Cargando js y css
+        $this->load->js('assets/myjs/genericos/get_data.js');//genericos
+        $this->load->js('assets/myjs/genericos/set_data.js');//genericos
+        //$this->load->js('assets/myjs/documentacion_calibracion_tanque.js');
+        
+        $this->load->js('assets/js/bootbox.min.js');
+        $this->load->js('assets/js/typeahead/typeahead.min.js');
+        $this->load->js('assets/js/shortcut.js');//actiacion de teclasv
+        
+
+        //$this->load->model('almacen');
+        $this->load->model('get_data');
+        $this->load->model('cliente');
+
+        $list_btns_info = array();
+
+        $output = array('flag_show_btn_importar_proforma'=> false, 'list_btns_info' =>  $list_btns_info); 
+        $get_clientes = $this->load->view('get_data/clientes', $output,true) ;
+
+        
+        $idserie = $this->id_serie_mantenimiento_calibracion;
+        $output = array('title' => 'Nueva calibracion tanques', 
+                        'idserie' => $idserie,
+                        'serie_data' => $this->get_data->get_correlativo($idserie),                        
+                        'get_clientes' =>  $get_clientes, 
+                        'idcalibracion_tanque' => 'nuevo',
+                        'msj_return_save'=> ''
+        ); 
+        //Cargando ultima
+        
+        $this->load->view('documentacion/add_calibracion_tanque', $output ) ;
+    }
+
+
+    public function save_calibracion_tanque($idcalibracion_tanque = 'nuevo'){
+
+        $iddocumentacion = $idcalibracion_tanque;
+        $msj_return_save = "Documento Guardado con éxito.";
+        $iddato = $this->id_dato_img;
+        $data = [];
+   
+        $count = count($_FILES['files']['name']);
+    
+        for($i=0;$i<$count;$i++){
+    
+            if(!empty($_FILES['files']['name'][$i])){
+    
+            $_FILES['file']['name'] = $_FILES['files']['name'][$i];
+            $_FILES['file']['type'] = $_FILES['files']['type'][$i];
+            $_FILES['file']['tmp_name'] = $_FILES['files']['tmp_name'][$i];
+            $_FILES['file']['error'] = $_FILES['files']['error'][$i];
+            $_FILES['file']['size'] = $_FILES['files']['size'][$i];
+
+            $extension_file = substr($_FILES['files']['name'][$i], -4);
+            if(  in_array($extension_file, array('jpeg') ) ){
+                $extension_file = ".".$extension_file;
+            }
+            $name_file_formated = $this->input->post('serie_correlativo')."_".strval($i).$extension_file; 
+
+            $config['upload_path'] = 'assets/uploads/calibracion_tanque/'; 
+            $config['allowed_types'] = 'jpg|jpeg|png|gif';
+            $config['max_size'] = '5000';            
+            $config['file_name'] = $name_file_formated;
+   
+            $this->load->library('upload',$config); 
+    
+                if($this->upload->do_upload('file')){
+                    $uploadData = $this->upload->data();
+                    $filename = $uploadData['file_name'];
+
+                    $data['totalFiles'][] = $filename;
+                }
+            }
+
+            $_POST['iddato'][$i] = $iddato;
+            $_POST['dato'][$i] = $filename; //valor de dato
+
+        }
+        //print_r($_POST['iddato']);// print_r($_POST['dato']);
+
+        if($idcalibracion_tanque == 'nuevo'){            
+
+            $this->db->trans_start();//Inicio de transaccion
+
+            $this->load->model('get_data');
+            $idserie = $this->input->post('idserie');
+            $serie = $this->get_data->get_correlativo($idserie);//Obtener correlativo actual
+
+            $this->load->model('comprobante');  
+            $tipo_comprobante = $this->comprobante->get_tipo_serie($idserie);//Obtener tipo de comprobante         
+            $this->comprobante->update_serie_correlativo($idserie,'correlativo','correlativo + 1' );//idserie , campo , valor //Actualizar el correlativo de la serie 
+
+            $ruc_cliente = $this->input->post('ruc_cliente');
+            $dni_cliente = $this->input->post('dni_cliente');
+
+            if( $ruc_cliente != '00000000000' AND strlen($ruc_cliente) == 11 ){
+                $nro_documento_cliente = $ruc_cliente;
+            }else if($dni_cliente != '00000000' AND strlen($dni_cliente) == 8){
+                $nro_documento_cliente = $dni_cliente;                          
+            }else{
+                $nro_documento_cliente = '-' ;    
+            }        
+
+            //Guardar Venta
+            $this->load->model('documentacion');        
+            $this->documentacion->tipo_comprobante_idtipo_comprobante = $tipo_comprobante; 
+            $this->documentacion->nro_documento = $serie->correlativo;   
+            $this->documentacion->serie_comprobante_idserie_comprobante = $idserie;          
+            $this->documentacion->cliente_documento = $nro_documento_cliente;
+            
+            $this->documentacion->insert_documentacion();
+            $iddocumentacion = $this->db->insert_id();
+
+            //Guardar Detalle Venta
+            $this->load->model('det_documentacion');   
+            $this->det_documentacion->documentacion_iddocumentacion = $iddocumentacion;     
+            $this->det_documentacion->insert_det_documentacion();
+
+            if ($this->db->trans_status() === FALSE) { 
+                $error = $this->db->error();
+                $msj_return_save = "ERROR => ". $error['message'];
+                $this->db->trans_rollback();
+                $iddocumentacion = 0;
+
+            } else {
+                $this->db->trans_commit();//$this->db->trans_rollback(); 
+                $msj_return_save = "EXITO => Documento de Calibración guardado con éxito.";
+            }
+
+        
+        }
+
+        
+        $id_documento = 109;
+        $msj_return_save = "EXITO => Documento de Calibración guardado con éxito.";
+        $this->show_status($msj_return_save, $iddocumentacion);
+        //$this->lista();
+    }
+
+
+
     public function save()
     {   
+        // la tabla datos_documentacion es la tabla intermedia entrre la relacion entre datos (tipos de datos ) y la tabla serie_comproante
+        // debido a que la tabla serie_comprobante, representa a cada tipo de documento que se puede crear
+
         
         //print_r($_POST);exit();
         $return = array( 'estado_validacion' => true , 'estado' => false, 'msj' => '' , 'error'=> '' , 'idsave' => '' , 'enlace' => '');  
@@ -282,7 +436,7 @@ class Documentaciones extends MY_Controller {
         if(isset($_GET['format'])){
             $format = $this->input->get('format');
         }
-        
+
         $documentacion = $this->documentacion->get_print_documentacion($this->input->get('iddocumentacion'));
         $det_documentacion = $this->det_documentacion->get_print_det_documentacion($this->input->get('iddocumentacion'));
         //echo '<pre>';print_r($documentacion);print_r($det_documentacion);exit();
@@ -300,8 +454,8 @@ class Documentaciones extends MY_Controller {
         $pdf = new Pdf_documentacion($orientation, 'mm', $format , true, 'UTF-8', false);
 
         $pdf->tipo_documento = $documentacion['Comprobante'];
-        $pdf->nro_documento = $documentacion['Nro_documento'];       
-
+        $pdf->nro_documento = $documentacion['Nro_documento'];
+        
         //Parametros del PDF
         $pdf->SetTitle($nombrepdf);
         
@@ -315,47 +469,7 @@ class Documentaciones extends MY_Controller {
         
         $pdf->comprobante_data($det_documentacion);
 
-
-
-        //$pdf->comprobante_data_title('El que suscribe Gerente General de la empresa PETROLMECANICA JC SAC   CON RUC  N° 20602440908.');
-
-        /*$data_usuario_receptor = array('Cliente' => array($venta['Cliente'],'4'),
-                                  'RUC/DNI' => array($venta['RUC/DNI'],'1'),
-                                  'Dirección' => array($venta['Direccion'],'5')  );
-        $pdf->receptor_data( 5 ,$data_usuario_receptor);
-
-        $data_comprobante = array('Emitido' => array($venta['Fecha'],'1'),
-                                  'Tienda' => array($venta['Tienda'],'1'),  
-                                  'Vendedor' => array($venta['Usuario'],'1'),
-                                  'Observacion' => array($venta['Observacion'],'3')  );
-        $pdf->comprobante_data( 3 ,$data_comprobante);
-
-        $width_cols = array(  array('Descripcion',40 ,'L') , array('Cant.',20, 'R'),array('P.unit',20,'R'),array('Subtotal',20,'R') );
-        $pdf->data_table( $det_venta ,  $width_cols, true);       
-        
-
-       
-
-
-        $cod_documento_client = '0';
-        if( strlen($venta['RUC/DNI']) == 11 ){
-            $cod_documento_client = '6';
-        }else if( strlen($venta['RUC/DNI']) ==8) {
-            $cod_documento_client = '1';
-        }
-
-
-        $comprobante = explode("-", $venta['Nro_documento']); // Separamos serie de correlativo
-
-        $data_resumen = $this->ruc.'|'.$venta['codsunat'].'|'.$comprobante[0].'|'.$comprobante[1].'|'.$venta['Igv'].'|'.$venta['Total'].'|'.$venta['Fecha'].'|'.$cod_documento_client.'|'.$venta['RUC/DNI'].'|' ;
-        $qr_code = $this->crear_qr($data_resumen); 
-
-
-        $data_footer = array('monto_letra' => array( 'texto' => num_to_letras($venta['Total'])),
-                            'monto' => array('op_importe'=>$venta['Total'] ,  'op_exonerados'=>$venta['Total'] , 'op_igv'=>$venta['Igv'] , ) ,
-                            'qr_code' =>  $qr_code   );
-        $pdf->data_table_footer( 'monto_venta',  $data_footer , 'msj');
-
+        $pdf->add_firma_digital(); 
 
          /* Limpiamos la salida del búfer y lo desactivamos */
         ob_end_clean();

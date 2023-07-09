@@ -16,11 +16,6 @@ class Login extends MY_Controller {
         $this->load->view('login/index',$parametros) ;
 	}
 
-    public function hola()
-    {      
-        echo "Hola";
-    }
-
     public function verificar() 
     {
         if ($this->input->post('token') == $this->session->flashdata('token') ) {

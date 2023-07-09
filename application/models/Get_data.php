@@ -74,7 +74,7 @@ class Get_data extends CI_Model {
 
     public function get_series($idtipocomprobante = '%')//segun el tipo de comprobante
     {
-        $this->db->select("serie.idserie_comprobante as idserie, tipo_comp.idtipo_comprobante, tipo_comp.abreviatura, tipo_comp.descripcion as tipo_comprobante, CONCAT( serie.serie,'-',serie.correlativo ) as correlativo ");
+        $this->db->select("serie.idserie_comprobante as idserie, tipo_comp.idtipo_comprobante, tipo_comp.abreviatura, tipo_comp.descripcion as tipo_comprobante, CONCAT( serie.serie,'-',serie.correlativo ) as correlativo, coalesce(serie.titulo, tipo_comp.descripcion) as titulo_serie ");
         $this->db->from('tipo_comprobante as tipo_comp');
          $this->db->join('serie_comprobante as serie', 'tipo_comp.idtipo_comprobante = serie.tipo_comprobante_idtipocomprobante');
         $this->db->where('serie.estado','Activo');
@@ -131,7 +131,7 @@ class Get_data extends CI_Model {
     public function get_correlativo($idserie)
     {
         //$query = $this->db->get('producto', 10);
-        $this->db->select(" CONCAT( serie.serie,'-',serie.correlativo ) as correlativo , serie.titulo , serie.correlativo as correlativo_solo  ");
+        $this->db->select(" CONCAT( serie.serie,'-',serie.correlativo ) as correlativo , serie.titulo , serie.correlativo as correlativo_solo ");
         $this->db->from('serie_comprobante as serie');
         $this->db->where('serie.idserie_comprobante',$idserie);
         $query = $this->db->get();
@@ -207,6 +207,59 @@ class Get_data extends CI_Model {
 
         return $query->result();
     }
+	
+	public function get_data_ubigeo($nivel = 'distrito')
+    {	
+		$length_codigo_ubigeo = 0;
+		
+		if($nivel = 'distrito'){
+			$length_codigo_ubigeo = 6;
+		}else if($nivel = 'provincia'){
+			$length_codigo_ubigeo = 4;
+		}else if($nivel = 'departamento'){
+			$length_codigo_ubigeo = 2;
+		}
+		
+        $this->db->select(" ubi.* ");
+        $this->db->from('sunat_ubigeo as ubi');
+        if( $length_codigo_ubigeo > 0){
+            $this->db->where('LENGTH(ubi.codigo_ubigeo)',$length_codigo_ubigeo);
+        }
+		$this->db->order_by(" ubi.descripcion_ubigeo","asc");
+        $query = $this->db->get();
+        return $query->result_array();
+    }
+
+        public function find_datos_documentacion_existente($nro_documento) // para realizar importaciones
+    {
+        
+        $this->db->select(" dat.iddato, dat.descripcion, docu_det.orden as orden, dat.tipo, dat.abreviatura, dat.validacion, COALESCE(docu_det.valor,'') as valor ");
+
+        $this->db->from('documentacion as docu');
+        $this->db->join('detalle_documentacion as docu_det', 'docu.iddocumentacion = docu_det.documentacion_iddocumentacion');
+        $this->db->join('dato as dat', 'dat.iddato = docu_det.dato_iddato');
+        $this->db->where('docu.nro_documento',$nro_documento);
+
+        $this->db->order_by(' orden ASC');
+
+        $query = $this->db->get();
+
+        return $query->result();
+    }
+
+
+        public function get_basic_info_documento_existente($tipo_doc, $numero_doc)
+    {
+        
+        $this->db->select(" docu.serie_comprobante_idserie_comprobante ");
+        $this->db->from('documentacion as docu');
+        $this->db->where('docu.'.$tipo_doc,$numero_doc);
+
+        $query = $this->db->get();
+
+        return $query->row();
+
+    }
 
     public function get_proforma_documento($tipo_doc, $numero_doc)
     {
@@ -236,6 +289,61 @@ class Get_data extends CI_Model {
         return $query->row();
 
     }
+
+    public function get_comprobante_como_proforma_documento($tipo_doc, $numero_doc)
+    {
+        
+        $this->db->select(" pro.idventa as idproforma,
+                pro.estado as Estado,
+                pro.fecha_creacion as Fecha, 
+                pro.cliente_razon_social as Cliente, 
+                pro.cliente_documento as 'Ruc',
+                pro.cliente_direccion as Direccion,
+                pp.descripcion as Periodo_pago,
+                pp.idperiodo_pago as idperiodo_pago,
+                tp.descripcion as Tipo_pago,
+                tp.idtipo_pago as idtipo_moneda,
+                tc.descripcion Comprobante, 
+                pro.nro_documento as Nro_documento, 
+                pro.total as Total,
+                ' --- COMPROBANTE usado como proforma. --- ' as Observacion ");
+
+        $this->db->from('venta pro');
+        $this->db->join('tipo_comprobante tc', 'tc.idtipo_comprobante = pro.tipo_comprobante_idtipo_comprobante');
+        $this->db->join('tipo_pago tp', 'tp.idtipo_pago = pro.idtipo_moneda');
+        $this->db->join('periodo_pago pp', 'pp.idperiodo_pago = pro.idperiodo_pago');
+        $this->db->where('pro.'.$tipo_doc,$numero_doc);
+        $query = $this->db->get();
+
+        return $query->row();
+
+    }
+
+    public function get_busqueda_general($table, $valor)
+    {   
+        $where_filtro = " ( tab.razon_social LIKE '%{$valor}%' OR tab.nombre_comercial LIKE '%{$valor}%' ) ";
+        $id_result = " tab.idcliente as id_result ";
+        $text_result = " tab.razon_social as texto_result ";
+
+        if($table == "proveedor"){
+             $id_result = " tab.idproveedor as id_result ";  
+        }
+
+        if($table == "colaborador"){
+            $where_filtro = " ( tab.nombre LIKE '%{$valor}%' ) ";
+            $id_result = " tab.idcolaborador as id_result ";
+            $text_result = " tab.nombre as texto_result ";  
+        }
+
+        //$query = $this->db->get('producto', 10);
+        $this->db->select($id_result.",".$text_result);
+        $this->db->from($table.' as tab');
+        $this->db->where($where_filtro);
+        $this->db->order_by(' texto_result ');
+        $query = $this->db->get();
+        return $query->result();
+    }
+
 
 
     // DEVELOP

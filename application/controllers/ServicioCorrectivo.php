@@ -221,6 +221,9 @@ class ServicioCorrectivo extends MY_Controller {
         $pdf->MultiCell($tam_wi*0.2, 0,'Fecha de Visita : ', 0, 'L',0,0);  
         $pdf->MultiCell($tam_wi*0.3, 0,$servicio['fecha_visita'], 'B', 'L',0,1); 
 
+        $pdf->add_firma_digital(); 
+
+
         ob_end_clean();
         $pdf->Output($nombrepdf, 'I');
     }

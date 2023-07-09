@@ -53,32 +53,59 @@ class Get_datas extends MY_Controller {
         print json_encode($this->get_data->get_correlativo($idserie) );
     }
 
-    public function get_datos_documentacion()
+    public function get_datos_default_documentacion()
     {   
+        // get datos configurados para cada tipo de documentacion
         $result = array();
-
         $idserie = $this->input->get('idserie');
         $this->load->model('get_data');
-
         $result['get_datos_documentacion'] = $this->get_data->get_datos_documentacion($idserie);
-
         $result['get_correlativo'] = $this->get_data->get_correlativo($idserie);
-
+        $result['idserie'] = $idserie;
 
         print json_encode($result);
+    }
 
+    public function find_datos_documentacion_existente()
+    {   
+        // para realizar importaciones
+        $result = array();
+        $this->load->model('get_data');
 
+        $tipo_doc = 'nro_documento';//$this->input->get('tipo');
+        $numero_doc = trim($this->input->get('idserie'));
+
+        $info_basic_documento = $this->get_data->get_basic_info_documento_existente($tipo_doc,$numero_doc);
+        $result['get_datos_documentacion'] = $this->get_data->find_datos_documentacion_existente($numero_doc);
+        $result['get_correlativo'] = $this->get_data->get_correlativo($info_basic_documento->serie_comprobante_idserie_comprobante);
+        $result['id_serie'] = $info_basic_documento->serie_comprobante_idserie_comprobante;
+
+        print json_encode($result);
     }
 
     public function get_proforma_info()
     {
         $tipo_doc = 'nro_documento';//$this->input->get('tipo');
         $numero_doc = trim($this->input->get('numero'));
-
         $this->load->model('get_data');
-        print json_encode($this->get_data->get_proforma_documento($tipo_doc, $numero_doc) );
+        
+
+        if(substr($numero_doc, 0,4) == "F001"){
+            //obtener un comprobante ya existen como proforma
+            print json_encode($this->get_data->get_comprobante_como_proforma_documento($tipo_doc, $numero_doc) );
+        } else {
+            print json_encode($this->get_data->get_proforma_documento($tipo_doc, $numero_doc) );
+        }
+
+        
     }
 
+    public function get_busqueda_general($table)
+    {
+        $get_query = $this->input->get('query');
+        $this->load->model('get_data');
+        print json_encode($this->get_data->get_busqueda_general($table, $get_query) );
+    }
 
 
 

@@ -32,12 +32,19 @@ class Pdf_comprobantes extends TCPDF
         $this->direccion = $MY_controller->direccion;
         $this->direccion_adicional = $MY_controller->direccion_adicional;
         $this->contacto = $MY_controller->contacto ;
+
+        $this->certificate_path = $MY_controller->certificate_path;
+        $this->primaryKey_path = $MY_controller->primaryKey_path;
+        $this->import_key = $MY_controller->import_key;
+        $this->sello_firma_path = $MY_controller->sello_firma_path; 
     }
 
     public $motivo = 'venta';
     public $max_width = 200;
     public $max_heigth = 287;
     public $h_footer = -12;
+    public $pos_y=3.5;
+    public $pos_x=5;
 
     public $orientation ;
     public $format  ;
@@ -55,12 +62,12 @@ class Pdf_comprobantes extends TCPDF
     public $tipo_documento;
     public $nro_documento;
   
-    public $cuentas_bancarias = "Cuenta corriente BCP : 245-2459385-0-18 <br>Cuenta CCI BCP : 00224500245938501893 <br>Cuenta de detracciones BN : 00761153560<br> <br>Cuenta DÓLARES BCP: 395-9405242-1-51<br>Cuenta DÓLARES CCI BCP : 00239500940524215121 ";
-            
+    //public $cuentas_bancarias = "Cuenta corriente BCP : 245-2459385-0-18 <br>Cuenta CCI BCP : 00224500245938501893 <br>Cuenta de detracciones BN : 00761153560<br> <br>Cuenta DÓLARES BCP: 395-9405242-1-51<br>Cuenta DÓLARES CCI BCP : 00239500940524215121<br>Cuenta SOLES Interbank : 7653004235004<br>Cuenta SOLES CCI Interbank : 003-765003004235004-58 ";        
+    public $cuentas_bancarias = "Cuenta corriente BCP : 245-2459385-0-18 <br>Cuenta CCI BCP : 00224500245938501893 <br>Cuenta de detracciones BN : 00761153560<br> <br>Cuenta DÓLARES BCP: 395-9405242-1-51<br>Cuenta DÓLARES CCI BCP : 00239500940524215121<br>Cuenta SOLES Interbank : 7653004235004<br>Cuenta SOLES CCI Interbank : 003-765003004235004-58 <br>Cuenta DÓLARES Interbank : 7653004235011<br>Cuenta DÓLARES CCI Interbank : 003-765003004235011-53 ";   
 
     /* ---Sectores del comprobante ---*/
 
-    public $logo_data = array ( 'mostrar'=> true , 'w'=> 45 , 'y' => 15);
+    public $logo_data = array ( 'mostrar'=> true , 'w'=> 50 , 'y' => 20);
     public $empresa_data = array ( 'align'=> 'J', 'w'=> 100 , 'ln' => 0 , 'font_h'=> 9 );
     public $comprobante_id = array ( 'border' => 1,'w' => 50, 'ln'=> 1, 'font_h'=> 10 );       
     public $receptor_data = array ( 'max_col'=>0,'border' => 1, 'ln' => 1 ,'w' => 200, 'font_h'=> 10);       
@@ -70,11 +77,11 @@ class Pdf_comprobantes extends TCPDF
     public $comprobante_table_footer_letras =array('w'=> 130 , 'border'=>1 , 'h'=>5 , 'ln' => false);           
     public $comprobante_table_footer_totales =array( 'align'=> 'R','w' => 70,'border'=>1 , 'h'=>5 , 'ln'=> 1 );  
     public $comprobante_codigo_qr = array( 'align'=> 'C','w' => 25,'border'=>0 ,'ln'=>0 , 'h'=>25);    
-    public $comprobante_mensaje = array( 'align'=> 'L','w' =>  90,'border'=>1 ,'ln'=>0 ,'font_h'=> 10 , 'pos_x' => 5  );         
+    public $comprobante_mensaje = array( 'align'=> 'L','w' =>  90,'border'=>1 ,'ln'=>0 ,'font_h'=> 10 , 'pos_x' => 5  );public $cuentas_bancarias_pie_pagina = array("file_path"=> "assets/img/petrolmecanicajc_cuentas_bancarias.jpg", 
+							 "w" => 130 , "h" => 45 , "pos_x" => 5	);
+    /* -- Firma digital parametros -- */
+    public $certificate_path , $primaryKey_path, $import_key, $sello_firma_path ; 
     
-
-    public $pos_y=3.5;
-    public $pos_x=5;
 
     public function Header() {        
 
@@ -109,7 +116,10 @@ class Pdf_comprobantes extends TCPDF
         
         if($this->logo_data['mostrar']){
             $ld = $this->logo_data ;
-            $this->Image($this->logo_empresa, $this->pos_x, $this->pos_y, $ld['w'], $ld['y'], 'JPG', '', 'T', false, 300, '', false, false, 0, false, false, false);    
+			$type_imagen = strtoupper(substr($this->logo_empresa, -3));
+            $this->Image($this->logo_empresa, $this->pos_x, $this->pos_y, $ld['w'], $ld['y'], $type_imagen, '', 'T', false, 300, '', false, false, 0, false, false, false);
+				
+			
         }         
 
 
@@ -119,7 +129,7 @@ class Pdf_comprobantes extends TCPDF
         switch ($this->tipo_documento) {
             case 'proforma':
                 $text.=" {$this->direccion}<br>" ;
-                $text.=" {$this->direccion_adicional}<br>" ;
+                $text.=" {$this->direccion_adicional}<br>";
                 break;            
             default:
                 $text.=" {$this->direccion}<br>" ;
@@ -217,14 +227,14 @@ class Pdf_comprobantes extends TCPDF
         foreach ($data as $key => $value) {
 
             if(!$rd['max_col']){
-                $text.='<th colspan="'.$value[1].'" > '.$key.' : '.$value[0].'</th>' ;
+                $text.="<th colspan='".$value[1]."' > ".$key." : ".$value[0]."</th>" ;
                 $colspan += $value[1];
                 if($colspan % $n_col == 0  &&  $colspan < $max_colspan ) {
                     $text.= '</tr><tr>';
                 }
             }else if($rd['max_col']){
                 $i_row++;
-                $text.='<th> '.$key.' : '.$value[0].'</th>' ;
+                $text.="<th> ".$key." : ".$value[0]."</th>" ;
                 if( $i_row < $max_rows ) {
                     $text.= '</tr><tr>';
                 }
@@ -233,9 +243,6 @@ class Pdf_comprobantes extends TCPDF
 
         $text.='</tr>';
         $text.='</table>';
-
-
-
         
         $this->SetFont('helvetica', '', $rd['font_h']);
         $this->MultiCell( $rd['w'], '', $text, $rd['border'], 'L', 0,$rd['ln'], '', '', false, 0,true );      
@@ -623,8 +630,6 @@ class Pdf_comprobantes extends TCPDF
             $this->comprobante_mensaje['pos_y'] = $pos_y_footer + 8;
             $this->comprobante_mensaje['pos_x'] = $pos_x_footer +  $this->comprobante_codigo_qr['w'] + 10;
 
-
-
         }elseif ( $this->format == 'Ticket_A' ){
             $this->comprobante_table_footer_letras['w'] = $this->max_width;
             $this->comprobante_table_footer_letras['h'] = 4;
@@ -647,6 +652,7 @@ class Pdf_comprobantes extends TCPDF
         $ctft = $this->comprobante_table_footer_totales;
         $cqr = $this->comprobante_codigo_qr;
         $cm = $this->comprobante_mensaje;
+		$cta_bcas = $this->cuentas_bancarias_pie_pagina;
 
 
         if($formato == 'monto_venta'){
@@ -688,9 +694,13 @@ class Pdf_comprobantes extends TCPDF
             $text.="Representación de Comprobante Electrónico<br>";
             $text.="Generado por {$this->sistema} <br>";
             //$text.="Representación impresa de la FACTURA ELECTRÓNICA, visita www.nubefact.com/20602440908 ";
-            $text.="<br>".$this->cuentas_bancarias;
-            $this->MultiCell( $cm['w'], '', $text,  $cm['border'],  $cm['align'],false, $cm['ln'],$cm['pos_x'], $cm['pos_y'] ,true,0,true );
-            $this->SetFont('', '', 9);
+            //$text.="<br>".$this->cuentas_bancarias;
+            $this->MultiCell( $cm['w'], '', $text,  $cm['border'],  $cm['align'],false, 1,$cm['pos_x'], $cm['pos_y'] ,true,0,true );
+			
+			$eje_x_cta_bca_img = $cm['pos_x'];
+			$eje_y_cta_bca_img = $this->GetY() + 1;
+			$this->Image($cta_bcas["file_path"], $eje_x_cta_bca_img, $eje_y_cta_bca_img, $cta_bcas["w"], $cta_bcas["h"], 'JPG', '', 'T', false, 300, '', false, false, 0, false, false, false);
+			
 
         }elseif($formato =='pie_movimiento'){
 
@@ -737,20 +747,18 @@ class Pdf_comprobantes extends TCPDF
             $text.="<br>".$this->cuentas_bancarias;
             $this->MultiCell( $ctfl['w'] + $ctft['w'], '', $text,  $cm['border'],  $cm['align'],false,1,'', '',true,0,true );
 
-
         }   elseif( $formato == 'pie_guia'){
+			
             
-            $cm['border'] = 1;
-
-
-            $this->SetFont('', '', 10);            
-
+			
             $observacion = (isset($data['observacion']['texto'])) ? $data['observacion']['texto'] : '  '  ;
-
             $this->SetFont('', '', $cm['font_h']);
-            $text= "Obs : ".$observacion." <br>";
-            $text.="<br>".$this->cuentas_bancarias;
-            $this->MultiCell( $ctfl['w'] + $ctft['w'], '', $text,  $cm['border'],  $cm['align'],false,0,'', '',true,0,true );
+            $text= "Observaciones .: ".$observacion." <br>";
+			$this->MultiCell( $this->max_width, '', $text,  $cm['border'],  $cm['align'],false,1,'', '',true,0,true );
+			
+			$eje_x_cta_bca_img = $this->GetX();
+			$eje_y_cta_bca_img = $this->GetY() + 1;
+			$this->Image($cta_bcas["file_path"], $eje_x_cta_bca_img, $eje_y_cta_bca_img, $cta_bcas["w"], $cta_bcas["h"], 'JPG', '', 'T', false, 300, '', false, false, 0, false, false, false);    
 
 
         }    
@@ -760,7 +768,27 @@ class Pdf_comprobantes extends TCPDF
 
     }
 
-    public function add_imagen(){
+    public function add_firma_digital() {
+
+        $certificate = 'file://'.realpath($this->certificate_path);
+        $primaryKey = 'file://'.realpath($this->primaryKey_path);
+        $import_key = $this->import_key; //'Edinjigue03109001';//'colbert1234';
+        $sello_firma_path = $this->sello_firma_path;// 'assets/img/firma_petrolmecanicajc.png';
+        
+        $sello_firma_tamanio_porcentaje = 0.14;
+        $sello_firma_ancho_tamanio = 497 * $sello_firma_tamanio_porcentaje;
+        $sello_firma_altura_tamanio = 159 * $sello_firma_tamanio_porcentaje;
+        $sello_firma_pos_x = 110;        
+        $sello_firma_pos_y = $this->GetY() >= 245 ? 255 : $this->GetY() + 5;
+
+        $firma_array_info = array();        
+
+        $this->Image($sello_firma_path, $sello_firma_pos_x , $sello_firma_pos_y,  $sello_firma_ancho_tamanio, $sello_firma_altura_tamanio, 'PNG');
+        $this->setSignature($certificate, $primaryKey, $import_key, '', 2, $firma_array_info);
+        $this->setSignatureAppearance($sello_firma_pos_x , $sello_firma_pos_y,  $sello_firma_ancho_tamanio, $sello_firma_altura_tamanio);        
+    }
+
+    public function add_imagen(){ //add_imagenes de logos de empresa en cabecera
         $this->Ln(1);
         
         $imags = array( array('img' => 'aile.jpg', 'w'=> 20, 'h' => 10, 'esp' => 1  ),
@@ -798,7 +826,7 @@ class Pdf_comprobantes extends TCPDF
         $this->Ln($salto_linea );
     }
 
-     public function anexo_informacion( $data, $flag_nro_item = false ) {//suma de $widthcols = 200 - $flag_nro_item
+    public function anexo_informacion( $data, $flag_nro_item = false ) {//suma de $widthcols = 200 - $flag_nro_item
         /*$this->SetAutoPageBreak(TRUE, 10);
         $this->AddPage();*/
         

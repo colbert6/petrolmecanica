@@ -1,9 +1,9 @@
 <style type="text/css">
 
-	.typeahead{
-	        font-size: 16px;
-	        width: 100%;
-	    }
+    .typeahead{
+            font-size: 16px;
+            width: 100%;
+        }
     .dropdown-menu>li>a {
         white-space: normal !important;
     }    
@@ -11,45 +11,51 @@
         background-color:#fbfbfb;
     }
     .typeahead, .tt-query, .tt-hint {
-		width: 100%;	
-	}
+        width: 100%;    
+    }
 
 </style>
 
 <?php
-	
-	$dni = isset($cliente_base[0]->dni)? $cliente_base[0]->dni: '';
-	$idcliente = isset($cliente_base[0]->idcliente)? $cliente_base[0]->idcliente: '';
-	$ruc = isset($cliente_base[0]->ruc)? $cliente_base[0]->ruc: '';
-	$razon_social = isset($cliente_base[0]->razon_social)? $cliente_base[0]->razon_social: '';
-	$direccion = isset($cliente_base[0]->direccion)? $cliente_base[0]->direccion: '';
+    
+    $dni = isset($cliente_base[0]->dni)? $cliente_base[0]->dni: '';
+    $idcliente = isset($cliente_base[0]->idcliente)? $cliente_base[0]->idcliente: '';
+    $ruc = isset($cliente_base[0]->ruc)? $cliente_base[0]->ruc: '';
+    $razon_social = isset($cliente_base[0]->razon_social)? $cliente_base[0]->razon_social: '';
+    $direccion = isset($cliente_base[0]->direccion)? $cliente_base[0]->direccion: '';
 
+    $flag_show_btn_importar_proforma = isset($flag_show_btn_importar_proforma)? $flag_show_btn_importar_proforma: true;
+    $list_btns_info =  isset($list_btns_info)? $list_btns_info: array();
 ?>
 
-<!--div class="form-group" style="margin-bottom: 0px;">
-    <label for="dni_cliente" class="col-xs-3 col-sm-4 control-label" style="text-align: left;">Dni </label>
-    <div class="col-xs-9 col-sm-8">
-			<input type="text" class="form-control" id="dni_cliente" name="dni_cliente" placeholder="Dni" value="<?php echo $dni; ?>" onkeypress="soloNumeros(event,'dni')" maxlength="8">
-			<span class="input-group-btn">
-              <button type="button" class="btn btn-info btn-flat" onclick="buscar_cliente()"><i class="fa fa-plus"></i></button>
-            </span>
-
-    </div>
- </div-->
 
  <div class="form-group" >
+    
+    
+
+    <?php if($flag_show_btn_importar_proforma ){  ?>
     <div class="col-xs-6 col-sm-6" >
         <input type="button" value="- Importar Proforma -" class="btn btn-primary" onclick="get_correlativo_proforma_info()">
     </div>
+    <?php } // endif -> $flag_show_btn_importar_proforma  ?>
+
+    <?php foreach ($list_btns_info as $clave => $valor){  ?>
+    <div class="col-xs-6 col-sm-6" >
+        <input type="button" value="<?php echo $valor['value']; ?>" class="btn btn-primary" 
+        onclick="<?php echo $valor['onclick_function']; ?>" >
+    </div>
+    <?php } // foreach -> $list_btns_info  ?>
+
     <div class="col-xs-6 col-sm-6" >
         <input type="button" value="- Nuevo cliente -" class="btn btn-info" onclick="get_cliente_document_info_sunat()">
     </div>
+    
  </div>
 
  <div class="form-group" style="margin-bottom: 0px;">
     <label for="ruc_cliente" class="col-xs-3 col-sm-4 control-label" style="text-align: left;">Ruc </label>
     <div class="col-xs-9 col-sm-8" >
-     	<input type="text" class="form-control" id="ruc_cliente" name="ruc_cliente" placeholder="Ruc" value="<?php echo $ruc; ?>" onkeypress="soloNumeros(event,'ruc')" maxlength="11"> 
+        <input type="text" class="form-control" id="ruc_cliente" name="ruc_cliente" placeholder="Ruc" value="<?php echo $ruc; ?>" onkeypress="soloNumeros(event,'ruc')" maxlength="11"> 
     </div>    
  </div>
 
@@ -75,8 +81,8 @@
   
   $(document).ready(function () {   
 
-  	$('#cliente').typeahead({
-  		source: function (query, process) {
+    $('#cliente').typeahead({
+        source: function (query, process) {
             $.ajax({
                 url: base_url + 'get_datas/get_clientes',
                 type: 'GET',
@@ -97,15 +103,15 @@
         items: 10,
         minLength:3,
         updater: function (item ) {
-        	obj = map[item];
+            obj = map[item];
             $('#idcliente').val(obj.idcliente);
-        	$('#dni_cliente').val(obj.dni);
-			$('#ruc_cliente').val(obj.ruc);
-			$('#direccion_cliente').val(obj.direccion);
+            $('#dni_cliente').val(obj.dni);
+            $('#ruc_cliente').val(obj.ruc);
+            $('#direccion_cliente').val(obj.direccion);
             return item;
         }
 
-  	}); 
+    }); 
 
   });
 
@@ -246,7 +252,7 @@
     function get_correlativo_proforma_info(){
         //10730319342
         bootbox.prompt({
-            title: "Ingrese el ID PROFORMA a buscar", 
+            title: "Ingrese el ID PROFORMA o NRO DOC COMPROBANTE a buscar", 
             //inputType: 'number',
             callback: function(result){ 
                 identificador_proforma='correlativo_proforma';
@@ -309,18 +315,18 @@
                     $('#tipo_moneda').val(obj_client_info.idtipo_moneda);
                     $('#condicion_pago').val(obj_client_info.idperiodo_pago);
                     get_cliente_document('ruc');
-                    buscar_importar_proforma(obj_client_info.idproforma)
+                    buscar_importar_proforma(obj_client_info.idproforma, obj_client_info.Nro_documento)
                     
                 }
             }
         });
     }
 
-    function buscar_importar_proforma(idproforma){
+    function buscar_importar_proforma(idproforma, nro_documento){
         $.ajax({
             url: base_url + 'proformas/exportar_proforma_detalle',
             type: 'GET',
-            data: 'idproforma='+idproforma,
+            data: 'idproforma='+idproforma+'&nro_documento='+nro_documento,
             dataType: 'JSON',
             success: function (obj) {                            
                 

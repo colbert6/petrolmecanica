@@ -7,6 +7,9 @@ class Det_documentacion extends CI_Model {
     public $estado;
     public $orden;
 
+    /*
+    Table "dato" ._  contiene los tipos de datos 
+    */
     
     public function insert_det_documentacion()
     {   
@@ -26,18 +29,28 @@ class Det_documentacion extends CI_Model {
     public function get_print_det_documentacion($iddocumentacion)
     {        
         $this->db->select("                        
-                        dat_doc.*  ,
+                        detc.dato_iddato as iddato,
+                        detc.documentacion_iddocumentacion as iddocumentacion,
+                        dat_doc.priority, 
+                        coalesce(dat_doc.add_descripcion,0) as add_descripcion,
+                        coalesce(dat_doc.add_borde,0) as add_borde,
+                        coalesce(dat_doc.salto_linea,1) as salto_linea,
+                        dat_doc.iddatos_documentacion,
+
                         detc.estado as estado,
                         detc.dato_iddato as iddato ,
                         detc.valor as valor,
-                        dat.descripcion as  descripcion_dato 
+
+                        dat.descripcion as  descripcion_dato ,
+                        dat.tipo
                           ");
         $this->db->from('detalle_documentacion detc');
         $this->db->join('documentacion doc', 'doc.iddocumentacion = detc.documentacion_iddocumentacion');
+        $this->db->join('dato dat', 'dat.iddato = detc.dato_iddato'); //dato  
 
-        $this->db->join('datos_documentacion dat_doc', ' doc.tipo_comprobante_idtipo_comprobante = dat_doc.iddocumento AND dat_doc.iddato = detc.dato_iddato ');
+        $this->db->join('datos_documentacion dat_doc', ' doc.serie_comprobante_idserie_comprobante = dat_doc.iddocumento AND dat_doc.iddato = detc.dato_iddato ', 'left'); // datos_documentacion da el formato de impresion 
 
-        $this->db->join('dato dat', 'dat.iddato = detc.dato_iddato');
+        
         $this->db->where('detc.documentacion_iddocumentacion',$iddocumentacion);
     
         $this->db->order_by('detc.orden','ASC');

@@ -1,5 +1,10 @@
 
+//Considerar el file flexigrid.js para no perder los eventos posterior a refresh ajax
+
+
+
 $(document).ready(function () {
+
 
     $('.anular').on('click', function (e){
 
@@ -147,7 +152,29 @@ $(document).ready(function () {
 
     })
 
-
 	
 });
 
+
+function consulta_servidor(href){
+    $.ajax({
+        url: href,
+        type: 'GET',
+        dataType: 'JSON',
+        async: true,
+        success: function (datos) {
+            texto = JSON.stringify(datos, null, '    ');
+
+            bootbox.dialog({
+                title: "Respuesta deL SERVIDOR",
+                message: "<pre>"+texto,
+                size: 'large',
+                buttons: {
+                    confirm: {
+                        label: '<i class="fa fa-check"></i> Aceptar'
+                    }
+                },
+            });
+        }
+    });
+}
