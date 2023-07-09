@@ -8,7 +8,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title><?php echo $this->nombre_empresa_abreviado; ?></title>
+  <title><?php echo $this->sistema_pestania_nombre; ?></title>
 
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
@@ -33,7 +33,7 @@
 	<script src="<?php echo base_url('assets/themes/adminlte/dist/js/adminlte.min.js')?>"></script>
     <script src="<?php echo base_url('assets/js/toast/js/jquery.toast.js')?>"></script>
 
-    <link rel='shortcut icon' type='image/png' href="<?php echo base_url('assets/img/logo_sistema.png')?>"/>
+    <link rel='shortcut icon' type='image/png' href="<?php echo base_url($this->sistema_pestania_icono)?>"/>
 	
 
 <?php
@@ -83,9 +83,9 @@
     <!-- Logo -->
 	    <a href="<?php echo base_url('principal');?>" class="logo">
 	      <!-- mini logo for sidebar mini 50x50 pixels -->
-	      <span class="logo-mini"><b><?php echo $this->nombre_empresa[0] ?></b>-sis</span>
+	      <span class="logo-mini"><b><?php echo $this->sistema[0] ?></b>-sys</span>
 	      <!-- logo for regular state and mobile devices -->
-	      <span class="logo-lg"><b><?php echo $this->nombre_empresa ?></b>Sis</span>
+	      <span class="logo-lg"><b><?php echo $this->sistema ?></b>system</span>
 	    </a>
 	    <!-- Header Navbar: style can be found in header.less -->
 	    <nav class="navbar navbar-static-top">

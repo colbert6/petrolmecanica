@@ -106,7 +106,10 @@ class Pdf_documentacion extends TCPDF
         
         if($this->logo_data['mostrar']){
             $ld = $this->logo_data ;
-            $this->Image($this->logo_empresa, $this->pos_x, $this->pos_y, $ld['w'], $ld['y'], 'JPG', '', 'T', false, 300, '', false, false, 0, false, false, false);    
+            
+            $logo_extension = strtoupper(explode(".", $this->logo_empresa)[1]);
+
+            $this->Image($this->logo_empresa, $this->pos_x, $this->pos_y, $ld['w'], $ld['y'], $logo_extension, '', 'T', false, 300, '', false, false, 0, false, false, false);    
         }         
 
 
