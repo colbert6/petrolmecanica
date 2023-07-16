@@ -39,7 +39,9 @@ function set_data( set_data ){
         type:   set_data.type || 'POST',
         url:    set_data.url_save,
         data:   set_data.data,
-        dataType: set_data.dataType || 'json'
+        dataType: set_data.dataType || 'json',
+        contentType: false,
+            processData: false,
 
         success: function (result) {
 

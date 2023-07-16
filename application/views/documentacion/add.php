@@ -5,7 +5,7 @@
   <div class="col-md-4">
     <div class="box box-info">     
 
-      <form class="form-horizontal">
+      <form id="form_cabecera_documentacion" class="form-horizontal">
         <div class="box-body">
 
           <div class="form-group" >
@@ -51,6 +51,7 @@
 
   <div class="col-md-8">
     <div class="box box-success">
+      <form id="form_datos_documentacion">
 
       <div class="box-header with-border">
         <div class="form-group" >
@@ -72,7 +73,7 @@
         <button type="button" class="btn btn-success pull-left" id="" >Generar</button>
         <button type="button" class="btn btn-success pull-right" id="" onclick="save()">Generar</button>
       </div-->
-
+      </form>
     </div>
   </div>
 

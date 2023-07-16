@@ -297,7 +297,8 @@ class Pdf_documentacion extends TCPDF
                 $salto_linea_despues_img = 1; 
 
                 //$this->Image($this->logo_empresa, $this->pos_x, $this->pos_y, $ld['w'], $ld['y'], 'JPG', '', 'T', false, 300, '', false, false, 0, false, false, false);   
-                $img_calibra = 'assets/uploads/calibracion_tanque/'.$val['valor'];
+                //$img_calibra = 'assets/uploads/calibracion_tanque/'.$val['valor'];
+                $img_calibra = $val['valor'];
 
                 $this->Image($img_calibra, $x, $y, $w, $h, 'JPG', '', 'T', false, 300, '', false, false, 0, false, false, false);
                 $this->SetY($y + $h);
