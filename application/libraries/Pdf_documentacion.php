@@ -291,16 +291,19 @@ class Pdf_documentacion extends TCPDF
             if ($val['tipo']=='img') {
 
                 $x = $this->pos_x ;
-                $y = 45;//$this->GetY() + 10;
-                $w = 170;
-                $h = 200;
+                $y = $this->GetY() + 10;
+                $w = 120;
+                $h = 100;
                 $salto_linea_despues_img = 1; 
 
-                //$this->Image($this->logo_empresa, $this->pos_x, $this->pos_y, $ld['w'], $ld['y'], 'JPG', '', 'T', false, 300, '', false, false, 0, false, false, false);   
-                //$img_calibra = 'assets/uploads/calibracion_tanque/'.$val['valor'];
-                $img_calibra = $val['valor'];
+                $imgPathUbicacion = $val['valor'];
 
-                $this->Image($img_calibra, $x, $y, $w, $h, 'JPG', '', 'T', false, 300, '', false, false, 0, false, false, false);
+                $imgUbicacionLastString = substr($_FILES['files']['name'][$i], -5);
+                $imgUbicacionExploded = explode(".",$imgUbicacionLastString);
+
+                $imgTypeExtension = strtoupper($imgUbicacionExploded[1]);
+
+                $this->Image($imgPathUbicacion, $x, $y, $w, $h, $imgTypeExtension, '', 'T', false, 300, '', false, false, 0, false, false, false);
                 $this->SetY($y + $h);
 
             }else{
