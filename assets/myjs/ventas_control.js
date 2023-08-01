@@ -1,9 +1,13 @@
 
 $(document).ready(function () {
-    get_control_ventas();
+    get_control_ventas_diario();
+    
+    $( "#fecha_control" ).on( "change", function() {
+        get_control_ventas_diario();
+    });
 });
 
-function get_control_ventas(){
+function get_control_ventas_diario(){
 	$('#get_control_ventas>i').addClass('fa-spin');
 	fecha_control= $('#fecha_control').val();
 	$.ajax({
@@ -16,7 +20,6 @@ function get_control_ventas(){
 
             $('#monto_fecha').html('S/ '+data[0].total_venta_fecha);
             $('#monto_fecha_mes').html('S/ '+data[1].total_venta_mes);
-            $('#fecha_consulta').html('Fecha : '+fecha_control);
             $('#get_control_ventas>i').removeClass('fa-spin');
 
 

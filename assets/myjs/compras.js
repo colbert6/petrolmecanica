@@ -5,7 +5,6 @@ var correlativo;
 
 $(document).ready(function () {
     get_lista_colaborador("colaborador_compra","Colaborador Compra");
-    get_lista_colaborador("colaborador_almacen","Colaborador Almacen");
     get_lista_proveedor();
     get_lista_productos();
     // CORRELATIVO ORDEN DE COMPRA

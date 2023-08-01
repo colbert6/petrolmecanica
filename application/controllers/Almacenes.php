@@ -21,18 +21,27 @@ class Almacenes extends MY_Controller {
         // ACCEDIENDO A LOS MODELOS           
         $this->load->library('grocery_CRUD');
 
-        $crud = new grocery_CRUD();
+        $crud = new grocery_CRUD(); 
 
-        $crud->columns('codbarras','producto','presentacion', 'precio_venta','stock', 'tienda');
+
+        $crud->columns('categoria_nombre','marca_nombre', 'producto_nombre', 'presentacion_nombre', 'producto_precio_venta','producto_stock', 'tienda_descripcion');
+
+        $crud->display_as('producto_codigo_barras','Cod_barras');
+        $crud->display_as('categoria_nombre','Categoria');
+        $crud->display_as('marca_nombre','Marca');
+        $crud->display_as('producto_nombre','Producto');
+        $crud->display_as('presentacion_nombre','Medida');
+        $crud->display_as('producto_precio_venta','Precio_venta');
+        $crud->display_as('producto_stock','Stock');
+        $crud->display_as('tienda_descripcion','Tienda');
+
         $crud->set_table('producto_stock'); //Change to your table name
-        $crud->set_primary_key('idproducto');
+        $crud->set_primary_key('producto_codigo_barras');
 
-        $crud->order_by('producto','asc');
-
+        $crud->order_by('categoria_nombre','asc');
 
         $crud->unset_operations();
         $output = $crud->render();
-
 
         $tiendas = $this->almacen->get_tienda();
 
@@ -40,7 +49,6 @@ class Almacenes extends MY_Controller {
         $output->tiendas = $tiendas;
         $output->idtienda = $idtienda;
 
-        
         // CARGANDO TEMPLATE DEL SISTEMA    
         $this->load->view('almacenes/stock', $output ) ;
     }    

@@ -4,35 +4,22 @@
 
 <div class="row">
   
- <div class="form-horizontal" id="form-compras">
-  <div class="col-md-7">
+ <div class="form-horizontal" id="form-compras">    
     
-      <div class="box box-info">
-          
-        
-          
-            <div class="box-header with-border">
-              <h3 class="box-title">INFORMACION DE COMPRA</h3>
-            </div>
+    <div class="col-md-12">
+        <div class="box box-info">          
+                
             <div class="box-body">
-
-          
-                <div class="box-body">
                   
                     <div class="form-group">
-                        <label for="exampleInputEmail1" class="col-sm-2 control-label">Auto-Guardado</label>
-                        <div class="col-sm-10">
-                            
-                            <button type="button" class="btn btn-success btn-sm" id='torden' name='torden' ></button>
+                        <label for="exampleInputEmail1" class="col-xs-3 col-sm-2 control-label">Orden de compra </label>
+                        <div class=" col-xs-3 col-sm-4">                            
+                            <button type="button" class="btn btn-success " id='torden' name='torden' ></button>
                         </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="exampleInputEmail1" class="col-sm-2 control-label">COD. Orden</label>
-                        <div class="col-sm-10">
-                            <div class="input-group input-group-sm">
+                         <div class="col-sm-6">
+                            <div class="input-group">
                                 <input type="hidden" name="idorden" id="idorden" />
-                                <input class="form-control" type="text" name="codorden" id="codorden" placeholder="Cod. Orden de Compra" value="" />
+                                <input class="form-control" type="text" name="codorden" id="codorden" placeholder="Ingrese nro de orden de compra" value="" />
                                 <span class="input-group-btn">
                                     <button type="button" class="btn btn-info btn-flat" onclick="get_search_orden()">
                                         <i class="fa fa-search"></i>
@@ -41,137 +28,84 @@
                             </div>
                         </div>
                     </div>
+                       
+                    <input type="hidden" class="form-control" id="fecha_compra" name="fecha_compra" onblur="updateData()" value="<?php echo date('Y-m-d');?>" >
                     
-                     <div class="form-group">
-                        <label for="inputPassword3" class="col-sm-2 control-label">Tienda *</label>
-
-                        <div class="col-sm-10">
-                            <select class="form-control" id="tienda" name="tienda" onchange="updateData()">
-                                <option value="">Seleccione..</option>
-                                <?php foreach ($tiendas as $tienda): ?>
-                                <option value="<?= $tienda->idtienda ?>"><?= $tienda->descripcion ?></option>
-                                <?php endforeach; ?>
-                          </select>
-
-                        </div>
-                     </div>
-                    
-                    
-                    <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label">Fecha *</label>
-                        <!--div class="col-sm-6">
-                          <select class="form-control select2" id="colaborador_compra" name="colaborador_compra" >
-                            <option></option>
-                          </select>
-                        </div-->
-                        <div class="col-sm-10">
-                            <input type="date" class="form-control" id="fecha_compra" name="fecha_compra" onblur="updateData()" value="<?php echo date('Y-m-d');?>" >
-                        </div>
+                    <div class="form-group" style="background-color: silver;">
+                        <label for="colaborador_almacen" class="col-xs-12 col-sm-2 control-label">Datos de recepción</label>
                         
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label">Recep *</label>
-                        <div class="col-sm-6">
-                         <select class="form-control" id="colaborador_almacen" name="colaborador_almacen">
-                            <option></option>
-                          </select>
-                        </div>
-                        <div class="col-sm-4">
-                          <input type="date" class="form-control" id="fecha_almacen" name="fecha_almacen" value="<?php echo date('Y-m-d');?>">
-                        </div>
-                        
-                    </div>
-                    
-                    
-                  <div class="form-group">
-                    <label for="inputEmail3" class="col-sm-2 control-label">Prov *</label>
-
-                    <div class="col-sm-10">
-                        <select class="form-control" id="idproveedor" name="idproveedor" onchange="asignaNroDoc()" >
-                            <option></option>
-                          </select>
-                    </div>
-                    <div class="col-sm-2"></div>
-                    <div class="col-sm-10">
-                     
-                      <input type="text" class="form-control" id="numdoc_proveedor" placeholder="RUC" readonly="readonly">
-                    </div>
-                  </div> 
-                    
-
-
-                </div>
-                
-
-      </div>
-      <!-- /.box-body -->
-    </div>
-  </div>  
-     <div class="col-md-5">
-    
-      <div class="box box-info">
-          
-          
-            <div class="box-header with-border">
-              <h3 class="box-title">COMPROBANTE DE COMPRA</h3>
-            </div>
-            <div class="box-body">
-
-          
-                <div class="box-body">
-                  
-
-                  
-                  <div class="form-group">
-                    <label for="inputPassword3" class="col-sm-3 control-label">COMP. * </label>
-
-                    <div class="col-sm-9">
-                        <select class="form-control" id='tipo_comprobante' name='tipo_comprobante'>
-                            <option value="">Seleccione..</option>
-                            <?php foreach ($tipo_comprobantes as $tc): ?>
-                            <option value="<?= $tc->idtipo_comprobante ?>"><?=  $tc->descripcion ?> </option>
+                        <div class="col-sm-3">
+                          <select class="form-control" id="tienda" name="tienda">           
+                            <?php foreach ($tiendas as $data): ?>
+                            <option value="<?= $data['id'] ?>"><?= $data['descripcion'] ?></option>
                             <?php endforeach; ?>
-                      </select>
-                      
-                    </div>
-                    
-                  </div>
-                    
-                    <div class="form-group">
-                        <label for="inputPassword3" class="col-sm-3 control-label"> N° DOC * </label>
-                        <div class="col-sm-9">
+                          </select>
 
-                        <input class="form-control" id="nro_comprobante_compra" name="nro_comprobante_compra" placeholder="N° Comprobante">
-                      </div>
-                     
-                    </div>
-                    <div class="form-group">
-                        <label for="inputPassword3" class="col-sm-3 control-label"> REMISION</label>
+                        </div>
+                        <div class="col-sm-3">
+                            <select class="form-control" id="colaborador_almacen" name="colaborador_almacen">           
+                                <?php foreach ($colaboradores_recepcion as $data): ?>
+                                <option value="<?= $data['id'] ?>"><?= $data['descripcion'] ?></option>
+                                <?php endforeach; ?>
+                              </select>
+                        </div>
+                        <div class="col-sm-3">
+                          <input type="date" class="form-control" id="fecha_almacen" name="fecha_almacen" value="<?php echo date('Y-m-d');?>">
+                        </div>                       
                         
-                      <div class="col-sm-9">
-
-                        <input class="form-control" id="guia_remision" name="guia_remision" placeholder="Guia Remision">
-                      </div>
                     </div>
-                  
+                    
+                    
+                    <div class="form-group">
+                        <label for="idproveedor" class="col-sm-2 control-label">Datos de proveedor</label>
 
-                  
-                   <div class="form-group">
-                    <label for="inputEmail3" class="col-sm-3 control-label">OBS.</label>
+                        <div class="col-xs-12 col-sm-6">
+                            <select class="form-control" id="idproveedor" name="idproveedor" onchange="asignaNroDoc()" >
+                                <option></option>
+                            </select>
+                        </div>
+                        <div class="col-xs-8 col-sm-2">                         
+                          <input type="text" class="form-control" id="numdoc_proveedor" placeholder="RUC" readonly="readonly">
+                        </div>
+                        <div class="col-xs-4 col-sm-2">                            
+                            <button type="button" class="btn btn-info " id='registrar_nuevo_proveedor'> Nuevo proveedor</button>
+                        </div>
+                    </div> 
 
-                    <div class="col-sm-9">
-                        <textarea class="form-control" id="obs_compra" name="obs_compra" onblur="updateData()"></textarea>
+                    <div class="form-group" style="background-color: silver;">
+                        <label for="" class="col-sm-2 control-label">Datos de comprobante</label>
+
+                        <div class="col-sm-3">
+                            <select class="form-control" id='tipo_comprobante' name='tipo_comprobante'>
+                                <?php foreach ($tipos_comprobantes as $data): ?>
+                                <option value="<?= $data['id'] ?>"><?= $data['descripcion'] ?></option>
+                                <?php endforeach; ?>
+                            </select>                      
+                        </div>
+
+                        <div class="col-sm-3">
+                            <input class="form-control" id="nro_comprobante_compra" name="nro_comprobante_compra" placeholder="Nro comprobante">
+                        </div>
+                             
+                        <div class="col-sm-3">
+                            <input class="form-control" id="guia_remision" name="guia_remision" placeholder="Guia Remision">
+                        </div>
                     </div>
-                  </div>
-               
 
-                </div>
-                
-      </div>
-      <!-- /.box-body -->
-    </div>
-  </div>  
+                    <div class="form-group">
+                        <label for="idproveedor" class="col-sm-2 control-label">Observaciones </label> 
+
+                        <div class="col-sm-9">
+                            <textarea class="form-control" id="obs_compra" name="obs_compra"  placeholder="Ingrese observaciones sobre la compra"></textarea>
+                        </div>
+                    </div>
+                    
+
+            </div><!-- /.box-body -->
+      
+        </div>
+    </div>  
+ 
     
     <div class="col-md-12">
     

@@ -115,13 +115,24 @@ function get_contenido_ajax( url_consulta, key_consulta ){
                 html += "<label for='dato_"+e.iddato+"'>"+e.descripcion+" <a onclick='remover_item("+e.iddato+")'> (Quitar) </a></label>";
                
                 html += "<div >";
-                html += "<input type='hidden' name='iddato[]' value='"+e.iddato+"'>";
+
+                if(e.tipo == 'img' ){
+                    html += "<input type='hidden' name='iddato_"+e.tipo+"[]' value='"+e.iddato+"'>";
+                                    
+                }else {
+                    html += "<input type='hidden' name='iddato[]' value='"+e.iddato+"'>";    
+                }
+                
 
                 if(e.tipo == 'text' ){    
                     html += "<input type='"+e.tipo+"' class='form-control' id='dato_"+e.iddato+"' name='dato[]' placeholder='"+e.descripcion+"' value='"+e.valor+"'>";
                 
                 }else if(e.tipo == 'textarea' ){ 
                     html += "<textarea class='form-control' rows='4' id='dato_"+e.iddato+"' name='dato[]' >"+e.valor+"</textarea>";
+                
+                }else if(e.tipo == 'img' ){
+                    html += "<input type='file' class='form-control dato_img' id='dato_"+e.tipo+"_"+e.iddato+"' name='dato_"+e.tipo+"[]' multiple >";
+                
                 }
 
                 html += "</div>";
@@ -139,20 +150,50 @@ function remover_item(iddato){
     $('div[id="form_dato_'+iddato+'"]').remove();
 }
 
+function is_peso_imagen_valido(maxSizeInMegaBytes){
+    
+    var inputsDatoImg = document.getElementsByClassName("dato_img"); 
+    var maxSizeInBytes = (maxSizeInMegaBytes * 1048576) || 1048576; // 1 MB (1 megabyte = 1048576 bytes)
+    var status = true;
+
+    Array.prototype.forEach.call(inputsDatoImg, function(inputImg) {
+        
+        var files = inputImg.files;
+        for (var i = 0; i < files.length; i++) {
+            pesoImgBytes = files[i].size;
+            if (files[i] && pesoImgBytes > maxSizeInBytes) {
+                pesoImgMegabytes = Number((pesoImgBytes / 1024 /1024).toFixed(2));
+                
+                alerta("Peso de imagen invalido","El peso de la imagen "+i+" ("+pesoImgMegabytes+" MB) supera el peso permitido",'warning');
+                return status = false;
+            }
+        }  
+
+    });
+
+    return status;
+}
 
 var save = function(){
     var fallas, total;
 
     //Validar campos 
-    fallas=true;
+    fallas=true; //true significa que hay fallas
     
     if($("#btn_save").is(":disabled") ){
-        alerta("Procesando proforma","En estos momentos se esta procesando la venta",'warning');
+        alerta("Procesando documento","En estos momentos se esta procesando el nuevo documento",'warning');
             return 0;
     }else{
         $("#btn_save").attr({'disabled':'disabled'});
+    }
 
-        fallas=false;
+    if(  $("#idcliente").val()==""){
+        alerta(" Cliente no valido","Debe seleccionar un cliente valido",'warning');
+    } else {
+
+        if(is_peso_imagen_valido(2)){
+            fallas=false; //significa que no hay fallas
+        }        
     }      
             
     if(!fallas){
@@ -162,7 +203,19 @@ var save = function(){
 
         obj.type = 'POST';
         obj.url_save = base_url +'documentaciones/save';
-        obj.data = $('#form').find('select, textarea, input').serialize();
+        //obj.data = $('#form').find('select, textarea, input').serialize();
+
+        var form_cabecera_documentacion = new FormData(document.getElementById('form_cabecera_documentacion'));
+        var form_datos_documentacion = new FormData(document.getElementById('form_datos_documentacion'));
+
+        form_datos_documentacion.forEach(function(value, key) {
+            form_cabecera_documentacion.append(key, value);
+        });
+
+
+        obj.data = form_cabecera_documentacion;
+        
+
         obj.async = true;
         obj.url_reload = base_url +'documentaciones/add';
         obj.msj_success_true = 'Documento guardado';

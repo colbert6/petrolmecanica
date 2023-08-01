@@ -55,7 +55,8 @@ function set_data( set_data ){
                 });
                 
             }else{
-                msj_proceso.find('#carga_msj').html("ERROR : "+result.error+"");
+                message_error = result.error || result.mensaje || 'Error'
+                msj_proceso.find('#carga_msj').html("!!! "+message_error);
             }           
             
         },

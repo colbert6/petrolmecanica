@@ -65,7 +65,7 @@ class Compras extends MY_Controller {
     public function add()
     {
 
-        $this->metodo = 'Nueva Compra';//Siempre define las migagas de pan
+        $this->metodo = 'Crear compra';//Siempre define las migagas de pan
         
         // CARGANDO LIBRERIA DE SELECT2
         $this->load->js('assets/js/select2/js/select2.full.min.js');
@@ -87,9 +87,10 @@ class Compras extends MY_Controller {
          $this->load->model('get_data');
         
         $output = array(
-            'title' => 'Compra',
-            'tiendas' => $this->almacen->get_tienda(),
-            'tipo_comprobantes' => $this->comprobante->get_tipo_comprobantes(array( $this->id_factura,$this->id_boleta))
+             
+            'tiendas' => $this->get_data->get_tiendas(),  
+            'colaboradores_recepcion' => $this->get_data->get_colaboradores(),  
+            'tipos_comprobantes' => $this->get_data->get_tipos_comprobantes("$this->id_boleta, $this->id_factura", "idtipo_comprobante", 'idtipo_comprobante asc')
         ); 
         
         

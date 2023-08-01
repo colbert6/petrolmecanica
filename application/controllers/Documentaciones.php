@@ -150,7 +150,7 @@ class Documentaciones extends MY_Controller {
 
         //Cargando js y css
         $this->load->js('assets/myjs/genericos/get_data.js');//genericos
-        $this->load->js('assets/myjs/genericos/set_data.js');//genericos
+        $this->load->js('assets/myjs/genericos/set_data_documentacion.js');//genericos
         $this->load->js('assets/myjs/documentacion.js');
         
         $this->load->js('assets/js/bootbox.min.js');
@@ -335,9 +335,59 @@ class Documentaciones extends MY_Controller {
         // la tabla datos_documentacion es la tabla intermedia entrre la relacion entre datos (tipos de datos ) y la tabla serie_comproante
         // debido a que la tabla serie_comprobante, representa a cada tipo de documento que se puede crear
 
-        
-        //print_r($_POST);exit();
-        $return = array( 'estado_validacion' => true , 'estado' => false, 'msj' => '' , 'error'=> '' , 'idsave' => '' , 'enlace' => '');  
+        //print_r($_FILES);print_r($_POST); echo "separador";//exit();
+
+        // Ruta donde se guardarán las imágenes
+        $uploadPath = 'assets/uploads/documentacion/'; 
+        $iddato_deafult = isset($this->id_dato_img) ? $this->id_dato_img : '0';
+
+        // Array para almacenar los nombres de las imágenes subidas
+        //$uploadedImages = array();
+
+        // Procesa cada imagen enviada
+        if (!empty($_FILES['dato_img']['name'])) {
+            $filesCount = count($_FILES['dato_img']['name']);
+            for ($i = 0; $i < $filesCount; $i++) {
+                $_FILES['userfile']['name']     = $_FILES['dato_img']['name'][$i];
+                $_FILES['userfile']['type']     = $_FILES['dato_img']['type'][$i];
+                $_FILES['userfile']['tmp_name'] = $_FILES['dato_img']['tmp_name'][$i];
+                $_FILES['userfile']['error']    = $_FILES['dato_img']['error'][$i];
+                $_FILES['userfile']['size']     = $_FILES['dato_img']['size'][$i];
+
+                $imagenTypeExtension = substr($_FILES['dato_img']['name'][$i], -4);
+                if(  in_array($imagenTypeExtension, array('jpeg') ) ){
+                    $imagenTypeExtension = ".".$imagenTypeExtension;
+                }
+                $imagenNameFormated = $this->input->post('correlativo')."_".strval($i).$imagenTypeExtension; 
+
+                $config['upload_path']   = $uploadPath;
+                $config['allowed_types'] = 'gif|jpg|jpeg|png';
+                $config['file_name'] = $imagenNameFormated;
+
+                $this->load->library('upload', $config);
+
+                if ($this->upload->do_upload('userfile')) {
+                    $imageData = $this->upload->data();
+
+                    // Guarda el nombre de la imagen en el array
+                    //$uploadedImages[] = $imageData['file_name'];
+                    $imageData_filename = $imageData['file_name'];
+
+                    //Generar metadata para guardar en BD
+                    $iddato_img = isset($_POST['iddato_img'][$i]) ? $_POST['iddato_img'][$i] : $iddato_deafult;
+                    $_POST['iddato'][] = $iddato_img;
+                    $_POST['dato'][] = $uploadPath.$imageData_filename; //valor de dato
+                }
+            }
+            
+        }
+
+        $return = array( 'estado_validacion' => true , 
+            'estado' => false, 
+            'msj' => '' , 
+            'error'=> '' , 
+            'idsave' => '' , 
+            'enlace' => '');  
 
         //VALIDACIONES
 
@@ -379,16 +429,7 @@ class Documentaciones extends MY_Controller {
         $this->load->model('det_documentacion');   
         $this->det_documentacion->documentacion_iddocumentacion = $iddocumentacion;     
         $this->det_documentacion->insert_det_documentacion();
-    
-        /*//Modificar Stock
-        $this->load->model('stock');       
-        $this->stock->modificar_stock("-");
-
-        //Agregar Kardex
-        $this->load->model('kardex');      
-        $this->kardex->codmotivo = $idventa;
-        $this->kardex->insert_kardex("S","venta");*/
-        
+            
         $return['idsave'] = $iddocumentacion;
        
         if ($this->db->trans_status() === FALSE) { 
@@ -400,20 +441,11 @@ class Documentaciones extends MY_Controller {
 
         } else {
 
-            $this->db->trans_commit();//$this->db->trans_rollback(); 
+            $this->db->trans_commit();
+            //$this->db->trans_rollback(); 
             $return['estado']=true;
 
-
-            /*$return['enlace'] = '-';
-            $respuesta_pse = $this->envio_pse($idventa,'generar_comprobante');
-
-            if( isset($respuesta_pse['enlace'])  ){
-              $return['enlace'] = $respuesta_pse['enlace'];  
-            }*/
-
-        }
-
-       
+        }       
 
         print json_encode($return);
     }

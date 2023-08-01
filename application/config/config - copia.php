@@ -23,7 +23,7 @@ date_default_timezone_set('America/Lima');
 | a PHP script and you can easily do that on your own.
 |
 */
-$config['base_url'] = 'https://'.$_SERVER["SERVER_NAME"].'/sistem/';//'http://petrolmecanicajc.com/sistem/';//'http://localhost/trebloc/';
+$config['base_url'] = 'http://'.$_SERVER["SERVER_NAME"].'/sistem/';//'http://petrolmecanicajc.com/sistem/';//'https://localhost/trebloc/';
 
 /*
 |--------------------------------------------------------------------------
@@ -324,7 +324,7 @@ $config['cache_query_string'] = FALSE;
 | https://codeigniter.com/user_guide/libraries/encryption.html
 |
 */
-$config['encryption_key'] = '';
+$config['encryption_key'] = 'asasqweqwedasaa66dadqwe';
 
 /*
 |--------------------------------------------------------------------------

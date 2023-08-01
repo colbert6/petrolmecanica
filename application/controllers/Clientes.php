@@ -39,30 +39,40 @@ class Clientes extends MY_Controller {
 	public function add_cliente_from_info_sunat()
     {   
         $this->db->trans_start();
-
         $this->load->model('cliente'); 
+        $return = array('estado' => false, 'mensaje' => '', 'idsave' => 0);       
+        
+        $numero_documento = $this->input->post('ruc');
+        $tipo_documento = "ruc";
+        if(strlen($numero_documento) != 11 ){
+            $numero_documento = $this->input->post('dni');
+            $tipo_documento = "dni";
+        } 
 
-        $return = array('estado' => false, 'msj' => '' , 'error'=> '' , 'idsave' => 0);
+        $result_cliente_registrado = $this->cliente->validar_registro_cliente(" $tipo_documento = $numero_documento "); 
 
-        $flag_valid_cliente = $this->cliente->valid_cliente('ruc',$this->input->post('ruc')); 
+        if( !is_null($result_cliente_registrado) ){
+            $return['estado']= false;
+            $return['mensaje'] = "AVISO: Cliente YA EXISTE en la base de datos. <br>";
+            $return['mensaje'] .= " >> Razón social : ". $result_cliente_registrado['cliente_nombre'];
+            print json_encode($return);
+            die('');
 
-        if(count($flag_valid_cliente)){
-            $return['msj']= "Cliente YA EXISTE";
         }else{
             $this->cliente->insert_cliente();
             $idcliente = $this->db->insert_id();
 
-            if ($this->db->trans_status() === FALSE) {
+            if ($this->db->trans_status() === FALSE) {                
+                $error = $this->db->error();
+				$return['estado'] = false;
+				$return['mensaje'] = 'ERROR: Fallo en peraciones de base de datos. <br> ('.$error['message'].') ';
                 $this->db->trans_rollback();
-                $return['msj']= $error['message'];
             } else {
-
                 $this->db->trans_commit();
                 $return['estado']=true;
+                $return['mensaje'] = "Se ha registrado nuevo cliente.";
             }
-
-        }
-        
+        }        
         print json_encode($return);
         
     }

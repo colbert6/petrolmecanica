@@ -1,7 +1,117 @@
 <?php 
 class Get_data extends CI_Model {
 
+	public function get_tiendas($valor_condicion = False, $campo_condicion= '')
+    {
+        $campos = " codtienda as id, descripcion ";
+		$table = "tienda";
+		$condicion = " estado='Activo' ";
+		if($valor_condicion){
+			$condicion .= " and $campo_condicion in ($valor_condicion) ";
+		}
+		return self::select_array($campos, $table, $condicion);
+    }
+	
+	public function get_tipos_monedas($valor_condicion = False, $campo_condicion= '')
+    {
+		$campos = " idtipo_moneda as id, descripcion ";
+		$table = "tipo_moneda";
+		$condicion = " estado='Activo' ";
+		if($valor_condicion){
+			$condicion .= " and $campo_condicion in ($valor_condicion) ";
+		}
+		return self::select_array($campos, $table, $condicion);
+    }
+	
+	public function get_formas_pagos($valor_condicion = False, $campo_condicion= '', $order_by= False)
+    {
+		$campos = " idforma_pago as id, descripcion ";
+		$table = "forma_pago";
+		$condicion = " estado='Activo' "; 
+		if($valor_condicion){
+			$condicion .= " and $campo_condicion in ($valor_condicion) ";
+		}
+		return self::select_array($campos, $table, $condicion, $order_by);
+    }
+	
+	public function get_periodos_pagos($valor_condicion = False, $campo_condicion= '')
+    {
+		$campos = " idperiodo_pago as id, descripcion ";
+		$table = "periodo_pago";
+		$condicion = " estado='Activo' "; 
+		if($valor_condicion){
+			$condicion .= " and $campo_condicion in ($valor_condicion) ";
+		}
+		return self::select_array($campos, $table, $condicion);
+    }
+	
+	public function get_series_correlativos($valor_condicion = False, $campo_condicion= '')
+    {
+		$campos = " idserie_comprobante as id, CONCAT(serie,'-',correlativo ) as descripcion, serie, correlativo";
+		$table = "serie_comprobante";
+		$condicion = " estado='Activo' "; 
+		if($valor_condicion){
+			$condicion .= " and $campo_condicion in ($valor_condicion) ";
+		}
+		return self::select_array($campos, $table, $condicion);
+    }
 
+    public function get_colaboradores($valor_condicion = False, $campo_condicion= '')
+    {
+        $campos = " idcolaborador as id, nombre as descripcion ";
+        $table = "colaborador";
+        $condicion = " estado='Activo' "; 
+        if($valor_condicion){
+            $condicion .= " and $campo_condicion in ($valor_condicion) ";
+        }
+        return self::select_array($campos, $table, $condicion);
+    }
+
+    public function get_tipos_comprobantes($valor_condicion = False, $campo_condicion= '', $order_by= False)
+    {
+        $campos = " idtipo_comprobante as id, descripcion ";
+        $table = "tipo_comprobante";
+        $condicion = " estado='Activo' "; 
+        if($valor_condicion){
+            $condicion .= " and $campo_condicion in ($valor_condicion) ";
+        }
+        return self::select_array($campos, $table, $condicion, $order_by);
+    }
+	
+	public function get_comprobantes_series_correlativo($valor_condicion = False, $campo_condicion= '', $order_by= False)
+    {
+        $this->db->select(" serie.idserie_comprobante as id, 
+		CONCAT( tipo_comp.descripcion,': ',serie.serie,'-',serie.correlativo ) as descripcion
+		");
+        $this->db->from('tipo_comprobante as tipo_comp');
+        $this->db->join('serie_comprobante as serie', 'tipo_comp.idtipo_comprobante = serie.tipo_comprobante_idtipocomprobante');
+        $this->db->where('serie.estado','Activo');
+        $this->db->where('tipo_comp.estado','Activo');
+
+        if($valor_condicion) {			
+			$this->db->where(" $campo_condicion in ($valor_condicion) ");
+        }
+		if($order_by){
+			$this->db->order_by($order_by);
+		}
+		
+        $query = $this->db->get();
+        return $query->result_array();
+    }
+	
+	public function select_array($campos, $table, $condicion, $order_by=False)
+    {
+        $this->db->select($campos);
+        $this->db->from($table);
+        $this->db->where($condicion);
+		if($order_by){
+			$this->db->order_by($order_by);
+		}
+        $query = $this->db->get();
+        return $query->result_array();  
+    }
+	
+	/*---------------------------------*/
     
     public function get_clientes($valor)
     {   
@@ -344,6 +454,19 @@ class Get_data extends CI_Model {
         return $query->result();
     }
 
+
+
+    // DEVELOP
+    public function get_data_parametros_bd($id = '%')
+    {
+        $this->db->from('parametros as par');
+        if( $id != '%'){
+            $this->db->where('par.nombre',$id);
+        }
+        $query = $this->db->get();
+        
+        return $query->result_array();
+    }
 
 
 }

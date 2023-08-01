@@ -13,6 +13,9 @@ class MY_Controller extends CI_Controller {
     public $nombre_usuario = '';
     public $perfil_usuario = '';
 
+    public $sistema_pestania_nombre = 'PETROLMECANICA JC';
+    public $sistema_pestania_icono = 'assets/img/icono_sistema.png';
+
     public $nombre_empresa = 'PETROLMECANICA JC';
     public $nombre_empresa_abreviado = 'PETROLMECANICA JC';
     public $logo_empresa = 'assets/img/logo_empresa.png';
