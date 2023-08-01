@@ -173,14 +173,14 @@ class Facturalaya{
     			
     			$detalle_cuotas[] = array('fecha_vencimiento' => $fecha_vencimiento,  'monto_cuota'=> $monto_cuota);
     			$nro_cuotas_cont--;
-    		}else{
-				$data_venta['detalle_cuotas'] =  array();
-			}
+    		}
 
     		$data_venta['monto_deuda_total'] = $monto_venta;
     		$data_venta['detalle_cuotas'] = $detalle_cuotas;
 
-    	}
+    	}else{
+			$data_venta['detalle_cuotas'] =  array();
+		}
 
     	unset($data_venta["nro_cuotas"]);    	
 

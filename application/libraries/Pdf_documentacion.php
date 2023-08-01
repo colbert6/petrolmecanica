@@ -248,11 +248,6 @@ class Pdf_documentacion extends TCPDF
         }         
         
         foreach ($data as $key => $val) {
-
-            if($salto_linea_despues_img){
-                $this->AddPage();
-                $salto_linea_despues_img = 0;
-            }
                     
             $this->SetFont('helvetica', '', 11);
             $w_aux = $cd['w'];
@@ -287,24 +282,29 @@ class Pdf_documentacion extends TCPDF
                 
             }
 
-            $eje_XY = "X=".$this->GetX().",Y=".$this->GetY();
+            //$eje_XY = "X=".$this->GetX().",Y=".$this->GetY();
+            //$this->MultiCell($w_aux, $new_h, $eje_XY, $borde_aux, $cd['align'], 0,$cd['ln'], '', '' );
+
             if ($val['tipo']=='img') {
 
                 $x = $this->pos_x ;
                 $y = $this->GetY() + 10;
-                $w = 120;
-                $h = 100;
-                $salto_linea_despues_img = 1; 
+                $w = 120; //ancho de imagen
+                $h = 80; //alto de imagen
+
+                if($this->GetY() > $this->max_heigth + $h ){ 
+                    $this->AddPage() ;
+                    $this->Setx($this->pos_x);//posicion inicial x
+                    $this->SetY($this->pos_Y);//posicion inicial y
+                }
 
                 $imgPathUbicacion = $val['valor'];
-
                 $imgUbicacionLastString = substr($_FILES['files']['name'][$i], -5);
                 $imgUbicacionExploded = explode(".",$imgUbicacionLastString);
-
                 $imgTypeExtension = strtoupper($imgUbicacionExploded[1]);
 
                 $this->Image($imgPathUbicacion, $x, $y, $w, $h, $imgTypeExtension, '', 'T', false, 300, '', false, false, 0, false, false, false);
-                $this->SetY($y + $h);
+                $this->SetY( $this->GetY() + $h);                
 
             }else{
                 $this->MultiCell($w_aux, $new_h, $val['valor'], $borde_aux, $cd['align'], 0,$cd['ln'], '', '' );
