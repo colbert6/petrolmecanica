@@ -4,7 +4,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class MY_Controller extends CI_Controller {
 
     //constructor, debe llamar al constructor de la clase parent
-    public $sistema = 'PETROLMECANICA JC - TREBLOCs';
     
     public $controller = '';
     public $metodo = '';
@@ -13,25 +12,28 @@ class MY_Controller extends CI_Controller {
     public $nombre_usuario = '';
     public $perfil_usuario = '';
 
-    public $sistema_pestania_nombre = 'PETROLMECANICA JC';
-    public $sistema_pestania_icono = 'assets/img/icono_sistema.png';
+    // Variables de sistema sobre la empresa
+    public $sistema = '';
+    public $sistema_pestania_nombre = '';
+    public $sistema_pestania_icono = '';
 
-    public $nombre_empresa = 'PETROLMECANICA JC';
-    public $nombre_empresa_abreviado = 'PETROLMECANICA JC';
-    public $logo_empresa = 'assets/img/logo_empresa.png';
-    public $razon_social = 'PETROLMECANICA JC S.A.C.';
-    public $ruc = '20602440908';
-    public $direccion = 'Pj. La Amistad nro. 145 Bar. Mollepampa - Cajamarca - Cajamarca';//'Jr. Alfonso ugarte Nro. 1800, Bar. Shucapampa - CAJAMARCA';
-    public $direccion_adicional = 'Calle San francisco nro. 435 - urb. las palmeras - Jaen - Cajamarca';
-    public $contacto = 'Cel.978833002 | Correos: edinson@petrolmecanicajc.com,  petrolmecanica.jc@gmail.com';
-    public $rubro = 'Venta al por mayor de otros tipos de maquinaria y equipo <br> Fabricación de productos metalicos para uso estructural';
+    public $nombre_empresa = '';
+    public $nombre_empresa_abreviado = '';
+    public $logo_empresa = '';
+    public $razon_social = '';
+    public $ruc = '';
+    public $direccion = '';
+    public $direccion_adicional = '';
+    public $contacto = '';
+    public $rubro = '';
 
-    public $certificate_path = 'assets/key/C22080467303.crt';
-    public $primaryKey_path = 'assets/key/C22080467303.pem';
-    public $import_key = 'Edinjigue03109001';
-    public $sello_firma_path = 'assets/img/firma_petrolmecanicajc.png';
-	public $icono_sistema = 'assets/img/icono_sistema.png';
+    public $certificate_path = '';
+    public $primaryKey_path = '';
+    public $import_key = '';
+    public $sello_firma_path = '';
+	public $icono_sistema = '';
 
+    // Variables de sistema sobre comprobantes
     public $id_ticket = 1;
     public $id_boleta = 3;
     public $id_factura = 2;
@@ -50,8 +52,34 @@ class MY_Controller extends CI_Controller {
 
     public function __construct()
     {
-        parent::__construct();        
+        parent::__construct(); 
         
+        $variables_sistema_default = array(
+            "sistema" =>'PETROLMECANICA JC - TREBLOCs',            
+            "sistema_pestania_nombre" =>'PETROLMECANICA JC',
+            "sistema_pestania_icono" =>'assets/img/icono_sistema.png',
+            "nombre_empresa" =>'PETROLMECANICA JC',
+            "nombre_empresa_abreviado" =>'PETROLMECANICA JC',
+            "logo_empresa" =>'assets/img/logo_empresa.png',
+            "razon_social" =>'PETROLMECANICA JC S.A.C.',
+            "ruc" =>'20602440908',
+            "direccion" =>'Pj. La Amistad nro. 145 Bar. Mollepampa - Cajamarca - Cajamarca',
+            "direccion_adicional" =>'Calle San francisco nro. 435 - urb. las palmeras - Jaen - Cajamarca',
+            "contacto" =>'Cel.978833002 | Correos: edinson@petrolmecanicajc.com,  petrolmecanica.jc@gmail.com',
+            "rubro" =>'Venta al por mayor de otros tipos de maquinaria y equipo <br> Fabricación de productos metalicos para uso estructural',
+            "certificate_path" =>'assets/key/C22080467303.crt',
+            "primaryKey_path" =>'assets/key/C22080467303.pem',
+            "import_key" =>'Edinjigue03109001',
+            "sello_firma_path" =>'assets/img/firma_petrolmecanicajc.png',
+            "icono_sistema" =>'assets/img/icono_sistema.png'
+        );
+
+        $this->ci = &get_instance();
+        
+        foreach ($variables_sistema_default as $key => $value) {
+            //echo $this->ci->config->item('MY_Controller_'.$key);
+            $this->$key = $this->ci->config->item('MY_Controller_'.$key);
+        } 
         
     }
 

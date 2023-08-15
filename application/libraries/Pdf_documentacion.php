@@ -286,11 +286,18 @@ class Pdf_documentacion extends TCPDF
             //$this->MultiCell($w_aux, $new_h, $eje_XY, $borde_aux, $cd['align'], 0,$cd['ln'], '', '' );
 
             if ($val['tipo']=='img') {
-
+                
+                // Valores dafault para 2 imgs por pagina
                 $x = $this->pos_x ;
                 $y = $this->GetY() + 10;
                 $w = 120; //ancho de imagen
                 $h = 80; //alto de imagen
+
+                if($val['salto_linea'] == 999){
+                    $val['salto_linea'] = 1; 
+                    $w = 170; //ancho de imagen
+                    $h = 210; //alto de imagen
+                } 
 
                 if($this->GetY() > $this->max_heigth + $h ){ 
                     $this->AddPage() ;
@@ -303,7 +310,7 @@ class Pdf_documentacion extends TCPDF
                 $imgUbicacionExploded = explode(".",$imgUbicacionLastString);
                 $imgTypeExtension = strtoupper($imgUbicacionExploded[1]);
 
-                $this->Image($imgPathUbicacion, $x, $y, $w, $h, $imgTypeExtension, '', 'T', false, 300, '', false, false, 0, false, false, false);
+                $this->Image($imgPathUbicacion, $x, $y, $w, $h, $imgTypeExtension, $link=$imgPathUbicacion, 'T', false, 300, '', false, false, 0, false, false, false);
                 $this->SetY( $this->GetY() + $h);                
 
             }else{
