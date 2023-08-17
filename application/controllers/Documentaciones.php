@@ -53,7 +53,6 @@ class Documentaciones extends MY_Controller {
         $output = $crud->render();
 
         $output->title = "Documentacion :: <a href='".base_url('documentaciones/add')."'> crear nuevo documento</a>"; 
-        $output->title .= "<br> <br> <a href='".base_url('documentaciones/add_calibracion_tanque')."'> Crear calibracion_tanque</a>";
 
         $this->_init(true,true,true);//Carga el tema ( $cargar_menu, $cargar_url, $cargar_template )
         $this->load->view('grocery_crud/basic_crud', (array)$output ) ;
