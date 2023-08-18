@@ -59,6 +59,7 @@ class Get_datas extends MY_Controller {
             }else{
                 // separar las respuestas según resultado de consulta EMPRESA/PERSONA
                 $r_c_c = $result_cliente_consultado;
+                //print_r($r_c_c);
                 $return['estado']= true;
 
                 $r_data = array();
@@ -71,7 +72,7 @@ class Get_datas extends MY_Controller {
                 $r_data['correo'] = ''?? '';
                 $r_data['fecha_nacimiento'] = $r_c_c['fecha_nacimiento']?? '';
 
-                if(isset($r_data['fecha_nacimiento']) ){
+                if(isset($r_c_c['fecha_nacimiento']) ){
                     $fecha_nacimiento = date_create_from_format('d/m/Y', $r_data['fecha_nacimiento']);
                     $fecha_nacimiento = date_format($fecha_nacimiento, 'd-m-Y');
                 }
