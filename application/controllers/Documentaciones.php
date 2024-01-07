@@ -506,6 +506,8 @@ class Documentaciones extends MY_Controller {
         ob_end_clean();
         $pdf->Output($nombrepdf.'.pdf', 'I');
     }
+
+    
 	
 
 }

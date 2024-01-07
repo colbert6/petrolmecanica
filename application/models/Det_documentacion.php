@@ -10,15 +10,66 @@ class Det_documentacion extends CI_Model {
     /*
     Table "dato" ._  contiene los tipos de datos 
     */
-    
+
+    function convertirATablaHTML($texto) {
+        // Reemplazar los caracteres especiales
+        #$texto = htmlspecialchars($texto);
+        #return $texto;
+
+        // Dividir las líneas del texto
+        $lineas = explode("\n", $texto);
+
+        // Inicializar la variable para almacenar la tabla HTML
+        $tablaHTML = '<table border="1" style="font-size: 7px;">' . PHP_EOL;
+       
+        // Recorrer cada línea y construir las filas de la tabla
+        foreach ($lineas as $linea) {
+
+            // Omitir la primera línea que contiene "<table>"
+            if (strtolower(trim($linea)) === '<table>') {
+                continue;
+            }
+
+            // Eliminar caracteres no deseados y dividir los elementos de la fila
+            $elementos = explode('|', trim($linea, " \t\n\r\0\x0B|-"));
+
+            // Omitir las líneas que no tienen division de >1 elementos
+            if (count($elementos) <= 1 ) { // aqui se valida la linea "--""
+                continue;
+            }
+
+            // Construir la fila de la tabla
+            $tablaHTML .= '<tr>' . PHP_EOL;
+            foreach ($elementos as $elemento) {
+                // Añadir cada elemento como una celda
+                $tablaHTML .= '<td>' . $elemento . '</td>' . PHP_EOL;
+            }
+            $tablaHTML .= '</tr>' . PHP_EOL;
+        }
+
+        // Cerrar la etiqueta de la tabla
+        $tablaHTML .= '</table>';
+
+        // Retornar la tabla HTML generada
+        return $tablaHTML;
+    }
+
+
     public function insert_det_documentacion()
     {   
         $cont = count($this->input->post('iddato'));
 
         for ($i=0; $i < $cont ; $i++) { 
+
+            $valor_dato = $this->input->post('dato')[$i];
+
+            if (strpos($valor_dato, '<table') !== false ){
+               $valor_dato = $this->convertirATablaHTML($valor_dato);
+            }
+
             # code..
             $this->dato_iddato = $this->input->post('iddato')[$i];
-            $this->valor = $this->input->post('dato')[$i];
+            $this->valor = $valor_dato;
             $this->estado = 'Activo';
             $this->orden = $i;
 

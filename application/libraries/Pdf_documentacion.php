@@ -314,9 +314,18 @@ class Pdf_documentacion extends TCPDF
                 $this->SetY( $this->GetY() + $h);                
 
             }else{
-                $this->MultiCell($w_aux, $new_h, $val['valor'], $borde_aux, $cd['align'], 0,$cd['ln'], '', '' );
-            }
-            
+                // tipo texto normal or HTML
+
+                $ishtml_text=false;
+
+                if (strpos($val['valor'], '<table') !== false ){
+                    $ishtml_text=true;
+                    //$val['valor'] = $this->convertirATablaHTML($val['valor']);
+                }
+
+                $this->MultiCell($w_aux, $new_h, $val['valor'], $borde_aux, $cd['align'], 0,$cd['ln'], '', '', $reseth=true, $stretch=0, $ishtml_text );
+                
+            }            
 
             if($val['salto_linea'] > 0){
                 $salto = $val['salto_linea'] * 1; 
@@ -326,6 +335,7 @@ class Pdf_documentacion extends TCPDF
         }
         //echo $text;      exit();     
     }
+
 
     public function data_table( $data, $head_cols, $flag_nro_item = false ) {//suma de $widthcols = 200 - $flag_nro_item
         $this->set_formato($this->format);
