@@ -362,6 +362,7 @@ class Documentaciones extends MY_Controller {
                 $config['upload_path']   = $uploadPath;
                 $config['allowed_types'] = 'gif|jpg|jpeg|png';
                 $config['file_name'] = $imagenNameFormated;
+		$config['max_size'] = 0;
 
                 $this->load->library('upload', $config);
 
