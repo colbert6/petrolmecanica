@@ -37,7 +37,9 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 /public/qr_code/*.gif
 !/public/qr_code/*.txt
 
+/public/*.txt
 
+/assets/key/*.key
 /assets/uploads/calibracion_tanque/*.jpg
 /assets/uploads/calibracion_tanque/*.jpeg
 /assets/uploads/calibracion_tanque/*.png

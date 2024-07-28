@@ -5360,6 +5360,12 @@ class Grocery_CRUD extends grocery_CRUD_States
 		return $this;
 	}
 
+	public function set_relation_cct($field_name , $field_name_related_table , $related_table, $related_title_field, $where_clause = null, $order_by = null)
+	{
+		$this->relation[$field_name_related_table] = array($field_name, $related_table,$related_title_field, $where_clause, $order_by);
+		return $this;
+	}
+
 	/**
 	 *
 	 * Sets a relation with n-n relationship.

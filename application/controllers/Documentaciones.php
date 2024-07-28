@@ -140,6 +140,44 @@ class Documentaciones extends MY_Controller {
         $this->load->view('grocery_crud/basic_crud', (array)$output ) ;
     }
 
+    public function detalle_documentacion()
+    {
+        $this->metodo = 'Lista';//Siempre define las migagas de pan
+
+        $crud = new grocery_CRUD();
+        $crud->set_table('detalle_documentacion');
+
+        $crud->required_fields('dato_iddato','documentacion_iddocumentacion' );
+
+        $crud->set_relation('dato_iddato', 'dato','descripcion');
+        $crud->set_relation('documentacion_iddocumentacion','documentacion','nro_documento');
+
+        $crud->unset_texteditor(array('valor','full_text'));
+
+        //$crud->display_as('priority','Orden');
+        //$crud->columns('descripcion','documentacion_iddocumentacion', 'valor');
+        $crud->unset_delete();
+        $crud->unset_add();
+        //$crud->unique_fields(array(''));}
+
+        $crud->order_by('orden','desc');
+        $crud->order_by('documentacion_iddocumentacion','desc');
+
+        $crud->callback_after_update(function ($post_array, $primary_key) {
+            $fecha_hora = date('Y-m-d H:i:s');
+            $valores = implode(', ', $post_array);
+            $log_message = "[$fecha_hora] id: $primary_key - Valores: $valores";
+            file_put_contents('public\log_upd_det_doc.txt', $log_message . PHP_EOL, FILE_APPEND);
+            return true;
+        });
+
+        $output = $crud->render();
+        $output->title = 'Detalle de Documento';
+
+        $this->_init(true,true,true);//Carga el tema ( $cargar_menu, $cargar_url, $cargar_template )
+        $this->load->view('grocery_crud/basic_crud', (array)$output ) ;
+    }
+
     public function add()
     {
         

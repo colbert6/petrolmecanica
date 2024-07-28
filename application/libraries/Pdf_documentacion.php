@@ -34,7 +34,9 @@ class Pdf_documentacion extends TCPDF
         $this->certificate_path = $MY_controller->certificate_path;
         $this->primaryKey_path = $MY_controller->primaryKey_path;
         $this->import_key = $MY_controller->import_key;
-        $this->sello_firma_path = $MY_controller->sello_firma_path; 
+        $this->sello_firma_path = $MY_controller->sello_firma_path;
+
+        //echo  $this->certificate_path; die();
     }
 
     public $motivo = 'documentacion';
@@ -171,12 +173,13 @@ class Pdf_documentacion extends TCPDF
 
     public function add_firma_digital() {
 
+
         $certificate = 'file://'.realpath($this->certificate_path);
         $primaryKey = 'file://'.realpath($this->primaryKey_path);
-        $import_key = $this->import_key; //'Edinjigue03109001';//'colbert1234';
+        $import_key = 'file://'.realpath($this->import_key); //$this->import_key; //'Edinjigue03109001';//'colbert1234';//'file://'.realpath('assets/key/C240726108234.key');
         $sello_firma_path = $this->sello_firma_path;// 'assets/img/firma_petrolmecanicajc.png';
         
-        $sello_firma_tamanio_porcentaje = 0.14;
+        $sello_firma_tamanio_porcentaje = 0.18;
         $sello_firma_ancho_tamanio = 497 * $sello_firma_tamanio_porcentaje;
         $sello_firma_altura_tamanio = 159 * $sello_firma_tamanio_porcentaje;
         $sello_firma_pos_x = 110;        

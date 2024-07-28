@@ -67,8 +67,8 @@ class MY_Controller extends CI_Controller {
             "direccion_adicional" =>'Calle San francisco nro. 435 - urb. las palmeras - Jaen - Cajamarca',
             "contacto" =>'Cel.978833002 | Correos: edinson@petrolmecanicajc.com,  petrolmecanica.jc@gmail.com',
             "rubro" =>'Venta al por mayor de otros tipos de maquinaria y equipo <br> Fabricación de productos metalicos para uso estructural',
-            "certificate_path" =>'assets/key/C22080467303.crt',
-            "primaryKey_path" =>'assets/key/C22080467303.pem',
+            "certificate_path" =>'assets/key-bkp/C22080467303.crt',
+            "primaryKey_path" =>'assets/key-bkp/C22080467303.pem',
             "import_key" =>'Edinjigue03109001',
             "sello_firma_path" =>'assets/img/firma_petrolmecanicajc.png',
             "icono_sistema" =>'assets/img/icono_sistema.png'

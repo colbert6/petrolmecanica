@@ -101,7 +101,7 @@ class Det_documentacion extends CI_Model {
 
         $this->db->join('datos_documentacion dat_doc', ' doc.serie_comprobante_idserie_comprobante = dat_doc.iddocumento AND dat_doc.iddato = detc.dato_iddato ', 'left'); // datos_documentacion da el formato de impresion 
 
-        
+        $this->db->where('detc.estado','Activo');
         $this->db->where('detc.documentacion_iddocumentacion',$iddocumentacion);
     
         $this->db->order_by('detc.orden','ASC');
