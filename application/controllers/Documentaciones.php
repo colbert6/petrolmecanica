@@ -167,7 +167,7 @@ class Documentaciones extends MY_Controller {
             $fecha_hora = date('Y-m-d H:i:s');
             $valores = implode(', ', $post_array);
             $log_message = "[$fecha_hora] id: $primary_key - Valores: $valores";
-            file_put_contents('public\log_upd_det_doc.txt', $log_message . PHP_EOL, FILE_APPEND);
+            file_put_contents('public/log_upd_det_doc.txt', $log_message . PHP_EOL, FILE_APPEND);
             return true;
         });
 
