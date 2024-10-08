@@ -191,7 +191,7 @@ var save = function(){
         alerta(" Cliente no valido","Debe seleccionar un cliente valido",'warning');
     } else {
 
-        if(is_peso_imagen_valido(2)){
+        if(is_peso_imagen_valido(5)){
             fallas=false; //significa que no hay fallas
         }        
     }      

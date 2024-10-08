@@ -33,7 +33,7 @@ class Compras extends MY_Controller {
         $crud->set_relation('colaborador_registro','colaborador','nombre');
         $crud->set_relation('tipo_comprobante_idtipo_comprobante','tipo_comprobante','descripcion');
 
-        //$crud->unset_add();
+        $crud->unset_add();
         //$crud->unset_edit();
         $crud->unset_clone();
         $crud->unset_delete();
@@ -55,7 +55,7 @@ class Compras extends MY_Controller {
         $crud->order_by('fecha_creacion','desc');
         
         $output = $crud->render();
-        $output->title = "Compras :: <a href='".base_url('compras/lista/add')."'> Crear nueva Compra </a>";
+        $output->title = "Compras :: <a href='".base_url('compras/add')."'> Crear nueva Compra </a>";
 
         $this->_init(true,true,true);//Carga el tema ( $cargar_menu, $cargar_url, $cargar_template )
         $this->load->view('grocery_crud/basic_crud', (array)$output ) ;
