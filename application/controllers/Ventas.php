@@ -621,7 +621,7 @@ class Ventas extends MY_Controller {
         }else{ //No debería ingresar, ya que toda venta debe ser enviada  
 			
             $result['codigo'] = $cod_sunat;
-            $result['mensaje'] = $msj_sunat
+            $result['mensaje'] = $result;
             $this->envio_cpe->set_error($data_json, $result);//guardar registro error envio
             $result['respuesta'] = 'error';
 
