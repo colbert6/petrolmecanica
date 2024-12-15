@@ -232,7 +232,10 @@ class Ventas extends MY_Controller {
 					$error = $this->db->error();
 					$return['estado'] = false;
 					$return['mensaje'] = 'ERROR: Envio comprobante electrónico. <br> ('.$result_envio_cpe['mensaje'].') ';
+                    print_r($result_envio_cpe);
 					$this->db->trans_rollback();
+
+
 				}
 
 			}else{
