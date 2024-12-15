@@ -105,7 +105,16 @@ class Facturalaya{
     	$data = array_merge($data_cpe, $this->get_token_cliente());
 		$data["emisor"] = $this->get_data_emisor();
 
-    	return json_decode($this->send_cpe($data, $data['token_cliente'], $ruta), true);
+		$result_send_cpe = $this->send_cpe($data, $data['token_cliente'], $ruta);
+		$result_send_cpe_array = json_decode($result_send_cpe, true);
+
+		if (is_array($result_send_cpe_array)) {
+			return $result_send_cpe_array; 
+		}
+
+		$result_send_cpe_array["msj_sunat"] = $result_send_cpe;
+		
+    	return $result_send_cpe_array;
 		
     }
 	
@@ -126,6 +135,8 @@ class Facturalaya{
 		curl_setopt($ch, CURLOPT_POSTFIELDS,$data_json);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		$respuesta  = curl_exec($ch);
+
+
 		if (curl_error($ch)) {
 			$error_msg = curl_error($ch);
 		}
@@ -145,7 +156,7 @@ class Facturalaya{
 	
 		return $respuesta;
 
-		//echo $respuesta;exit();
+		
        
     }
   

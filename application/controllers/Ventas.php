@@ -231,7 +231,7 @@ class Ventas extends MY_Controller {
 				}else{
 					$error = $this->db->error();
 					$return['estado'] = false;
-					$return['mensaje'] = 'ERROR: Envio comprobante electrónico. <br> ('.$result_envio_cpe['mensaje'].') ';
+					$return['mensaje'] = 'ERROR en Envio comprobante electrónico. <br> INFO: <br>'.$result_envio_cpe['mensaje'].'';
                     //print_r($result_envio_cpe);
 					$this->db->trans_rollback();
 
@@ -597,7 +597,6 @@ class Ventas extends MY_Controller {
 
         //print_r($data_json);die();
 	
-	
 
         //Validación - Problema con data del cpe
         if(count($data_json) &&  $data_json != 'null' ){
@@ -623,11 +622,11 @@ class Ventas extends MY_Controller {
 
         }else{ //No debería ingresar, ya que toda venta debe ser enviada  
 			
-            $result['codigo'] = $cod_sunat;
             $result['mensaje'] = is_array($result)? implode(",", $result):$msj_sunat;
             $this->envio_cpe->set_error($data_json, $result);//guardar registro error envio
             $result['respuesta'] = 'error';
-
+            $result['codigo'] = $cod_sunat;
+            
         }
 
         return $result;
