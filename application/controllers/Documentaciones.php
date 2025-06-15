@@ -494,8 +494,6 @@ class Documentaciones extends MY_Controller {
         $this->load->model('documentacion');
         $this->load->model('det_documentacion');
         $this->load->helper('calculo');
-      
-        //$this->det_documentacion->actualizar();exit();
 
         $orientation = 'P' ;
         $format = 'A4';
@@ -539,7 +537,9 @@ class Documentaciones extends MY_Controller {
         
         $pdf->comprobante_data($det_documentacion);
 
-        $pdf->add_firma_digital(); 
+        $sello_firma_path_modelo = ($documentacion['Comprobante'] != 'Contrato') ? 'assets/img/firma_petrolmecanicajc_mas_ing_pmvp.png' : '';
+
+        $pdf->add_firma_digital($sello_firma_path_modelo); 
 
          /* Limpiamos la salida del búfer y lo desactivamos */
         ob_end_clean();

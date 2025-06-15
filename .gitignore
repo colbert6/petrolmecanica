@@ -40,6 +40,10 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 /public/*.txt
 
 /assets/key/*.key
+/assets/key/*.pem
+/assets/key/*.crt
+/assets/key/*.pfx
+
 /assets/uploads/calibracion_tanque/*.jpg
 /assets/uploads/calibracion_tanque/*.jpeg
 /assets/uploads/calibracion_tanque/*.png

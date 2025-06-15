@@ -171,20 +171,22 @@ class Pdf_documentacion extends TCPDF
         }
     }
 
-    public function add_firma_digital() {
-
+    public function add_firma_digital($img_firma_modelo = '') {
 
         $certificate = 'file://'.realpath($this->certificate_path);
         $primaryKey = 'file://'.realpath($this->primaryKey_path);
         $import_key = 'file://'.realpath($this->import_key); //$this->import_key; //'Edinjigue03109001';//'colbert1234';//'file://'.realpath('assets/key/C240726108234.key');
-        $sello_firma_path = $this->sello_firma_path;// 'assets/img/firma_petrolmecanicajc.png';
         
-        $sello_firma_tamanio_porcentaje = 0.18;
+        $firma_default =  $this->sello_firma_path;
+        $sello_firma_tamanio_porcentaje_default = 0.14;
+        
+        $sello_firma_path = ($img_firma_modelo != '') ? $img_firma_modelo : $this->sello_firma_path;
+        $sello_firma_tamanio_porcentaje = ($img_firma_modelo != '') ? 0.18 : $sello_firma_tamanio_porcentaje_default;
+
         $sello_firma_ancho_tamanio = 497 * $sello_firma_tamanio_porcentaje;
         $sello_firma_altura_tamanio = 159 * $sello_firma_tamanio_porcentaje;
         $sello_firma_pos_x = 110;        
         $sello_firma_pos_y = $this->GetY() >= 245 ? 255 : $this->GetY() + 5;
-
 
         $firma_array_info = array();        
 
