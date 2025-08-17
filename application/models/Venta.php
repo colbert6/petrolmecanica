@@ -82,9 +82,10 @@ class Venta extends CI_Model {
     public function get_ventas($fecha_inicio,$fecha_fin)
     {   
 
-        $this->db->select("fecha_creacion as Fecha, cliente_razon_social as Cliente, nro_documento as Nro_documento, total as Total ");
+        $this->db->select("DATE_FORMAT(vent.fecha_venta,'%Y-%m-%d') as Fecha, cliente_razon_social as Cliente, cliente_documento as Cliente_documento, nro_documento as Nro_documento, total as Total, vent.estado as Estado ");
         $this->db->from('venta vent');
-        $this->db->where('vent.estado="Vigente" AND DATE_FORMAT(vent.fecha_venta,"%Y-%m-%d") BETWEEN DATE_FORMAT("'.$fecha_inicio.'","%Y-%m-%d") AND DATE_FORMAT("'.$fecha_fin.'","%Y-%m-%d")' );
+        $this->db->where('DATE_FORMAT(vent.fecha_venta,"%Y-%m-%d") BETWEEN DATE_FORMAT("'.$fecha_inicio.'","%Y-%m-%d") AND DATE_FORMAT("'.$fecha_fin.'","%Y-%m-%d")' );
+        #vent.estado="Vigente" AND 
         $this->db->order_by('fecha_creacion','desc');
         $result = $this->db->get()->result_array();        
       
