@@ -39,6 +39,8 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 
 /public/*.txt
 
+/public/cpe_sunat/*.zip
+
 /assets/key/*.key
 /assets/key/*.pem
 /assets/key/*.crt
