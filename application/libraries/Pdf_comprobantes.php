@@ -758,7 +758,7 @@ class Pdf_comprobantes extends TCPDF
 			
 			$eje_x_cta_bca_img = $this->GetX();
 			$eje_y_cta_bca_img = $this->GetY() + 1;
-			$this->Image($cta_bcas["file_path"], $eje_x_cta_bca_img, $eje_y_cta_bca_img, $cta_bcas["w"], $cta_bcas["h"], 'JPG', '', 'T', false, 300, '', false, false, 0, false, false, false);    
+			#$this->Image($cta_bcas["file_path"], $eje_x_cta_bca_img, $eje_y_cta_bca_img, $cta_bcas["w"], $cta_bcas["h"], 'JPG', '', 'T', false, 300, '', false, false, 0, false, false, false);    
 
 
         }    
