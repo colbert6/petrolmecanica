@@ -494,7 +494,7 @@ class Ventas extends MY_Controller {
 
      public function print_guia() //copia de venta
     {   
-
+        return "";
         $this->load->model('venta');
         $this->load->model('det_venta');
         $this->load->helper('calculo');

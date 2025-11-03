@@ -152,7 +152,7 @@ var save = function(){
                                       className: 'btn-info',
                                       callback: function() {
                                             open_imprimir('ventas/print_venta?idventa=', idsave); 
-                                            open_imprimir('ventas/print_guia?idventa=', idsave); 
+                                            //open_imprimir('ventas/print_guia?idventa=', idsave); 
                                       }
                                     },
                                     
