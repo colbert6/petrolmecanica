@@ -232,8 +232,7 @@ class Envio_cpes extends MY_Controller {
         $sql = "SELECT IF( tipoenvio = 'generar_comprobante', 'consultar_comprobante' , 'consultar_anulacion') as operacion, 
                        tipo as tipo_de_comprobante,          
                        serie as serie,
-                       correlativo as numero , 
-                       aceptada_por_sunat 
+                       correlativo as numero  
 
                 FROM envio_electronico 
                 WHERE id = ".$idenvio ;
