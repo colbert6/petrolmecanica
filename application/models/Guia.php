@@ -22,7 +22,7 @@ class Guia extends CI_Model {
 		        
         $this->nro_documento_transporte = $this->input->post('nro_documento_transporte');
 		$this->razon_social_transporte = $this->input->post('razon_social_transporte');
-        $this->transporte_nro_placa = $this->input->post('transporte_nro_placa');
+        $this->transporte_nro_placa = strtoupper($this->input->post('transporte_nro_placa'));
         $this->id_ubigeo_destino = $this->input->post('id_ubigeo_destino');
         $this->dir_destino = $this->input->post('dir_destino');
         $this->id_ubigeo_partida = $this->input->post('id_ubigeo_partida');
