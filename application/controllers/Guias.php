@@ -208,7 +208,7 @@ class Guias extends MY_Controller {
 		}
 		
 		//Insert DB envio_electronico y update tabla venta|guia_remision
-        $this->envio_cpe->set_envio($data_json, $result_curl);//guardar registro envio
+        $this->envio_cpe->set_envio($data_seteada_cpe, $result_curl);//guardar registro envio
         $this->envio_cpe->update_envio_cpe($idguia, $codigo_envio);//Actualizar en tabla venta
 		
 		//COMPLETAR TRANSACCION
