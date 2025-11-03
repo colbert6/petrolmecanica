@@ -210,6 +210,37 @@ class Guias extends MY_Controller {
 		//Insert DB envio_electronico y update tabla venta|guia_remision
         $this->envio_cpe->set_envio($data_seteada_cpe, $result_curl);//guardar registro envio
         $this->envio_cpe->update_envio_cpe($idguia, $codigo_envio);//Actualizar en tabla venta
+
+		if ($tipo_envio == $codigo_envi){
+			$result=$result_curl;
+			$data_json=$data_seteada_cpe;
+			$sunat_files_down = [$result['ruta_xml'],$result['ruta_cdr']];
+			$comprobante_name_file_sunat =  $data_json["serie_comprobante"].$data_json["numero_comprobante"];
+
+			// Carpeta de destino en tu proyecto (asegúrate que tenga permisos de escritura)
+			$destino = FCPATH . 'public/cpe_sunat/';  // FCPATH apunta a la carpeta public/ en CodeIgniter 4
+			if (!is_dir($destino)) {
+				mkdir($destino, 0777, true);
+			}
+
+			foreach ($sunat_files_down as $url) {
+				// Obtener nombre de archivo de la URL
+
+				$nombreArchivo = $comprobante_name_file_sunat.basename(parse_url($url, PHP_URL_PATH)).".zip";
+				$rutaLocal = $destino . $nombreArchivo;
+
+				// Descargar archivo
+				$archivo = fopen($rutaLocal, 'w+');
+				$ch = curl_init($url);
+				curl_setopt($ch, CURLOPT_FILE, $archivo);
+				curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+				curl_exec($ch);
+				curl_close($ch);
+				fclose($archivo);
+
+				#echo "Archivo guardado: " . $url . "<br>";
+			}
+		}
 		
 		//COMPLETAR TRANSACCION
 		$this->db->trans_commit();//Para guardar la venta				
