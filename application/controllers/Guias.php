@@ -211,7 +211,7 @@ class Guias extends MY_Controller {
         $this->envio_cpe->set_envio($data_seteada_cpe, $result_curl);//guardar registro envio
         $this->envio_cpe->update_envio_cpe($idguia, $codigo_envio);//Actualizar en tabla venta
 
-		if ("generar_guia_remision" == $codigo_envi){
+		if ("generar_guia_remision" == $codigo_envio){
 			$result=$result_curl;
 			$data_json=$data_seteada_cpe;
 			$sunat_files_down = [$result['ruta_xml'],$result['ruta_cdr']];
