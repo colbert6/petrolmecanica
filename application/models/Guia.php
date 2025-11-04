@@ -100,6 +100,7 @@ class Guia extends CI_Model {
 			guia.id_codigopuerto as id_codigopuerto,
 			guia.numero_contenedor as numero_contenedor,
 			guia.nota as nota,
+			guia.url_sunat_guia as url_sunat_guia,
 			
 			SUBSTRING(guia.nro_documento, 1, 4) as serie_comprobante,
             (SUBSTRING(guia.nro_documento, 6, 8) * 1) as numero_comprobante,

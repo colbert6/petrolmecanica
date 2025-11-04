@@ -96,6 +96,22 @@ class Envio_cpe extends CI_Model {
         return  1;
     }    
 
+    public function update_envio_cpe_guia($idventa,$url_sunat_guia, $tipo)
+    {   
+		$tabla_nombre = "guia_remision";
+        $campo_llave_nombre = "idguia_remision";
+        $campo_update_nombre = 'envio_cpe_emision';
+        
+        if($campo_update_nombre != '' ){
+            $this->db->set($campo_update_nombre, 1);
+            $this->db->set("url_sunat_guia", $url_sunat_guia);
+            $this->db->where($campo_llave_nombre,$idventa);
+            $this->db->update($tabla_nombre);
+        }       
+
+        return  1;
+    }   
+
 
 }
 

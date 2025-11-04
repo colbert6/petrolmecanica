@@ -748,13 +748,18 @@ class Pdf_comprobantes extends TCPDF
             $this->MultiCell( $ctfl['w'] + $ctft['w'], '', $text,  $cm['border'],  $cm['align'],false,1,'', '',true,0,true );
 
         }   elseif( $formato == 'pie_guia'){
+
+            $cm['w'] = $ctfl['w'];
 			
-            
+            $imgdata = base64_decode($data['qr_code']);
+            //$this->Image('@'.$imgdata, 10,245 , 28, 28);
+
+            $this->Image('@'.$imgdata, '', $cqr['pos_y'] , $cqr['w'], $cqr['h']   );
 			
             $observacion = (isset($data['observacion']['texto'])) ? $data['observacion']['texto'] : '  '  ;
             $this->SetFont('', '', $cm['font_h']);
             $text= "Observaciones .: ".$observacion." <br>";
-			$this->MultiCell( $this->max_width, '', $text,  $cm['border'],  $cm['align'],false,1,'', '',true,0,true );
+			$this->MultiCell( $cm['w'], '', $text,  $cm['border'],  $cm['align'],false,1,$cm['pos_x'], '',true,0,true );
 			
 			$eje_x_cta_bca_img = $this->GetX();
 			$eje_y_cta_bca_img = $this->GetY() + 1;

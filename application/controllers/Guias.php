@@ -206,10 +206,12 @@ class Guias extends MY_Controller {
 			print json_encode($return);
             die('');						
 		}
+
+		$url_sunat_guia = $result['url_sunat_guia'];
 		
 		//Insert DB envio_electronico y update tabla venta|guia_remision
         $this->envio_cpe->set_envio($data_seteada_cpe, $result_curl);//guardar registro envio
-        $this->envio_cpe->update_envio_cpe($idguia, $codigo_envio);//Actualizar en tabla venta
+        $this->envio_cpe->update_envio_cpe_guia($idguia, $url_sunat_guia, $codigo_envio);//Actualizar en tabla venta
 
 		if ("generar_guia_remision" == $codigo_envio){
 			$result=$result_curl;
@@ -243,7 +245,11 @@ class Guias extends MY_Controller {
 		}
 		
 		//COMPLETAR TRANSACCION
-		$this->db->trans_commit();//Para guardar la venta				
+		$this->db->trans_commit();//Para guardar la guia
+
+		
+		
+		
 		$return['idsave'] = $idguia;
 		$return['estado'] = true;
 		
@@ -331,14 +337,75 @@ class Guias extends MY_Controller {
         $width_cols = array(  array('Descripcion',50, 'L'), array('Codigo',15 ,'R'), array('Medida',15,'R'), array('Cantidad',10,'R'), array('Peso',10,'R') );
         $pdf->data_table( $data_det_guia ,  $width_cols, true);       
         
-        $qr_code = '';		
-        $data_footer = array('observacion' => array( 'texto' =>  $data_guia['nota']));
+        $qr_code = $this->crear_qr($data_guia['url_sunat_guia'], "url_sunat_guia"); 
+
+        $data_footer = array('observacion' => array( 'texto' =>  $data_guia['nota']), 
+		'qr_code' =>  $qr_code );
+		
         $pdf->data_table_footer( 'pie_guia',  $data_footer , 'msj');
 		
          
         ob_end_clean();/* Limpiamos la salida del búfer y lo desactivamos */
         $pdf->Output($pdf_file_nombre.'.pdf', 'I');
     }
+
+	//CREAMOS EL CODIGO QR PARA LA FACTURA ELECTRONICA
+	public function crear_qr($data_text, $name_file='qr_code'){
+
+		$this->load->library('ciqrcode');
+
+		$codeContents = $data_text;
+		$tempDir = 'public/qr_code/';//EXAMPLE_TMP_SERVERPATH; 
+		$fileName = $name_file.'.jpg'; 
+		$outerFrame = 0; //tamaño de borde
+		$pixelPerPoint = 6; //tamaño de los pixeles por point
+		$jpegQuality = 150;  // calidad de imagen
+
+		// generating frame 
+		$frame = QRcode::text($codeContents, false, QR_ECLEVEL_M); 
+		// rendering frame with GD2 (that should be function by real impl.!!!) 
+		$h = count($frame); 
+		$w = strlen($frame[0]); 
+			
+		$imgW = $w + 2*$outerFrame; 
+		$imgH = $h + 2*$outerFrame; 
+			
+		$base_image = imagecreate($imgW, $imgH); 
+			
+		$col[0] = imagecolorallocate($base_image,255,255,255); // BG, white  
+		$col[1] = imagecolorallocate($base_image,0,0,0);     // FG, Black 
+
+		imagefill($base_image, 0, 0, $col[0]); 
+
+		for($y=0; $y<$h; $y++) { 
+			for($x=0; $x<$w; $x++) { 
+				if ($frame[$y][$x] == '1') { 
+					imagesetpixel($base_image,$x+$outerFrame,$y+$outerFrame,$col[1]);  
+				} 
+			} 
+		} 
+			
+		// saving to file 
+		$target_image = imagecreate($imgW * $pixelPerPoint, $imgH * $pixelPerPoint); 
+		imagecopyresized( 
+			$target_image,  
+			$base_image,  
+			0, 0, 0, 0,  
+			$imgW * $pixelPerPoint, $imgH * $pixelPerPoint, $imgW, $imgH 
+		); 
+		imagedestroy($base_image); 
+		imagejpeg($target_image, $tempDir.$fileName, $jpegQuality); 
+		imagedestroy($target_image); 
+
+		$path = $tempDir.$fileName;
+		$type = pathinfo($path, PATHINFO_EXTENSION);
+		$data = file_get_contents($path);
+
+		//$qr_code= 'data:image/' . $type . ';base64,' . base64_encode($data);
+		//echo '<img src="' . $qr_code . '">';
+		$qr_code= base64_encode($data);
+		return $qr_code;
+	}
     
 
 
