@@ -207,7 +207,7 @@ class Guias extends MY_Controller {
             die('');						
 		}
 
-		$url_sunat_guia = $result['url_sunat_guia'];
+		$url_sunat_guia = $result_curl['url_sunat_guia'];
 		
 		//Insert DB envio_electronico y update tabla venta|guia_remision
         $this->envio_cpe->set_envio($data_seteada_cpe, $result_curl);//guardar registro envio
