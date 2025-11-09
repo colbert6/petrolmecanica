@@ -120,7 +120,7 @@
                 <option value="<?= $key['codigo_ubigeo'] ?>"><?= $key['descripcion_ubigeo'] ?></option>
                 <?php endforeach; ?>
               </select>
-              <input type="text" class="form-control" id="dir_partida" name="dir_partida" value="" placeholder="DIRECCION DE PARTIDA"> 
+              <input type="text" class="form-control" id="dir_partida" name="dir_partida" value="Pasaje La amistad #145, barrio Mollepampa" placeholder="DIRECCION DE PARTIDA"> 
 			  
 			  <select class="form-control" id="id_ubigeo_destino" name="id_ubigeo_destino">
                 <?php foreach ($data_distrito_ubigeo as $key): ?>
