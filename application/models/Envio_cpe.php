@@ -8,6 +8,8 @@ class Envio_cpe extends CI_Model {
             $this->errors =  $data_result['mensaje'];
         }else if(isset($data_result['msj_sunat']) ){
             $this->errors =  $data_result['msj_sunat'];
+        }else if(isset($data_result['msj']) ){
+            $this->errors =  $data_result['msj_sunat'];
         }else{
             $this->errors = "-";
         }
