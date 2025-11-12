@@ -314,9 +314,8 @@ class Ventas extends MY_Controller {
 					$return['estado'] = false;	
                     
                     $this->load->model('envio_cpe');
-                    $data_envio['tipo_envio'] = $tipo_envio;
-                    $data_envio['idmaster'] = $idventa;
-                    $respuesta_envio_error = $this->envio_cpe->set_error($data_json, $result_envio_cpe);//guardar registro error envio
+                    $data_envio = array('tipo_envio' => $tipo_envio, 'idmaster' => $idventa); 
+                    $respuesta_envio_error = $this->envio_cpe->set_error($data_envio, $result_envio_cpe);//guardar registro error envio
                     
                     
                     
