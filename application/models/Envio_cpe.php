@@ -30,7 +30,7 @@ class Envio_cpe extends CI_Model {
 	
         $this->db->insert('error_envio_electronico', $this);
         $error = $this->db->error();
-        echo $error['message'];
+        echo "error". $error['message'];
 
         #return  $this->db->insert('error_envio_electronico', $this);
     }
