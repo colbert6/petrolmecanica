@@ -311,7 +311,15 @@ class Ventas extends MY_Controller {
                     $error = $this->db->error();
                     $this->db->trans_rollback(); 
                     $return['msj'] = $return['error'] = 'ERROR: Envio electrónico. <br>- '.$result_envio_cpe['mensaje'].'<br>- '.$error['message']; 
-					$return['estado'] = false;					
+					$return['estado'] = false;	
+                    
+                    $this->load->model('envio_cpe');
+                    $data_envio['tipo_envio'] = $tipo_envio;
+                    $data_envio['idmaster'] = $idventa;
+                    $respuesta_envio_error = $this->envio_cpe->set_error($data_json, $result_envio_cpe);//guardar registro error envio
+                    
+                    
+                    
                 }
             }
 
