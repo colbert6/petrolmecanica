@@ -38,19 +38,19 @@ class Envio_cpe extends CI_Model {
     public function set_envio($data_envio, $data_result)
     {   
         $this->idmaster = $data_envio['idmaster'];
-        $this->tipo = isset($data_envio['cod_tipo_documento'])?$data_envio['cod_tipo_documento']:0;
-        $this->correlativo = isset($data_envio['numero_comprobante'])?$data_envio['numero_comprobante']:0; 
-        $this->serie = isset($data_envio['serie_comprobante'])?$data_envio['serie_comprobante']:"0";
+        $this->tipo = isset($data_envio['cod_tipo_documento'])?$data_envio['codigo_tipo_documento']:0;
+        $this->correlativo = isset($data_envio['numero_documento'])?$data_envio['numero_documento']:0; 
+        $this->serie = isset($data_envio['serie_documento'])?$data_envio['serie_documento']:"0";
 
-        $this->cod_sunat =isset($data_result['cod_sunat'])?$data_result['cod_sunat']:"0";
-        $this->msj_sunat = isset($data_result['msj_sunat'])?$data_result['msj_sunat']:" "; 
-        $this->ruta_xml = isset($data_result['ruta_xml'])?$data_result['ruta_xml']:"0";
-        $this->ruta_cdr = isset($data_result['ruta_cdr'])?$data_result['ruta_cdr']:"0";
-        $this->ruta_pdf = isset($data_result['ruta_pdf'])?$data_result['ruta_pdf']:"0";
+        $this->cod_sunat =isset($data_result['response']['code'])?$data_result['response']['code']:"0";
+        $this->msj_sunat = isset($data_result['response']['description'])?$data_result['response']['description']:" "; 
+        $this->ruta_xml = isset($data_result['links']['xml'])?$data_result['links']['xml']:"0";
+        $this->ruta_cdr = isset($data_result['links']['cdr'])?$data_result['links']['cdr']:"0";
+        $this->ruta_pdf = isset($data_result['links']['pdf'])?$data_result['links']['pdf']:"0";
 
         $this->tipoenvio = $data_envio['tipo_envio'];
         $this->fecha_envio = date("Y-m-d H:i:s");
-        $this->fecha_emi = isset($data_envio['fecha_comprobante'])?$data_envio['fecha_comprobante']:""; 
+        $this->fecha_emi = isset($data_envio['fecha_comprobante'])?$data_envio['fecha_de_emision']:""; 
         $this->data_result =  json_encode($data_result);
 
         return  $this->db->insert('envio_electronico', $this);
@@ -66,13 +66,14 @@ class Envio_cpe extends CI_Model {
         return  1;
     }
 
-    public function update_envio_cpe($idventa, $tipo)
+    public function update_envio_cpe($idventa, $tipo, $external_id = '')
     {   
 		$tabla_nombre = "venta";
 		$campo_llave_nombre = "idventa";
         switch ($tipo) {
             case 'generar_comprobante':
                 $campo_update_nombre = 'envio_cpe_emision';
+                $this->db->set('external_id', $external_id);
                 break;
 
              case 'generar_anulacion':

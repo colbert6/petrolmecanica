@@ -297,7 +297,7 @@ class Ventas extends MY_Controller {
 
                 //Envio anulacion CPE
                 $tipo_envio="generar_anulacion";   
-                $result_envio_cpe = $this->enviar_comprobante_proveedor_cpe($tipo_envio,$idventa); 
+                $result_envio_cpe = $this->enviar_comprobante_proveedor_cpe($tipo_envio, $idventa); 
 
                 if($result_envio_cpe['respuesta'] == 'ok' && $this->db->trans_status() !== FALSE){
 
@@ -316,8 +316,6 @@ class Ventas extends MY_Controller {
                     $this->load->model('envio_cpe');
                     $data_envio = array('tipo_envio' => $tipo_envio, 'idmaster' => $idventa); 
                     $respuesta_envio_error = $this->envio_cpe->set_error($data_envio, $result_envio_cpe);//guardar registro error envio
-                    
-                    
                     
                 }
             }
@@ -580,96 +578,87 @@ class Ventas extends MY_Controller {
 
     ///--------------------------CPE--------------------
 
-   public function enviar_comprobante_proveedor_cpe( $tipo_envio, $idventa) {
+    public function enviar_comprobante_proveedor_cpe($tipo_envio, $idventa) {
 
-        //Parametros
-        /*$idventa = $this->input->get('id');
-        $tipo_envio = $this->input->get('tipo_envio');   */     
+        //Parametros    
         $data_json = array();
-        $this->load->library('Facturalaya');
-        $envio_cpe = new Facturalaya();
+        $this_response = array('respuesta' => 'error');
+
+        // Iniciación de librería de envío de comprobante electrónico
+        $this->load->library('FacturaloPeru');
+        $envio_cpe_fp = new FacturaloPeru();
+
+        // Importación de modelos
+        $this->load->model('venta');
+        $this->load->model('det_venta');
 
         switch ($tipo_envio) {
             case "generar_comprobante":
-                $data_json = $envio_cpe->generar_comprobante_json($idventa, $this);
-                if (isset($data_json["numero_comprobante"])) {
-                    $data_json["numero_comprobante"] = $data_json["numero_comprobante"] * 1;
-                }
+                
+                // Obtención de datos de venta y detalle venta
+                $data_venta = $this->venta->cpe_venta($idventa); 
+                $data_detventa = $this->det_venta->cpe_detventa($idventa); 
+            
+                // Formateo de datos para el envío del comprobante
+                $data_json = $envio_cpe_fp->formatear_venta_estructura($data_venta, $data_detventa, $idventa);
+                              
                 break;
             
             case "generar_anulacion":
+                $data_venta = $this->venta->cpe_venta_anulacion($idventa); 
+                $data_json = $envio_cpe_fp->formatear_anulacion_venta_estructura($data_venta, $data_detventa, $idventa);
+
                 $data_json = $envio_cpe->generar_anulacion_json($idventa, $this);
                 break;
-        }
-
-        //print_r($data_json);die();
-	
-
-        //Validación - Problema con data del cpe
-        if(count($data_json) &&  $data_json != 'null' ){
-            $result = $envio_cpe->builder_cpe($data_json, $tipo_envio);
             
-        }else{
-            $result = array('mensaje'=>'No se encontro datos del comprobante.', 
-                'respuesta'=> "error", 'titulo'=> "error",'cod_sunat'=> "error local" , 'codigo'=> "error local");            
+            default: // Validación
+                $this_response['mensaje']='El tipo de envio de comprobante no definido.';
+                return $this_response;
+                break;
         }
-
-        $this->load->model('envio_cpe');
-        $data_json["tipo_envio"] = $tipo_envio;
-        $data_json["idmaster"] = $idventa;	
-		$cod_sunat = isset($result['cod_sunat'])? $result['cod_sunat']:999;
-		$msj_sunat = isset($result['msj_sunat'])? $result['msj_sunat']:'error';
-        $respuesta_sunat = isset($result['respuesta'])? $result['respuesta']:'error';
-	
         
-        if($respuesta_sunat == 'ok' &&  $cod_sunat == 0 ){ //Guardar
-            $this->envio_cpe->set_envio($data_json, $result);//guardar registro envio
-            $this->envio_cpe->update_envio_cpe($idventa, $tipo_envio);//Actualizar en tabla venta
+        if(count($data_json)==0){// Validación
+            $this_response['mensaje']='No se encontro datos del comprobante en la base de datos.';
+            return $this_response;
+        }
+        
+        $result_builder_cpe = $envio_cpe_fp->builder_cpe($data_json, $tipo_envio); 
 
-            if ($tipo_envio == "generar_comprobante"){
-                $sunat_files_down = [$result['ruta_xml'],$result['ruta_cdr']];
-                $comprobante_name_file_sunat =  $data_json["serie_comprobante"].$data_json["numero_comprobante"];
+        if($result_builder_cpe['respuesta_curl'] != 'ok'){ // Escenario ERROR           
+            $this_response['mensaje'] = 'Error en respuesta curl. <br>'.json_encode($result_builder_cpe) ;
+            $this_response['detalle'] = $result_builder_cpe;
+            // pendiente insertar error en bd
 
-                // Carpeta de destino en tu proyecto (asegúrate que tenga permisos de escritura)
-                $destino = FCPATH . 'public/cpe_sunat/';  // FCPATH apunta a la carpeta public/ en CodeIgniter 4
-                if (!is_dir($destino)) {
-                    mkdir($destino, 0777, true);
-                }
-
-                foreach ($sunat_files_down as $url) {
-                    // Obtener nombre de archivo de la URL
-
-                    $nombreArchivo = $comprobante_name_file_sunat.basename(parse_url($url, PHP_URL_PATH)).".zip";
-                    $rutaLocal = $destino . $nombreArchivo;
-
-                    // Descargar archivo
-                    $archivo = fopen($rutaLocal, 'w+');
-                    $ch = curl_init($url);
-                    curl_setopt($ch, CURLOPT_FILE, $archivo);
-                    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-                    curl_exec($ch);
-                    curl_close($ch);
-                    fclose($archivo);
-
-                    #echo "Archivo guardado: " . $url . "<br>";
-                }
-            }
-
-
-        }else{ //No debería ingresar, ya que toda venta debe ser enviada  
-			
-            $result['mensaje'] = is_array($result)? json_encode($result):$msj_sunat;
-            $respuesta_envio_error = $this->envio_cpe->set_error($data_json, $result);//guardar registro error envio
-            $result['respuesta'] = 'error envio cpe';
-            $result['codigo'] = $cod_sunat;
-            
+            return $this_response;
         }
 
-        return $result;
+        if(!$result_builder_cpe['success']){ // Escenario ERROR
+            $this_response['mensaje'] = 'Error en respuesta de proveedor. <br>'.json_encode($result_builder_cpe);
+            $this_response['detalle'] = $result_builder_cpe;
+            // pendiente insertar error en bd
+
+            return $this_response;
+        }
+        
+        if($result_builder_cpe['respuesta_curl'] == 'ok' && $result_builder_cpe['success']){ // Escenario SUCCESS
+            
+            // Importación de modelos
+            $this->load->model('envio_cpe');
+
+            $data_json ['idmaster'] = $idventa;
+            $data_json ['tipo_envio'] = $tipo_envio;
+            unset($result_builder_cpe['data']['qr']);// tamaño excesivo para guardar en bd
+
+            $this->envio_cpe->set_envio($data_json, $result_builder_cpe);//guardar registro envio
+            $this->envio_cpe->update_envio_cpe($idventa, $tipo_envio, $result_builder_cpe['data']['external_id']);//Actualizar en tabla venta
+
+            $this_response['respuesta'] = "ok";// necesario para retornar exitoso
+        }
+
+        return $this_response;
 
     }
     
-
     //CREAMOS EL CODIGO QR PARA LA FACTURA ELECTRONICA
     public function crear_qr($data_text, $name_file='qr_code'){
 
@@ -727,7 +716,5 @@ class Ventas extends MY_Controller {
         $qr_code= base64_encode($data);
         return $qr_code;
     }
-
-	
 
 }
