@@ -133,6 +133,11 @@ class Envio_cpes extends MY_Controller {
             if (isset($data_json["numero_comprobante"])) {
                 $data_json["numero_comprobante"] = $data_json["numero_comprobante"] * 1;
             }
+
+            $this->load->model('venta');
+            $this->load->model('det_venta');
+
+            $data = $ci->venta->cpe_venta($idventa); 
             
         }else if($tipo_envio =="generar_anulacion"){
             $data_json = $envio_cpe->generar_anulacion_json($idventa, $this);

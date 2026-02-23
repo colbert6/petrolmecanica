@@ -201,63 +201,50 @@ class Venta extends CI_Model {
 
     public function cpe_venta($idventa)
     {        
-        $this->db->select(' 
+        $this->db->select('   
+            SUBSTRING_INDEX(vent.nro_documento,"-",1)  AS  serie_documento,
+            (SUBSTRING_INDEX(vent.nro_documento,"-",-1) * 1) as numero_documento,
+            DATE_FORMAT( vent.fecha_venta,"%Y-%m-%d") as fecha_de_emision, 
+            DATE_FORMAT( vent.fecha_venta,"%H:%i:%s") as hora_de_emision, 
+            "0101" as  codigo_tipo_operacion,
+            "01" as  codigo_tipo_documento,
+            tm.cod_tipo_moneda as codigo_tipo_moneda,
+            DATE_FORMAT( vent.fecha_venta,"%Y-%m-%d") as fecha_de_vencimiento,
+            LPAD(vent.idventa, 10, "0") as  numero_orden_de_compra,            
+            LPAD(pp.idperiodo_pago, 2, "0") as codigo_condicion_de_pago,
+            CONCAT("Forma de pago:", fp.descripcion,"|Caja: 1") as informacion_adicional,
 
-            IF( LENGTH( vent.cliente_documento) = 11, 6, IF( LENGTH( vent.cliente_documento ) = 8, 1,  "-" )  ) AS cliente_tipodocumento,
-            IF( LENGTH( vent.cliente_documento) > 0, vent.cliente_documento, "0")  AS cliente_numerodocumento,
-            vent.cliente_razon_social as cliente_nombre,
-            vent.cliente_direccion, 
-            "PE" as cliente_pais,
-            "" as cliente_ciudad,
-            coalesce(cli.cod_ubigeo,"") as cliente_codigoubigeo,
-            "" as cliente_departamento,
-            "" as cliente_provincia,
-            "" as cliente_distrito,
+            IF( LENGTH( vent.cliente_documento) = 11, 6, IF( LENGTH( vent.cliente_documento ) = 8, 1,  "-" )  ) AS codigo_tipo_documento_identidad,
+            IF( LENGTH( vent.cliente_documento) > 0, vent.cliente_documento, "0")  AS numero_documento_cliente,
+            vent.cliente_razon_social as apellidos_y_nombres_o_razon_social,
+            "PE" as codigo_pais,
+            coalesce(cli.cod_ubigeo,"") as ubigeo,
+            vent.cliente_direccion as direccion, 
+            cli.correo as correo_electronico,
+            cli.contacto as telefono, 
 
-            "0101" as  tipo_operacion,
-            vent.subtotal as total_gravadas,
-            0 as total_inafecta,
-            0 as total_exoneradas,
-            0 as total_gratuitas,
-            0 as total_exportacion,
-            0 as total_isc,
-            0 as total_icbper,
-            0 as total_otr_imp,
-            vent.descuento as total_descuento,
-            "0.2" as impuesto_icbper,
-            18 as porcentaje_igv,
+            0 as total_exportacion, 
+            vent.subtotal as total_operaciones_gravadas,
+            0 as total_operaciones_inafectas,
+            0 as total_operaciones_exoneradas,
+            0 as total_operaciones_gratuitas,            
             vent.igv as total_igv,
-            vent.subtotal as sub_total,
-            vent.total as total,
-            "" as total_letras,
-            "" as nro_otr_comprobante,
-            "" as transporte_nro_placa,
-            tm.cod_tipo_moneda as cod_moneda ,
-            "0000" as cod_sucursal_sunat , 
-            pp.codigo_facturalaya as forma_de_pago,
-			pp.codigo_facturalaya as forma_pago,
-            0 as monto_deuda_total,
-            nro_cuotas as nro_cuotas, 
-            DATE_FORMAT( vent.fecha_venta,"%Y-%m-%d") as fecha_comprobante, 
-            DATE_FORMAT( vent.fecha_venta,"%Y-%m-%d") as fecha_vto_comprobante,
-
-            tc.codsunat as cod_tipo_documento ,
-            SUBSTRING_INDEX(vent.nro_documento,"-",1)  AS  serie_comprobante,
-            (SUBSTRING_INDEX(vent.nro_documento,"-",-1) * 1) as numero_comprobante
-            ');
+            vent.igv as total_impuestos,
+            vent.subtotal as total_valor,
+            vent.total as total_venta,
+            
+            vent.nro_cuotas,
+            "" as item
+        ');
 
         $this->db->from('venta vent');
         $this->db->join('tienda tt', 'tt.idtienda = vent.tienda_idtienda');
         $this->db->join('cliente cli', 'cli.idcliente = vent.cliente_idcliente', 'left');
         $this->db->join('tipo_comprobante tc', 'tc.idtipo_comprobante = vent.tipo_comprobante_idtipo_comprobante');
-
-
         $this->db->join('forma_pago fp', 'fp.idforma_pago = vent.idforma_pago');
         $this->db->join('tipo_moneda tm', 'tm.idtipo_moneda = vent.idtipo_moneda');
         $this->db->join('periodo_pago pp', 'pp.idperiodo_pago = vent.idperiodo_pago');
-
         $this->db->where('vent.idventa',$idventa);
-
         $query = $this->db->get();
 
         return $query->row_array();
@@ -266,18 +253,14 @@ class Venta extends CI_Model {
     public function cpe_venta_anulacion($idventa)
     {        
         $this->db->select('
-                1 as ITEM_DET,
-                "01" as TIPO_COMPROBANTE,
-                SUBSTRING(vent.nro_documento, 1, 4) as SERIE,
-                (SUBSTRING(vent.nro_documento, 6, 8) * 1) as NUMERO,
-                "ERROR EN EL PEDIDO" as MOTIVO,
-                DATE_FORMAT( vent.fecha_venta,"%Y-%m-%d") as fecha_comprobante
-                ');
+            external_id,
+            DATE_FORMAT( vent.fecha_venta,"%Y-%m-%d") as fecha_emision,
+            "ERROR EN EL PEDIDO" as motivo_anulacion
+        ');
 
         $this->db->from('venta as vent');
         $this->db->join('tipo_comprobante tipo_comp', 'tipo_comp.idtipo_comprobante = vent.tipo_comprobante_idtipo_comprobante');
-        $this->db->where('vent.idventa',$idventa);
-        //$this->db->where('vent.estado','anulado');
+        $this->db->where('vent.idventa', $idventa);
 
         $query = $this->db->get();
 
