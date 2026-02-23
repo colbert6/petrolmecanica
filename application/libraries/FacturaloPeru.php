@@ -12,7 +12,7 @@ class FacturaloPeru{
         return 'enBLG3Jub2kf7CaRJ2KUAHoLUnckT3WJ59RTfAhGGF7GWm1iWT';
     }
 
-    public function formatear_venta_estructura($row_venta, $row_detventa, $idventa) {
+    public function formatear_venta_estructura($row_venta, $row_detventa, $idventa, $cuotas = array()) {
         // Obtener items de la venta
 
         // Estructura principal
@@ -59,32 +59,26 @@ class FacturaloPeru{
             // Información adicional
             "informacion_adicional" => $row_venta['informacion_adicional']
         ];
+        
+        if (!empty($cuotas)) {
+            $data['cuotas'] = $cuotas;
+        }
 
         return $data;
     }
 
-    public function formatear_anulacion_venta_estructura($idventa,$ci){
+    public function formatear_anulacion_venta_estructura($row_venta, $idventa){
 
-        $ci->load->model('venta');
-
-        $detalle = $ci->venta->cpe_venta_anulacion($idventa);
-
-        if( isset($detalle) && count($detalle) ) {
-
-            $data['cabecera'] = array(
-                "codigo"                        => 'RA', 
-                "serie"                         => date('Ymd'), //La serie se genera con el AÑO, MES, DÍA, todo junto sin espacios
-                "secuencia"                     => 1, //La secuencia es diaria
-                "fecha_referencia"              => date('Y-m-d'), //Fecha de Emisión del Documento Electrónico o documentos electrónicos
-                "fecha_baja"                    => date('Y-m-d') //Fecha de generación de la comunicación de baja (yyyy-mm-dd)
-            );
-
-            $data["cabecera"]["fecha_referencia"] = $detalle["fecha_comprobante"];
-            unset($detalle["fecha_comprobante"]);
-            $data["detalle"][] = $detalle;
-        }else{
-            $data = array();
-        }
+        // Estructura principal
+        $data = [
+            "fecha_de_emision_de_documentos" => $row_venta['fecha_emision'],
+            "documentos" => [
+                [  // Array indexado (genera corchetes en JSON)
+                    "external_id" => $row_venta['external_id'],
+                    "motivo_anulacion" => $row_venta['motivo_anulacion']
+                ]
+            ],
+        ];
 
         return $data;
     }
@@ -96,7 +90,7 @@ class FacturaloPeru{
                 $ruta =  'https://petrolmecanica.nubox360.com/api/documents';
     			break;
     		case 'generar_anulacion':
-    			$ruta = 'https://facturalahoy.com/api/facturalaya/comunicacion_baja';
+    			$ruta = 'https://petrolmecanica.nubox360.com/api/voided';
     			break;
     		case 'generar_guia_remision':
     			$ruta = 'https://facturalahoy.com/api/facturalaya/guia_remision';
@@ -122,6 +116,8 @@ class FacturaloPeru{
         //$ruta_url =  'https://petrolmecanica.nubox360.com/api/documents';
         $this_response = array('respuesta_curl'=>'');
         $data_json = json_encode($data);
+
+        //print_r($data_json); die(); // debug
 
         $curl = curl_init();
 

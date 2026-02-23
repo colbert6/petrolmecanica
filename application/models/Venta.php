@@ -233,6 +233,7 @@ class Venta extends CI_Model {
             vent.subtotal as total_valor,
             vent.total as total_venta,
             
+            vent.nro_cuotas,
             "" as item
         ');
 
@@ -253,13 +254,13 @@ class Venta extends CI_Model {
     {        
         $this->db->select('
             external_id,
-            DATE_FORMAT( vent.fecha_venta,"%Y-%m-%d") as fecha_comprobante,
+            DATE_FORMAT( vent.fecha_venta,"%Y-%m-%d") as fecha_emision,
             "ERROR EN EL PEDIDO" as motivo_anulacion
         ');
 
         $this->db->from('venta as vent');
         $this->db->join('tipo_comprobante tipo_comp', 'tipo_comp.idtipo_comprobante = vent.tipo_comprobante_idtipo_comprobante');
-        $this->db->where('vent.idventa',$idventa);
+        $this->db->where('vent.idventa', $idventa);
 
         $query = $this->db->get();
 

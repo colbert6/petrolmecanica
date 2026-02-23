@@ -312,11 +312,6 @@ class Ventas extends MY_Controller {
                     $this->db->trans_rollback(); 
                     $return['msj'] = $return['error'] = 'ERROR: Envio electrónico. <br>- '.$result_envio_cpe['mensaje'].'<br>- '.$error['message']; 
 					$return['estado'] = false;	
-                    
-                    $this->load->model('envio_cpe');
-                    $data_envio = array('tipo_envio' => $tipo_envio, 'idmaster' => $idventa); 
-                    $respuesta_envio_error = $this->envio_cpe->set_error($data_envio, $result_envio_cpe);//guardar registro error envio
-                    
                 }
             }
 
@@ -593,22 +588,47 @@ class Ventas extends MY_Controller {
         $this->load->model('det_venta');
 
         switch ($tipo_envio) {
-            case "generar_comprobante":
-                
+            case "generar_comprobante":                
                 // Obtención de datos de venta y detalle venta
                 $data_venta = $this->venta->cpe_venta($idventa); 
                 $data_detventa = $this->det_venta->cpe_detventa($idventa); 
+                $detalle_cuotas = array();
+
+                if($data_venta['nro_cuotas'] > 1 ){ // Si la condicion de pago es credito, se obtiene detalle de cuotas para enviar al proveedor
+                    
+                    $nro_cuotas = $nro_cuotas_cont = $data_venta["nro_cuotas"];	
+                    $monto_venta = $data_venta["total_venta"];
+                    $monto_cuota_promedio = round($monto_venta / $nro_cuotas, 2);
+                    $monto_amortizado = 0;
+                    $fecha_vencimiento = $data_venta['fecha_de_emision'];
+
+                    while ( $nro_cuotas_cont >= 1) {
+                        $fecha_vencimiento = date("Y-m-d", strtotime($fecha_vencimiento."+ 1 month")); 
+
+                        $monto_cuota = $monto_cuota_promedio;
+                        if($nro_cuotas_cont > 1){  // la cuota 1 debe ser igual al restante de lo que no se ha amortizado  				
+                            $monto_amortizado += $monto_cuota_promedio;
+                        }else{
+                            $monto_cuota = $monto_venta - $monto_amortizado ;
+                        }
+                        
+                        $detalle_cuotas[] = array('fecha' => $fecha_vencimiento,  'monto'=> $monto_cuota, 'codigo_tipo_moneda' => 'PEN');
+                        $nro_cuotas_cont--;
+                    }
+                }
+                
+                unset($data_venta["nro_cuotas"]);
             
                 // Formateo de datos para el envío del comprobante
-                $data_json = $envio_cpe_fp->formatear_venta_estructura($data_venta, $data_detventa, $idventa);
+                $data_json = $envio_cpe_fp->formatear_venta_estructura($data_venta, $data_detventa, $idventa, $detalle_cuotas);
                               
                 break;
             
             case "generar_anulacion":
+                // Obtención de datos de venta para la anulacion
                 $data_venta = $this->venta->cpe_venta_anulacion($idventa); 
-                $data_json = $envio_cpe_fp->formatear_anulacion_venta_estructura($data_venta, $data_detventa, $idventa);
-
-                $data_json = $envio_cpe->generar_anulacion_json($idventa, $this);
+                $data_json = $envio_cpe_fp->formatear_anulacion_venta_estructura($data_venta, $idventa);
+                
                 break;
             
             default: // Validación
@@ -616,6 +636,8 @@ class Ventas extends MY_Controller {
                 return $this_response;
                 break;
         }
+
+        //print_r($data_json);die(''); //debug
         
         if(count($data_json)==0){// Validación
             $this_response['mensaje']='No se encontro datos del comprobante en la base de datos.';
@@ -628,11 +650,9 @@ class Ventas extends MY_Controller {
             $this_response['mensaje'] = 'Error en respuesta curl. <br>'.json_encode($result_builder_cpe) ;
             $this_response['detalle'] = $result_builder_cpe;
             // pendiente insertar error en bd
-
             return $this_response;
-        }
 
-        if(!$result_builder_cpe['success']){ // Escenario ERROR
+        }elseif(!$result_builder_cpe['success']){ // Escenario ERROR
             $this_response['mensaje'] = 'Error en respuesta de proveedor. <br>'.json_encode($result_builder_cpe);
             $this_response['detalle'] = $result_builder_cpe;
             // pendiente insertar error en bd
@@ -653,6 +673,41 @@ class Ventas extends MY_Controller {
             $this->envio_cpe->update_envio_cpe($idventa, $tipo_envio, $result_builder_cpe['data']['external_id']);//Actualizar en tabla venta
 
             $this_response['respuesta'] = "ok";// necesario para retornar exitoso
+
+
+            if ($tipo_envio == "generar_comprobante"){
+                $sunat_files_down = [
+                    $result_builder_cpe["data"]["filename"].".xml" => $result_builder_cpe['links']['xml'],
+                    $result_builder_cpe["data"]["filename"].".zip" => $result_builder_cpe['links']['cdr']
+                ];
+                $comprobante_name_file_sunat =  $result_builder_cpe["data"]["filename"];
+
+                // Carpeta de destino en tu proyecto (asegúrate que tenga permisos de escritura)
+                $ruta_destino = FCPATH . 'public/cpe_sunat/';  // FCPATH apunta a la carpeta public/ en CodeIgniter 4
+                if (!is_dir($ruta_destino)) {
+                    mkdir($ruta_destino, 0777, true);
+                }
+
+                foreach ($sunat_files_down as $nombre => $url) {
+                    
+                    $ch = curl_init();
+                    curl_setopt($ch, CURLOPT_URL, $url);
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+                    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Solo si es necesario
+                    
+                    $contenido = curl_exec($ch);
+                    $codigo_http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                    curl_close($ch);
+                    
+                    if ($codigo_http === 200) {
+                        file_put_contents($ruta_destino.$nombre, $contenido);
+                        
+                    }
+
+                }
+            }
         }
 
         return $this_response;
