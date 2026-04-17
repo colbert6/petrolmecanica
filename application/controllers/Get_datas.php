@@ -19,74 +19,103 @@ class Get_datas extends MY_Controller {
 
     public function get_cliente_document_info_sunat()
     {
-        $tipo_documento = $this->input->get('tipo');
         $numero_documento = $this->input->get('numero');
         $return = array('estado' => false, 'mensaje' => '');
         
-        switch (strlen($numero_documento)) {
-			case 11:// para ruc buscar en empresa
-				$tipo_documento = "ruc";
-				break;			
-			case 8:// para dni buscar en persona
-				$tipo_documento = "dni";
-				break;
-		}
+        // 1. Configuración según el tipo de documento
+        $apiKey = "c9c4d0cf-6553-4746-93a7-e683bc0bd6c2"; 
+        $url = "";
+        $postData = ["token" => $apiKey];
 
-        //1er pasa debemos validar si el cliente ya existe en nuestra BD
+        switch (strlen($numero_documento)) {
+            case 11:
+                $url = "https://api.consultaperuapi.com/api/v1/consultas";
+                $postData["ruc"] = $numero_documento;
+                $tipo_doc = "ruc";
+                break;          
+            case 8:
+                $url = "https://api.consultaperuapi.com/api/v1/consultas-dni";
+                $postData["dni"] = $numero_documento;
+                $tipo_doc = "dni";
+                break;
+            default:
+                $return['mensaje'] = "Número de documento inválido.";
+                print json_encode($return);
+                return;
+        }
+
+        // 2. Validar si ya existe en tu BD
         $this->load->model('cliente');
-        $result_cliente_registrado = $this->cliente->validar_registro_cliente(" $tipo_documento = $numero_documento ");
+        $result_cliente_registrado = $this->cliente->validar_registro_cliente(" $tipo_doc = $numero_documento ");
         
-        if( !is_null($result_cliente_registrado) ){// validar data obtenida desde la BD
-            $return['estado']= false;
-            $return['mensaje'] = "AVISO: Cliente YA EXISTE en la base de datos. <br>";
-            $return['mensaje'] .= " >> Razón social : ". $result_cliente_registrado['cliente_nombre'];
+        if( !is_null($result_cliente_registrado) ){
+            $return['mensaje'] = "AVISO: Cliente YA EXISTE. <br> >> " . $result_cliente_registrado['cliente_nombre'];
             print json_encode($return);
             die('');
         }
 
-        //2do buscar información en URL api
-        $result_cliente_consultado = array();
-        $this->load->library('Facturalaya');
-        $envio_cpe = new Facturalaya();
-        $result_cliente_consultado = $envio_cpe->buscar_cliente_por_nro_documento($numero_documento);
-        
-        if( isset($result_cliente_consultado['respuesta']) ){// respuesta
-            if( $result_cliente_consultado['respuesta']=='error' ){
-                $return['estado']= false;
-                $return['mensaje'] = "ERROR: ".$result_cliente_consultado['mensaje'].". <br>";
-                $return['mensaje'] .= $result_cliente_consultado['errores_curl'] ?? 'No existe';
+        sleep(1);
 
-            }else{
-                // separar las respuestas según resultado de consulta EMPRESA/PERSONA
-                $r_c_c = $result_cliente_consultado;
-                //print_r($r_c_c);
-                $return['estado']= true;
+        // 3. Consulta cURL
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_HTTPHEADER     => ["Content-Type: application/json"],
+            CURLOPT_POSTFIELDS     => json_encode($postData),
+            CURLOPT_TIMEOUT        => 15
+        ]);
 
-                $r_data = array();
-                $r_data['razon_social'] = $r_c_c['razon_social']?? $r_c_c['ap_paterno']." ".$r_c_c['ap_materno']." ".$r_c_c['nombres'];
-                $r_data['nombre_comercial'] = $r_c_c['nombre_comercial']?? $r_c_c['nombres']." ".$r_c_c['ap_paterno']." ".$r_c_c['ap_materno'];
-                $r_data['ruc'] = $r_c_c['ruc']?? '';
-                $r_data['dni'] = $r_c_c['dni']?? '';
-                $r_data['direccion'] = $r_c_c['direccion']?? '';
-                $r_data['contacto'] = $r_c_c['telefono']?? '';
-                $r_data['correo'] = ''?? '';
-                $r_data['fecha_nacimiento'] = $r_c_c['fecha_nacimiento']?? '';
+        $response = curl_exec($ch);
 
-                if(isset($r_c_c['fecha_nacimiento']) ){
-                    $fecha_nacimiento = date_create_from_format('d/m/Y', $r_data['fecha_nacimiento']);
-                    $fecha_nacimiento = date_format($fecha_nacimiento, 'd-m-Y');
+        curl_close($ch);
+        $data_api = json_decode($response);
+
+        // 4. Procesar Respuesta
+        // Para RUC, el API devuelve la data directamente. Para DNI, viene con success:true y data: {...}
+        $is_ruc_ok = ($tipo_doc == "ruc" && isset($data_api->ruc));
+        $is_dni_ok = ($tipo_doc == "dni" && isset($data_api->success) && $data_api->success);
+
+        if ($is_ruc_ok || $is_dni_ok) {
+            $return['estado'] = true;
+            $r_data = array();
+
+            if ($tipo_doc == "ruc") {
+                // Estructura para RUC (Directa)
+                $r_data['razon_social']     = $data_api->razon_social;
+                $r_data['nombre_comercial'] = $data_api->razon_social;
+                $r_data['ruc']              = $data_api->ruc;
+                $r_data['dni']              = '';
+                
+                // Procesar dirección de RUC (que es un objeto según tu raw)
+                $dir = $data_api->direccion;
+                if (is_object($dir)) {
+                    $r_data['direccion'] = trim(($dir->tipo_via ?? '') . " " . ($dir->nom_via ?? '') . " " . ($dir->nro ?? ''));
+                } else {
+                    $r_data['direccion'] = $dir;
                 }
-                $r_data['fecha_nacimiento'] = $fecha_nacimiento??'';                
-                $r_data['codigo_ubigeo'] = $r_c_c['codigo_ubigeo']?? '';
-
-                $return['data'] = $r_data;
+                $r_data['codigo_ubigeo']    = $data_api->ubigeo ?? '';
+            } else {
+                // Estructura para DNI (Dentro de 'data')
+                $info = $data_api->data;
+                $r_data['razon_social']     = $info->nombreCompleto;
+                $r_data['nombre_comercial'] = $info->nombres;
+                $r_data['ruc']              = '';
+                $r_data['dni']              = $info->dni;
+                $r_data['direccion']        = $info->direccion ?? '';
+                $r_data['codigo_ubigeo']    = $info->ubigeo ?? '';
             }
 
-        }else{
-            $return['estado']= false;
-            $return['mensaje'] = "ERROR: Error en respuesta .";
-        }
+            $r_data['contacto']         = '';
+            $r_data['correo']           = '';
+            $r_data['fecha_nacimiento'] = ''; 
 
+            $return['data'] = $r_data;
+            $return['mensaje'] = "Consulta exitosa"; // Limpiamos mensaje de error previo
+        } else {
+            $msg_api = $data_api->message ?? "No se encontraron resultados.";
+            $return['mensaje'] = "ERROR: " . $msg_api;
+        }
 
         print json_encode($return);
     }
