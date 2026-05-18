@@ -434,7 +434,8 @@ class Ventas extends MY_Controller {
         $comprobante = explode("-", $venta['Nro_documento']); // Separamos serie de correlativo
 
         $data_resumen = $this->ruc.'|'.$venta['codsunat'].'|'.$comprobante[0].'|'.$comprobante[1].'|'.$venta['Igv'].'|'.$venta['Total'].'|'.$venta['Fecha'].'|'.$cod_documento_client.'|'.$venta['RUC/DNI'].'|' ;
-        $qr_code = $this->crear_qr($data_resumen); 
+        $this->load->library('Qr_comprobante');
+        $qr_code = $this->qr_comprobante->crear($data_resumen);
 	
 		$descripcion_moneda = strtoupper($venta['moneda']);
         $simbolo_moneda =  $descripcion_moneda == 'DOLARES' ? '$ ' : 'S/ ';
@@ -456,83 +457,6 @@ class Ventas extends MY_Controller {
         ob_end_clean();
         $pdf->Output($nombrepdf.'.pdf', 'I');
     }
-
-     public function print_guia() //copia de venta
-    {   
-        return "";
-        $this->load->model('venta');
-        $this->load->model('det_venta');
-        $this->load->helper('calculo');
-
-        $orientation = 'P' ;
-        $format = 'A4';
-        if(isset($_GET['orientation'])){
-            $orientation = $this->input->get('orientation');
-
-        }
-        if(isset($_GET['format'])){
-            $format = $this->input->get('format');
-        }
-        
-        $venta = $this->venta->get_print_venta($this->input->get('idventa'));
-        $det_venta = $this->det_venta->det_venta_byId($this->input->get('idventa'));
-
-        if( count($venta) == 0 OR count($det_venta) == 0 ){ die('NO SE ENCONTRARON RESULTADOS'); exit();};
-
-        //$orientation = ())? $this->input->get('orientation') : 'P' ;
-        //$format = (isset($this->input->get('format')))? $this->input->get('format'):'A4';
-        
-        $nombrepdf  = 'Guia_'.$venta['Nro_guia'];
-
-        //echo '<pre>';print_r($venta);print_r($det_venta);exit();
-        $this->load->library('Pdf_comprobantes');
-        $pdf = new Pdf_comprobantes($orientation, 'mm', $format , true, 'UTF-8', false);
-
-        $pdf->tipo_documento = 'Guia Remisión';
-        $pdf->nro_documento = $venta['Nro_guia'];       
-
-        //Parametros del PDF
-        $pdf->SetTitle($nombrepdf);
-        
-        $pdf->SetAutoPageBreak(TRUE, 10);
-        $pdf->AddPage();
-
-        $data_usuario_receptor = array('Cliente' => array($venta['Cliente'],'4'),
-                                  'RUC/DNI' => array($venta['RUC/DNI'],'1'),
-                                  'Dirección' => array($venta['Direccion'],'5')  );
-        $pdf->receptor_data( 5 ,$data_usuario_receptor);
-
-        
-        $data_comprobante = array('Fecha inicio traslado ' => array($venta['Fecha'],'2'),
-                                  'Documento referencia' => array($venta['Nro_documento'],'1'),   
-                                  'Punto de partida' => array($this->direccion,'3'),
-                                  'Punto de llegada' => array($venta['Direccion'],'3')  );
-
-        $pdf->comprobante_data( 3 ,$data_comprobante);
-
-        $width_cols = array(  array('Descripcion',40 ,'L') , array('Cant.',20, 'R'),array('P.unit',20,'R'),array('Subtotal',20,'R') );
-        $pdf->data_table( $det_venta ,  $width_cols, true);       
-        
-
-       
-        $qr_code = '';
-
-        
-        $data_footer = array(/*'monto_letra' => array( 'texto' => num_to_letras($venta['Total'])),
-                            'monto' => array('op_importe'=>$venta['Total'] ,  'op_gravada'=>$venta['Subtotal'] , 'op_igv'=>$venta['Igv'] , ) ,
-                            'qr_code' =>  $qr_code  */
-                            'monto_letra' => array( 'texto' => num_to_letras($venta['Total'])),
-                            'monto' => array('op_importe'=>$venta['Total']),
-                            'observacion' => array( 'texto' =>  '')  
-                            );
-        $pdf->data_table_footer( 'pie_guia',  $data_footer , 'msj');
-
-
-         /* Limpiamos la salida del búfer y lo desactivamos */
-        ob_end_clean();
-        $pdf->Output($nombrepdf.'.pdf', 'I');
-    }
-
 
     //---------CPE
 
@@ -649,62 +573,4 @@ class Ventas extends MY_Controller {
         }
     }
     
-    //CREAMOS EL CODIGO QR PARA LA FACTURA ELECTRONICA
-    public function crear_qr($data_text, $name_file='qr_code'){
-
-        $this->load->library('ciqrcode');
-
-        $codeContents = $data_text;
-        $tempDir = 'public/qr_code/';//EXAMPLE_TMP_SERVERPATH; 
-        $fileName = $name_file.'.jpg'; 
-        $outerFrame = 0; //tamaño de borde
-        $pixelPerPoint = 6; //tamaño de los pixeles por point
-        $jpegQuality = 150;  // calidad de imagen
-
-        // generating frame 
-        $frame = QRcode::text($codeContents, false, QR_ECLEVEL_M); 
-        // rendering frame with GD2 (that should be function by real impl.!!!) 
-        $h = count($frame); 
-        $w = strlen($frame[0]); 
-         
-        $imgW = $w + 2*$outerFrame; 
-        $imgH = $h + 2*$outerFrame; 
-         
-        $base_image = imagecreate($imgW, $imgH); 
-         
-        $col[0] = imagecolorallocate($base_image,255,255,255); // BG, white  
-        $col[1] = imagecolorallocate($base_image,0,0,0);     // FG, Black 
-
-        imagefill($base_image, 0, 0, $col[0]); 
-
-        for($y=0; $y<$h; $y++) { 
-            for($x=0; $x<$w; $x++) { 
-                if ($frame[$y][$x] == '1') { 
-                    imagesetpixel($base_image,$x+$outerFrame,$y+$outerFrame,$col[1]);  
-                } 
-            } 
-        } 
-         
-        // saving to file 
-        $target_image = imagecreate($imgW * $pixelPerPoint, $imgH * $pixelPerPoint); 
-        imagecopyresized( 
-            $target_image,  
-            $base_image,  
-            0, 0, 0, 0,  
-            $imgW * $pixelPerPoint, $imgH * $pixelPerPoint, $imgW, $imgH 
-        ); 
-        imagedestroy($base_image); 
-        imagejpeg($target_image, $tempDir.$fileName, $jpegQuality); 
-        imagedestroy($target_image); 
-
-        $path = $tempDir.$fileName;
-        $type = pathinfo($path, PATHINFO_EXTENSION);
-        $data = file_get_contents($path);
-
-        //$qr_code= 'data:image/' . $type . ';base64,' . base64_encode($data);
-        //echo '<img src="' . $qr_code . '">';
-        $qr_code= base64_encode($data);
-        return $qr_code;
-    }
-
 }
