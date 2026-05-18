@@ -139,189 +139,183 @@ class Ventas extends MY_Controller {
 		return $return;
 	}
 
-    public function save()  {	
-		
-		$return = array( 
-			'estado' => false, 
-			'mensaje' => '' , 
-			'id_transaccion' => '' , 
-			'enlace' => ''
-		);  
+    private function calcular_cuotas($monto_total, $nro_cuotas, $fecha_inicio)
+    {
+        $cuotas              = array();
+        $monto_cuota_promedio = round($monto_total / $nro_cuotas, 2);
+        $monto_amortizado    = 0;
+        $fecha_vencimiento   = $fecha_inicio;
+        $contador            = $nro_cuotas;
 
-        // Obtener parametros para crear venta - validar_envio_cpe
+        while ($contador >= 1) {
+            $fecha_vencimiento = date("Y-m-d", strtotime($fecha_vencimiento . "+ 1 month"));
+
+            if ($contador > 1) {
+                $monto_cuota       = $monto_cuota_promedio;
+                $monto_amortizado += $monto_cuota_promedio;
+            } else {
+                $monto_cuota = $monto_total - $monto_amortizado;
+            }
+
+            $cuotas[] = array('fecha' => $fecha_vencimiento, 'monto' => $monto_cuota);
+            $contador--;
+        }
+
+        return $cuotas;
+    }
+
+    public function save()
+    {
+        $return = array(
+            'estado'  => false,
+            'mensaje' => '',
+            'idsave'  => '',
+            'enlace'  => ''
+        );
+
+        // Cargar modelos al inicio
         $this->load->model('get_data');
-		$serie_correlativo_envio_cpe = $this->get_data->get_series_correlativos(" 'E_CPE' ", "serie" );
-		$validar_envio_cpe = $serie_correlativo_envio_cpe[0]['correlativo'];
-		
-		// Obtener parametros para crear venta - tipo_comprobante
-		$this->load->model('comprobante');  
-		$idserie = $this->input->post('idserie');//id serie de la venta
-        $tipo_comprobante = $this->comprobante->get_tipo_serie($idserie); //Obtener tipo de comprobante 
-		
-		// Obtener parametros para crear venta - nro documento cliente
+        $this->load->model('comprobante');
+        $this->load->model('venta');
+        $this->load->model('det_venta');
+        $this->load->model('stock');
+        $this->load->model('kardex');
 
-		$nro_documento_cliente = $this->input->post('ruc_cliente');
-        if( $tipo_comprobante == $this->id_boleta){
+        // Flag de envío CPE
+        $serie_correlativo_envio_cpe = $this->get_data->get_series_correlativos(" 'E_CPE' ", "serie");
+        $validar_envio_cpe = $serie_correlativo_envio_cpe[0]['correlativo'];
+
+        // Tipo de comprobante y documento del cliente
+        $idserie          = $this->input->post('idserie');
+        $tipo_comprobante = $this->comprobante->get_tipo_serie($idserie);
+
+        $nro_documento_cliente = $this->input->post('ruc_cliente');
+        if ($tipo_comprobante == $this->id_boleta) {
             $nro_documento_cliente = $this->input->post('dni_cliente');
         }
 
-		$total_venta = ($this->input->post('subtotales')-$this->input->post('descuento')+$this->input->post('igv'));
-		
-		// Validaciones de negocio
-		$result_validacion = self::validar_guardado($nro_documento_cliente, $tipo_comprobante, $total_venta);
-		if( $result_validacion['estado'] == false){ // No paso validacion
-			$return['estado'] = $result_validacion['estado'];
-			$return['mensaje'] = $result_validacion['mensaje'];
-			print json_encode($return);
-            die('');
-		}		
-		
-		try{		
-			// Guardar venta en Base de Datos
-			$this->db->trans_start(); //Inicio de transaccion 
-			
-			$serie_correlativo_venta = $this->get_data->get_series_correlativos("$idserie", "idserie_comprobante");
-			$correlativo_actual = $serie_correlativo_venta[0]['descripcion'];//Obtener serie + correlativo actual venta       
+        $total_venta = $this->input->post('subtotales') - $this->input->post('descuento') + $this->input->post('igv');
 
-			//Guardar Venta
-			$this->load->model('venta');        
-			$this->venta->tipo_comprobante_idtipo_comprobante = $tipo_comprobante; 
-			$this->venta->nro_documento = $correlativo_actual;   
-			$this->venta->nro_guia_remision = "-";  
-			$this->venta->cliente_documento = $nro_documento_cliente;    
-			$this->venta->insert_venta();
-			$idventa = $this->db->insert_id();
+        // Validaciones de negocio
+        $result_validacion = $this->validar_guardado($nro_documento_cliente, $tipo_comprobante, $total_venta);
+        if ($result_validacion['estado'] == false) {
+            $return['mensaje'] = $result_validacion['mensaje'];
+            print json_encode($return);
+            return;
+        }
 
-			//Guardar Detalle Venta
-			$this->load->model('det_venta');   
-			$this->det_venta->venta_idventa = $idventa;     
-			$this->det_venta->insert_det_venta();
-		
-			//Modificar Stock
-			$this->load->model('stock');       
-			$this->stock->modificar_stock("-");
+        try {
+            $this->db->trans_start();
 
-			//Agregar Kardex
-			$this->load->model('kardex');      
-			$this->kardex->codmotivo = $idventa;
-			$this->kardex->insert_kardex("S","venta");
-			
-			//Actualizar correlativo de la serie de la venta       
-			$this->comprobante->update_serie_correlativo($idserie, 'correlativo', 'correlativo + 1' );//idserie , campo , valor 	
-			
-			$return['idsave'] = $idventa;
-			if ($this->db->trans_status() == false) { // Validaciones de inserción
-				$error = $this->db->error();
-				$return['estado'] = false;
-				$return['mensaje'] = 'ERROR: Fallo en peraciones de base de datos. <br> ('.$error['message'].') ';
+            $serie_correlativo_venta = $this->get_data->get_series_correlativos("$idserie", "idserie_comprobante");
+            $correlativo_actual      = $serie_correlativo_venta[0]['descripcion'];
+
+            // Guardar venta
+            $this->venta->tipo_comprobante_idtipo_comprobante = $tipo_comprobante;
+            $this->venta->nro_documento                       = $correlativo_actual;
+            $this->venta->nro_guia_remision                   = "-";
+            $this->venta->cliente_documento                   = $nro_documento_cliente;
+            $this->venta->insert_venta();
+            $idventa = $this->db->insert_id();
+
+            // Guardar detalle de venta
+            $this->det_venta->venta_idventa = $idventa;
+            $this->det_venta->insert_det_venta();
+
+            // Modificar stock
+            $this->stock->modificar_stock("-");
+
+            // Agregar kardex
+            $this->kardex->codmotivo = $idventa;
+            $this->kardex->insert_kardex("S", "venta");
+
+            // Actualizar correlativo de la serie
+            $this->comprobante->update_serie_correlativo($idserie, 'correlativo', 'correlativo + 1');
+
+            $return['idsave'] = $idventa;
+
+            if ($this->db->trans_status() === false) {
+                $error            = $this->db->error();
+                $return['mensaje'] = 'ERROR: Fallo en operaciones de base de datos. <br> (' . $error['message'] . ')';
                 $this->db->trans_rollback();
-				print json_encode($return);
-				die('');				
-			}
-			
-			if($validar_envio_cpe){//Flag para activar envio CPE
- 
-				$tipo_envio = "generar_comprobante";   
-				$result_envio_cpe = $this->enviar_comprobante_proveedor_cpe($tipo_envio, $idventa);
+                print json_encode($return);
+                return;
+            }
 
-				if($result_envio_cpe['respuesta'] == 'ok' && $this->db->trans_status() !== false){
-					$this->db->trans_commit();
-					$return['estado'] = true;
-					$return['mensaje'] = 'VENTA GUARDADA <br> Envio comprobante electrónico EXITOSO';
-				}else{
-					$error = $this->db->error();
-					$return['estado'] = false;
-					$return['mensaje'] = 'ERROR en Envio comprobante electrónico. <br> INFO: <br>'.$result_envio_cpe['mensaje'].'';
-                    //print_r($result_envio_cpe);
-					$this->db->trans_rollback();
+            if ($validar_envio_cpe) {
+                $result_envio_cpe = $this->enviar_comprobante_proveedor_cpe("generar_comprobante", $idventa);
 
-
-				}
-
-			}else{
-				//Si $validar_envio_cpe = 0, la venta NO incluye el envio CPE
-				$this->db->trans_commit();
-				$return['estado']=true;				
-				$return['mensaje'] = 'VENTA GUARDADA <br> Envio comprobante electrónico PENDIENTE.';		
-			} 
+                if ($result_envio_cpe['respuesta'] == 'ok' && $this->db->trans_status() !== false) {
+                    $this->db->trans_commit();
+                    $return['estado']  = true;
+                    $return['mensaje'] = 'VENTA GUARDADA <br> Envio comprobante electrónico EXITOSO';
+                } else {
+                    $return['estado']  = false;
+                    $return['mensaje'] = 'ERROR en Envio comprobante electrónico. <br> INFO: <br>' . $result_envio_cpe['mensaje'];
+                    $this->db->trans_rollback();
+                }
+            } else {
+                $this->db->trans_commit();
+                $return['estado']  = true;
+                $return['mensaje'] = 'VENTA GUARDADA <br> Envio comprobante electrónico PENDIENTE.';
+            }
 
         } catch (Exception $e) {
-			
-            $this->db->trans_rollback(); 
-			$return['mensaje'] = "ERROR: Error en codigo (".$e->getMessage().")";	
-			$return['estado']=true;
+            $this->db->trans_rollback();
+            $return['estado']  = false;
+            $return['mensaje'] = 'ERROR: Error en código (' . $e->getMessage() . ')';
         }
 
         print json_encode($return);
-            
     }
 
     public function anular()
-    {   
+    {
+        $return = array('estado' => false, 'msj' => '', 'error' => '');
 
-        $return = array('estado' => false, 'msj' => '' , 'error'=> '' , 'idsave' => '' , 'enlace' => '');        
         $idventa = $this->input->get('idventa');
 
-        $this->load->model('venta');  
+        $this->load->model('venta');
+        $this->load->model('stock');
+        $this->load->model('kardex');
+        $this->load->model('det_venta');
+
         $venta = $this->venta->venta_byId($idventa);
-        
-        if($venta['estado'] == 'vigente'){     
 
-            //Guardar movimiento
-            $this->db->trans_start();//Inicio de transaccion         
+        if ($venta['estado'] != 'vigente') {
+            $return['msj'] = $return['error'] = 'ERROR: La venta debe estar vigente.';
+            print json_encode($return);
+            return;
+        }
 
-            //Modificar Stock
-            $this->load->model('stock');       
-            $this->stock->devolver_stock('venta anulada',$idventa);
+        $this->db->trans_start();
 
-            //Agregar Kardex
-            $this->load->model('kardex');      
-            $this->kardex->insert_devolucion_kardex('venta',$idventa);
+        $this->stock->devolver_stock('venta anulada', $idventa);
+        $this->kardex->insert_devolucion_kardex('venta', $idventa);
+        $this->venta->anular_venta($idventa);
+        $this->det_venta->anular_det_venta($idventa);
 
-            //Anular Venta
-            $this->venta->anular_venta($idventa);
-            
-            //anular detalle ventas
-            $this->load->model('det_venta');    
-            $this->det_venta->anular_det_venta($idventa);
+        if ($this->db->trans_status() === false) {
+            $error = $this->db->error();
+            $return['msj'] = $return['error'] = 'ERROR: Operaciones de Base de Datos. <br>' . $error['message'];
+            $this->db->trans_rollback();
+            print json_encode($return);
+            return;
+        }
 
-            //if($venta['idtipo_comprobante'] == $this->id_factura || $venta['idtipo_comprobante'] == $this->id_boleta ){}
+        $result_envio_cpe = $this->enviar_comprobante_proveedor_cpe('generar_anulacion', $idventa);
 
-            if ($this->db->trans_status() === FALSE) {
-
-                $error = $this->db->error();
-                $return['msj'] = $return['error']= "ERROR: Operaciones de Base de Datos. <br>".$error['message'];  
-                $this->db->trans_rollback(); 
-
-            }else{        
-
-                //Envio anulacion CPE
-                $tipo_envio="generar_anulacion";   
-                $result_envio_cpe = $this->enviar_comprobante_proveedor_cpe($tipo_envio, $idventa); 
-
-                if($result_envio_cpe['respuesta'] == 'ok' && $this->db->trans_status() !== FALSE){
-
-                    $this->db->trans_commit();
-                    //$this->db->trans_rollback(); 
-                    $return['estado'] = true;
-                    $return['msj'] = 'VENTA ANULADA'; 
-
-                }else{
-
-                    $error = $this->db->error();
-                    $this->db->trans_rollback(); 
-                    $return['msj'] = $return['error'] = 'ERROR: Envio electrónico. <br>- '.$result_envio_cpe['mensaje'].'<br>- '.$error['message']; 
-					$return['estado'] = false;	
-                }
-            }
-
-        }else{
-
-            $return['msj'] = $return['error'] = 'ERROR: La venta debe estar vigente.'; 
-        } 
+        if ($result_envio_cpe['respuesta'] == 'ok' && $this->db->trans_status() !== false) {
+            $this->db->trans_commit();
+            $return['estado'] = true;
+            $return['msj']    = 'VENTA ANULADA';
+        } else {
+            $error = $this->db->error();
+            $this->db->trans_rollback();
+            $return['msj'] = $return['error'] = 'ERROR: Envio electrónico. <br>- ' . $result_envio_cpe['mensaje'] . '<br>- ' . $error['message'];
+        }
 
         print json_encode($return);
-        
     }
 
     public function control()
@@ -346,48 +340,19 @@ class Ventas extends MY_Controller {
         print json_encode($this->venta->control($fecha));
     }
 
-    public function generar_cuotas_print($data_venta){
+    public function generar_cuotas_print($data_venta)
+    {
+        $print_cuotas = '';
 
-        $Idperiodo_pago = $data_venta['Idperiodo_pago'];
-        $Nro_cuotas = $data_venta['Nro_cuotas'];
-        $Total = $data_venta['Total'];
-        $Fecha = $data_venta['Fecha'];
+        if ($data_venta['Idperiodo_pago'] == '2') {
+            $cuotas       = $this->calcular_cuotas($data_venta['Total'], $data_venta['Nro_cuotas'], $data_venta['Fecha']);
+            $print_cuotas = "<br> Monto Pendiente Pago: ({$data_venta['Total']}) / Nro Cuotas ({$data_venta['Nro_cuotas']}) : <br>";
 
-        $detalle_cuotas = array();
-
-        if($Idperiodo_pago == '2'){
-
-            $nro_cuotas = $nro_cuotas_cont = $Nro_cuotas; 
-            $monto_venta = $Total;
-            $monto_cuota_promedio = round($monto_venta / $nro_cuotas, 2);
-            $monto_amortizado = 0;
-
-            $fecha_vencimiento = $Fecha;            
-
-            while ( $nro_cuotas_cont >= 1) {
-                $fecha_vencimiento = date("Y-m-d", strtotime($fecha_vencimiento."+ 1 month")); 
-
-                $monto_cuota = $monto_cuota_promedio;
-                if($nro_cuotas_cont > 1){  // la cuota 1 debe ser igual al restante de lo que no se ha amortizado               
-                    $monto_amortizado += $monto_cuota_promedio;
-                }else{
-                    $monto_cuota = $monto_venta - $monto_amortizado ;
-                }
-                
-                $detalle_cuotas[] = array('fecha_vencimiento' => $fecha_vencimiento,  'monto_cuota'=> $monto_cuota);
-                $nro_cuotas_cont--;
+            foreach ($cuotas as $cuota) {
+                $monto_cuota   = number_format($cuota['monto'], 2, '.', '');
+                $print_cuotas .= " ({$cuota['fecha']}) {$monto_cuota} / ";
             }
-
-            $print_cuotas = "<br> Monto Pendiente Pago: (".$Total.")  / Nro Cuotas (".$Nro_cuotas.") : <br>";
-            foreach ($detalle_cuotas as $key => $value) {
-                $monto_cuota = number_format($value['monto_cuota'], 2, '.', '');
-                $print_cuotas .= " (".$value['fecha_vencimiento'].") ".$monto_cuota." / ";
-
-            }
-
         }
-
-        
 
         return $print_cuotas;
     }
@@ -469,7 +434,8 @@ class Ventas extends MY_Controller {
         $comprobante = explode("-", $venta['Nro_documento']); // Separamos serie de correlativo
 
         $data_resumen = $this->ruc.'|'.$venta['codsunat'].'|'.$comprobante[0].'|'.$comprobante[1].'|'.$venta['Igv'].'|'.$venta['Total'].'|'.$venta['Fecha'].'|'.$cod_documento_client.'|'.$venta['RUC/DNI'].'|' ;
-        $qr_code = $this->crear_qr($data_resumen); 
+        $this->load->library('Qr_comprobante');
+        $qr_code = $this->qr_comprobante->crear($data_resumen);
 	
 		$descripcion_moneda = strtoupper($venta['moneda']);
         $simbolo_moneda =  $descripcion_moneda == 'DOLARES' ? '$ ' : 'S/ ';
@@ -492,284 +458,119 @@ class Ventas extends MY_Controller {
         $pdf->Output($nombrepdf.'.pdf', 'I');
     }
 
-     public function print_guia() //copia de venta
-    {   
-        return "";
-        $this->load->model('venta');
-        $this->load->model('det_venta');
-        $this->load->helper('calculo');
-
-        $orientation = 'P' ;
-        $format = 'A4';
-        if(isset($_GET['orientation'])){
-            $orientation = $this->input->get('orientation');
-
-        }
-        if(isset($_GET['format'])){
-            $format = $this->input->get('format');
-        }
-        
-        $venta = $this->venta->get_print_venta($this->input->get('idventa'));
-        $det_venta = $this->det_venta->det_venta_byId($this->input->get('idventa'));
-
-        if( count($venta) == 0 OR count($det_venta) == 0 ){ die('NO SE ENCONTRARON RESULTADOS'); exit();};
-
-        //$orientation = ())? $this->input->get('orientation') : 'P' ;
-        //$format = (isset($this->input->get('format')))? $this->input->get('format'):'A4';
-        
-        $nombrepdf  = 'Guia_'.$venta['Nro_guia'];
-
-        //echo '<pre>';print_r($venta);print_r($det_venta);exit();
-        $this->load->library('Pdf_comprobantes');
-        $pdf = new Pdf_comprobantes($orientation, 'mm', $format , true, 'UTF-8', false);
-
-        $pdf->tipo_documento = 'Guia Remisión';
-        $pdf->nro_documento = $venta['Nro_guia'];       
-
-        //Parametros del PDF
-        $pdf->SetTitle($nombrepdf);
-        
-        $pdf->SetAutoPageBreak(TRUE, 10);
-        $pdf->AddPage();
-
-        $data_usuario_receptor = array('Cliente' => array($venta['Cliente'],'4'),
-                                  'RUC/DNI' => array($venta['RUC/DNI'],'1'),
-                                  'Dirección' => array($venta['Direccion'],'5')  );
-        $pdf->receptor_data( 5 ,$data_usuario_receptor);
-
-        
-        $data_comprobante = array('Fecha inicio traslado ' => array($venta['Fecha'],'2'),
-                                  'Documento referencia' => array($venta['Nro_documento'],'1'),   
-                                  'Punto de partida' => array($this->direccion,'3'),
-                                  'Punto de llegada' => array($venta['Direccion'],'3')  );
-
-        $pdf->comprobante_data( 3 ,$data_comprobante);
-
-        $width_cols = array(  array('Descripcion',40 ,'L') , array('Cant.',20, 'R'),array('P.unit',20,'R'),array('Subtotal',20,'R') );
-        $pdf->data_table( $det_venta ,  $width_cols, true);       
-        
-
-       
-        $qr_code = '';
-
-        
-        $data_footer = array(/*'monto_letra' => array( 'texto' => num_to_letras($venta['Total'])),
-                            'monto' => array('op_importe'=>$venta['Total'] ,  'op_gravada'=>$venta['Subtotal'] , 'op_igv'=>$venta['Igv'] , ) ,
-                            'qr_code' =>  $qr_code  */
-                            'monto_letra' => array( 'texto' => num_to_letras($venta['Total'])),
-                            'monto' => array('op_importe'=>$venta['Total']),
-                            'observacion' => array( 'texto' =>  '')  
-                            );
-        $pdf->data_table_footer( 'pie_guia',  $data_footer , 'msj');
-
-
-         /* Limpiamos la salida del búfer y lo desactivamos */
-        ob_end_clean();
-        $pdf->Output($nombrepdf.'.pdf', 'I');
-    }
-
-
     //---------CPE
 
-    ///--------------------------CPE--------------------
-
-    public function enviar_comprobante_proveedor_cpe($tipo_envio, $idventa) {
-
-        //Parametros    
-        $data_json = array();
-        $this_response = array('respuesta' => 'error');
-
-        // Iniciación de librería de envío de comprobante electrónico
+    public function enviar_comprobante_proveedor_cpe($tipo_envio, $idventa)
+    {
         $this->load->library('FacturaloPeru');
-        $envio_cpe_fp = new FacturaloPeru();
-
-        // Importación de modelos
         $this->load->model('venta');
         $this->load->model('det_venta');
 
-        switch ($tipo_envio) {
-            case "generar_comprobante":                
-                // Obtención de datos de venta y detalle venta
-                $data_venta = $this->venta->cpe_venta($idventa); 
-                $data_detventa = $this->det_venta->cpe_detventa($idventa); 
-                $detalle_cuotas = array();
+        $envio_cpe_fp  = new FacturaloPeru();
+        $this_response = array('respuesta' => 'error');
 
-                if($data_venta['nro_cuotas'] > 1 ){ // Si la condicion de pago es credito, se obtiene detalle de cuotas para enviar al proveedor
-                    
-                    $nro_cuotas = $nro_cuotas_cont = $data_venta["nro_cuotas"];	
-                    $monto_venta = $data_venta["total_venta"];
-                    $monto_cuota_promedio = round($monto_venta / $nro_cuotas, 2);
-                    $monto_amortizado = 0;
-                    $fecha_vencimiento = $data_venta['fecha_de_emision'];
+        $data_json = $this->preparar_datos_cpe($tipo_envio, $idventa, $envio_cpe_fp);
 
-                    while ( $nro_cuotas_cont >= 1) {
-                        $fecha_vencimiento = date("Y-m-d", strtotime($fecha_vencimiento."+ 1 month")); 
-
-                        $monto_cuota = $monto_cuota_promedio;
-                        if($nro_cuotas_cont > 1){  // la cuota 1 debe ser igual al restante de lo que no se ha amortizado  				
-                            $monto_amortizado += $monto_cuota_promedio;
-                        }else{
-                            $monto_cuota = $monto_venta - $monto_amortizado ;
-                        }
-                        
-                        $detalle_cuotas[] = array('fecha' => $fecha_vencimiento,  'monto'=> $monto_cuota, 'codigo_tipo_moneda' => 'PEN');
-                        $nro_cuotas_cont--;
-                    }
-                }
-                
-                unset($data_venta["nro_cuotas"]);
-            
-                // Formateo de datos para el envío del comprobante
-                $data_json = $envio_cpe_fp->formatear_venta_estructura($data_venta, $data_detventa, $idventa, $detalle_cuotas);
-                              
-                break;
-            
-            case "generar_anulacion":
-                // Obtención de datos de venta para la anulacion
-                $data_venta = $this->venta->cpe_venta_anulacion($idventa); 
-                $data_json = $envio_cpe_fp->formatear_anulacion_venta_estructura($data_venta, $idventa);
-                
-                break;
-            
-            default: // Validación
-                $this_response['mensaje']='El tipo de envio de comprobante no definido.';
-                return $this_response;
-                break;
-        }
-
-        //print_r($data_json);die(''); //debug
-        
-        if(count($data_json)==0){// Validación
-            $this_response['mensaje']='No se encontro datos del comprobante en la base de datos.';
+        if ($data_json === null) {
+            $this_response['mensaje'] = 'El tipo de envio de comprobante no definido.';
             return $this_response;
         }
-        
-        $result_builder_cpe = $envio_cpe_fp->builder_cpe($data_json, $tipo_envio); 
 
-        if($result_builder_cpe['respuesta_curl'] != 'ok'){ // Escenario ERROR           
-            $this_response['mensaje'] = 'Error en respuesta curl. <br>'.json_encode($result_builder_cpe) ;
+        if (empty($data_json)) {
+            $this_response['mensaje'] = 'No se encontro datos del comprobante en la base de datos.';
+            return $this_response;
+        }
+
+        $result_builder_cpe = $envio_cpe_fp->builder_cpe($data_json, $tipo_envio);
+
+        if ($result_builder_cpe['respuesta_curl'] != 'ok') {
+            $this_response['mensaje'] = 'Error en respuesta curl. <br>' . json_encode($result_builder_cpe);
             $this_response['detalle'] = $result_builder_cpe;
-            // pendiente insertar error en bd
             return $this_response;
+        }
 
-        }elseif(!$result_builder_cpe['success']){ // Escenario ERROR
-            $this_response['mensaje'] = 'Error en respuesta de proveedor. <br>'.json_encode($result_builder_cpe);
+        if (!$result_builder_cpe['success']) {
+            $this_response['mensaje'] = 'Error en respuesta de proveedor. <br>' . json_encode($result_builder_cpe);
             $this_response['detalle'] = $result_builder_cpe;
-            // pendiente insertar error en bd
-
             return $this_response;
         }
-        
-        if($result_builder_cpe['respuesta_curl'] == 'ok' && $result_builder_cpe['success']){ // Escenario SUCCESS
-            
-            // Importación de modelos
-            $this->load->model('envio_cpe');
 
-            $data_json ['idmaster'] = $idventa;
-            $data_json ['tipo_envio'] = $tipo_envio;
-            unset($result_builder_cpe['data']['qr']);// tamaño excesivo para guardar en bd
-
-            $this->envio_cpe->set_envio($data_json, $result_builder_cpe);//guardar registro envio
-            $this->envio_cpe->update_envio_cpe($idventa, $tipo_envio, $result_builder_cpe['data']['external_id']);//Actualizar en tabla venta
-
-            $this_response['respuesta'] = "ok";// necesario para retornar exitoso
-
-
-            if ($tipo_envio == "generar_comprobante"){
-                $sunat_files_down = [
-                    $result_builder_cpe["data"]["filename"].".xml" => $result_builder_cpe['links']['xml'],
-                    $result_builder_cpe["data"]["filename"].".zip" => $result_builder_cpe['links']['cdr']
-                ];
-                $comprobante_name_file_sunat =  $result_builder_cpe["data"]["filename"];
-
-                // Carpeta de destino en tu proyecto (asegúrate que tenga permisos de escritura)
-                $ruta_destino = FCPATH . 'public/cpe_sunat/';  // FCPATH apunta a la carpeta public/ en CodeIgniter 4
-                if (!is_dir($ruta_destino)) {
-                    mkdir($ruta_destino, 0777, true);
-                }
-
-                foreach ($sunat_files_down as $nombre => $url) {
-                    
-                    $ch = curl_init();
-                    curl_setopt($ch, CURLOPT_URL, $url);
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-                    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Solo si es necesario
-                    
-                    $contenido = curl_exec($ch);
-                    $codigo_http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                    curl_close($ch);
-                    
-                    if ($codigo_http === 200) {
-                        file_put_contents($ruta_destino.$nombre, $contenido);
-                        
-                    }
-
-                }
-            }
-        }
+        $this->guardar_resultado_cpe($data_json, $result_builder_cpe, $idventa, $tipo_envio);
+        $this_response['respuesta'] = 'ok';
 
         return $this_response;
+    }
 
+    private function preparar_datos_cpe($tipo_envio, $idventa, $envio_cpe_fp)
+    {
+        switch ($tipo_envio) {
+            case 'generar_comprobante':
+                $data_venta    = $this->venta->cpe_venta($idventa);
+                $data_detventa = $this->det_venta->cpe_detventa($idventa);
+                $detalle_cuotas = array();
+
+                if ($data_venta['nro_cuotas'] > 1) {
+                    $cuotas_base = $this->calcular_cuotas($data_venta['total_venta'], $data_venta['nro_cuotas'], $data_venta['fecha_de_emision']);
+                    foreach ($cuotas_base as $cuota) {
+                        $detalle_cuotas[] = array('fecha' => $cuota['fecha'], 'monto' => $cuota['monto'], 'codigo_tipo_moneda' => 'PEN');
+                    }
+                }
+
+                unset($data_venta['nro_cuotas']);
+                return $envio_cpe_fp->formatear_venta_estructura($data_venta, $data_detventa, $idventa, $detalle_cuotas);
+
+            case 'generar_anulacion':
+                $data_venta = $this->venta->cpe_venta_anulacion($idventa);
+                return $envio_cpe_fp->formatear_anulacion_venta_estructura($data_venta, $idventa);
+
+            default:
+                return null;
+        }
+    }
+
+    private function guardar_resultado_cpe($data_json, $result_builder_cpe, $idventa, $tipo_envio)
+    {
+        $this->load->model('envio_cpe');
+
+        $data_json['idmaster']   = $idventa;
+        $data_json['tipo_envio'] = $tipo_envio;
+        unset($result_builder_cpe['data']['qr']); // tamaño excesivo para guardar en bd
+
+        $this->envio_cpe->set_envio($data_json, $result_builder_cpe);
+        $this->envio_cpe->update_envio_cpe($idventa, $tipo_envio, $result_builder_cpe['data']['external_id']);
+
+        if ($tipo_envio === 'generar_comprobante') {
+            $archivos = [
+                $result_builder_cpe['data']['filename'] . '.xml' => $result_builder_cpe['links']['xml'],
+                $result_builder_cpe['data']['filename'] . '.zip' => $result_builder_cpe['links']['cdr'],
+            ];
+            $this->descargar_archivos_sunat($archivos);
+        }
+    }
+
+    private function descargar_archivos_sunat($archivos)
+    {
+        $ruta_destino = FCPATH . 'public/cpe_sunat/';
+        if (!is_dir($ruta_destino)) {
+            mkdir($ruta_destino, 0777, true);
+        }
+
+        foreach ($archivos as $nombre => $url) {
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+            $contenido   = curl_exec($ch);
+            $codigo_http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($codigo_http === 200) {
+                file_put_contents($ruta_destino . $nombre, $contenido);
+            }
+        }
     }
     
-    //CREAMOS EL CODIGO QR PARA LA FACTURA ELECTRONICA
-    public function crear_qr($data_text, $name_file='qr_code'){
-
-        $this->load->library('ciqrcode');
-
-        $codeContents = $data_text;
-        $tempDir = 'public/qr_code/';//EXAMPLE_TMP_SERVERPATH; 
-        $fileName = $name_file.'.jpg'; 
-        $outerFrame = 0; //tamaño de borde
-        $pixelPerPoint = 6; //tamaño de los pixeles por point
-        $jpegQuality = 150;  // calidad de imagen
-
-        // generating frame 
-        $frame = QRcode::text($codeContents, false, QR_ECLEVEL_M); 
-        // rendering frame with GD2 (that should be function by real impl.!!!) 
-        $h = count($frame); 
-        $w = strlen($frame[0]); 
-         
-        $imgW = $w + 2*$outerFrame; 
-        $imgH = $h + 2*$outerFrame; 
-         
-        $base_image = imagecreate($imgW, $imgH); 
-         
-        $col[0] = imagecolorallocate($base_image,255,255,255); // BG, white  
-        $col[1] = imagecolorallocate($base_image,0,0,0);     // FG, Black 
-
-        imagefill($base_image, 0, 0, $col[0]); 
-
-        for($y=0; $y<$h; $y++) { 
-            for($x=0; $x<$w; $x++) { 
-                if ($frame[$y][$x] == '1') { 
-                    imagesetpixel($base_image,$x+$outerFrame,$y+$outerFrame,$col[1]);  
-                } 
-            } 
-        } 
-         
-        // saving to file 
-        $target_image = imagecreate($imgW * $pixelPerPoint, $imgH * $pixelPerPoint); 
-        imagecopyresized( 
-            $target_image,  
-            $base_image,  
-            0, 0, 0, 0,  
-            $imgW * $pixelPerPoint, $imgH * $pixelPerPoint, $imgW, $imgH 
-        ); 
-        imagedestroy($base_image); 
-        imagejpeg($target_image, $tempDir.$fileName, $jpegQuality); 
-        imagedestroy($target_image); 
-
-        $path = $tempDir.$fileName;
-        $type = pathinfo($path, PATHINFO_EXTENSION);
-        $data = file_get_contents($path);
-
-        //$qr_code= 'data:image/' . $type . ';base64,' . base64_encode($data);
-        //echo '<img src="' . $qr_code . '">';
-        $qr_code= base64_encode($data);
-        return $qr_code;
-    }
-
 }

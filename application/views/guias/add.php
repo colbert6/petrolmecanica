@@ -2,6 +2,9 @@
 .input-required{
 	border-color: #a94442;
 }
+.form-horizontal .control-label {
+        padding-top: 10px;
+    }
 </style>
 
 <div class="row" id="form">
@@ -80,27 +83,53 @@
       <form class="form-horizontal">
         <div class="box-body">
 
-          <label> Datos de transporte</label>
-		  <div class="form-group">
-            <div class="col-sm-4">
-              <label for="id_tipo_documento_transporte" class="control-label">Tipo_Doc </label> 
-              <label for="nro_documento_transporte" class="control-label">Nro_documento </label>
+          <label>Datos de transporte</label>
 
-              <label for="razon_social_transporte" class="control-label">Razon_social</label> 
-              <label for="transporte_nro_placa" class="control-label">Numero_placa</label>
+          <div class="form-group">
+            <div class="col-sm-4">
+              <label class="control-label">Tipo_Doc</label>
+              <label class="control-label">Nro_documento</label>
             </div>
             <div class="col-sm-8">
               <select class="form-control" id="id_tipo_documento_transporte" name="id_tipo_documento_transporte">
-                <?php $tipo_documento_transporte = array(6=>"RUC", 1=>"DNI")?>
+                <?php $tipo_documento_transporte = array(6 => "RUC", 1 => "DNI"); ?>
                 <?php foreach ($tipo_documento_transporte as $key => $val): ?>
                 <option value="<?= $key ?>"><?= $val ?></option>
                 <?php endforeach; ?>
               </select>
+              <input type="text" class="form-control" id="nro_documento_transporte" name="nro_documento_transporte" value="" placeholder="RUC (público) / DNI (privado)">
+            </div>
+          </div>
 
-              <input type="text" class="form-control" id="nro_documento_transporte" name="nro_documento_transporte" value="" placeholder="DNI si transporte es privado">
-              <input type="text" class="form-control" id="razon_social_transporte" name="razon_social_transporte" value="" >
-              <input type="text" class="form-control" id="transporte_nro_placa" name="transporte_nro_placa" value="" placeholder="Solo si transporte es privado">             
-              
+          <!-- Transporte Público -->
+          <div id="seccion_publico">
+            <div class="form-group">
+              <div class="col-sm-4">
+                <label class="control-label">Razon_social</label>
+                <label class="control-label">Nro_MTC</label>
+              </div>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" id="razon_social_transporte" name="razon_social_transporte" value="" placeholder="Razón social transportista">
+                <input type="text" class="form-control" id="numero_mtc" name="numero_mtc" value="" placeholder="Número registro MTC">
+              </div>
+            </div>
+          </div>
+
+          <!-- Transporte Privado -->
+          <div id="seccion_privado" style="display:none;">
+            <div class="form-group">
+              <div class="col-sm-4">
+                <label class="control-label">Nombres_chofer</label>
+                <label class="control-label">Apellidos_chofer</label>
+                <label class="control-label">Nro_licencia</label>
+                <label class="control-label">Nro_placa</label>
+              </div>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" id="nombres_chofer" name="nombres_chofer" value="" placeholder="Nombres del chofer">
+                <input type="text" class="form-control" id="apellidos_chofer" name="apellidos_chofer" value="" placeholder="Apellidos del chofer">
+                <input type="text" class="form-control" id="numero_licencia" name="numero_licencia" value="" placeholder="Número de licencia de conducir">
+                <input type="text" class="form-control" id="transporte_nro_placa" name="transporte_nro_placa" value="" placeholder="Placa del vehículo">
+              </div>
             </div>
           </div>
 
@@ -149,7 +178,8 @@
               <label for="docs_referencia_numero_comprobante" class="control-label">Numero_comp.</label> 
             </div>
             <div class="col-sm-8">
-              <input type="hidden" class="form-control" id="docs_referencia_id_tipodoc_electronico" name="docs_referencia_id_tipodoc_electronico[]" value="09" >
+              <?php $cod_comprobante_ref = ($data_venta['tipo_comprobante_idtipo_comprobante'] == 2) ? '01' : '03'; ?>
+              <input type="hidden" class="form-control" id="docs_referencia_id_tipodoc_electronico" name="docs_referencia_id_tipodoc_electronico[]" value="<?= $cod_comprobante_ref ?>">
               <input type="text" class="form-control" id="docs_referencia_serie_comprobante" name="docs_referencia_serie_comprobante[]" value="<?= (explode("-", $data_venta['nro_documento']))[0] ?>" readonly>
               <input type="text" class="form-control" id="docs_referencia_numero_comprobante" name="docs_referencia_numero_comprobante[]" value="<?= (explode("-", $data_venta['nro_documento']))[1] ?>" readonly>
 			  

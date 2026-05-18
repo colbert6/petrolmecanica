@@ -246,7 +246,7 @@ class Pdf_comprobantes extends TCPDF
         
         $this->SetFont('helvetica', '', $rd['font_h']);
         $this->MultiCell( $rd['w'], '', $text, $rd['border'], 'L', 0,$rd['ln'], '', '', false, 0,true );      
-        //echo $text;      exit();   
+        //echo $text;      exit();
     }
 
     public function comprobante_data($n_col , $data ) {
