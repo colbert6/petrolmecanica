@@ -46,7 +46,8 @@ class Documento_referencia_guia_remision extends CI_Model {
 			doc_ref_guia.cliente_numerodocumento as cliente_numerodocumento,
 			doc_ref_guia.cliente_nombre as cliente_nombre,
 			doc_ref_guia.cliente_pais as cliente_pais,
-			doc_ref_guia.cliente_codigoubigeo as cliente_codigoubigeo			
+			doc_ref_guia.cliente_codigoubigeo as cliente_codigoubigeo,
+			doc_ref_guia.cliente_direccion as cliente_direccion
 		');
         $this->db->from('documento_referencia_guia_remision doc_ref_guia');
         $this->db->where('doc_ref_guia.guia_idguia_remision',$idguia_remision);

@@ -67,11 +67,100 @@ class FacturaloPeru {
         ];
     }
 
+    public function formatear_guia_estructura($data_guia, $idguia)
+    {
+        $cliente = $data_guia['cliente'];
+        $doc_ref = $data_guia['docs_referencia'][0];
+        $detalle = $data_guia['detalle'];
+
+        $datos_emisor = [
+            'codigo_pais'                 => 'PE',
+            'ubigeo'                      => '060101',
+            'direccion'                   => 'PJ. LA AMISTAD NRO. 145 BAR. MOLLEPAMPA',
+            'correo_electronico'          => 'petrolmecanica.jc@gmail.com',
+            'telefono'                    => '978833002',
+            'codigo_del_domicilio_fiscal' => '0000',
+        ];
+
+        $data = [
+            'serie_documento'              => $data_guia['serie_comprobante'],
+            'numero_documento'             => '#',
+            'fecha_de_emision'             => $data_guia['fecha_comprobante'],
+            'hora_de_emision'              => date('H:i:s'),
+            'codigo_tipo_documento'        => '09',
+            'datos_del_emisor'             => $datos_emisor,
+            'datos_del_cliente_o_receptor' => [
+                'codigo_tipo_documento_identidad'    => (string) $cliente['cliente_tipodocumento'],
+                'numero_documento'                   => $cliente['cliente_numerodocumento'],
+                'apellidos_y_nombres_o_razon_social' => $cliente['cliente_nombre'],
+                'nombre_comercial'                   => $cliente['cliente_nombre'],
+                'codigo_pais'                        => $cliente['cliente_pais'],
+                'ubigeo'                             => $cliente['cliente_codigoubigeo'],
+                'direccion'                          => $cliente['cliente_direccion'],
+                'correo_electronico'                 => '',
+                'telefono'                           => '',
+            ],
+            'observaciones'               => $data_guia['nota'],
+            'codigo_modo_transporte'      => $data_guia['id_modalidadtraslado'],
+            'codigo_motivo_traslado'      => $data_guia['id_motivotraslado'],
+            'descripcion_motivo_traslado' => $data_guia['motivo_traslado'],
+            'fecha_de_traslado'           => $data_guia['fecha_traslado'],
+            'codigo_de_puerto'            => $data_guia['id_codigopuerto'],
+            'indicador_de_transbordo'     => false,
+            'unidad_peso_total'           => 'KGM',
+            'peso_total'                  => (float) $data_guia['peso'],
+            'numero_de_bultos'            => (int) $data_guia['numero_paquetes'],
+            'numero_de_contenedor'        => $data_guia['numero_contenedor'],
+            'direccion_partida' => [
+                'ubigeo'                      => $data_guia['id_ubigeo_partida'],
+                'direccion'                   => $data_guia['dir_partida'],
+                'codigo_del_domicilio_fiscal' => '0000',
+            ],
+            'direccion_llegada' => [
+                'ubigeo'                      => $data_guia['id_ubigeo_destino'],
+                'direccion'                   => $data_guia['dir_destino'],
+                'codigo_del_domicilio_fiscal' => '0000',
+            ],
+            'items' => array_map(function ($item) {
+                return [
+                    'codigo_interno' => $item['CODIGO_PRODUCTO'],
+                    'cantidad'       => (int) $item['CANTIDAD_DET'],
+                ];
+            }, $detalle),
+            'documento_afectado' => [
+                'serie_documento'       => $doc_ref['serie_comprobante'],
+                'numero_documento'      => (string) $doc_ref['numero_comprobante'],
+                'codigo_tipo_documento' => $doc_ref['id_tipodoc_electronico'],
+            ],
+        ];
+
+        if ($data_guia['id_modalidadtraslado'] === '02') {
+            $data['chofer'] = [
+                'codigo_tipo_documento_identidad' => (string) $data_guia['id_tipo_documento_transporte'],
+                'numero_documento'                => $data_guia['nro_documento_transporte'],
+                'nombres'                         => $data_guia['nombres_chofer'],
+                'apellidos'                       => $data_guia['apellidos_chofer'],
+                'numero_licencia'                 => $data_guia['numero_licencia'],
+            ];
+            $data['numero_de_placa'] = $data_guia['transporte_nro_placa'];
+        } else {
+            $data['transportista'] = [
+                'codigo_tipo_documento_identidad'    => (string) $data_guia['id_tipo_documento_transporte'],
+                'numero_documento'                   => $data_guia['nro_documento_transporte'],
+                'apellidos_y_nombres_o_razon_social' => $data_guia['razon_social_transporte'],
+                'numero_mtc'                         => $data_guia['numero_mtc'],
+            ];
+        }
+
+        return $data;
+    }
+
     public function builder_cpe($data, $tipo_envio)
     {
         $rutas = [
             'generar_comprobante' => self::BASE_URL . '/documents',
             'generar_anulacion'   => self::BASE_URL . '/voided',
+            'generar_guia'        => self::BASE_URL . '/dispatches',
         ];
 
         if (!isset($rutas[$tipo_envio])) {
