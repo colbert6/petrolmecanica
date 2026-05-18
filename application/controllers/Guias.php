@@ -221,23 +221,32 @@ class Guias extends MY_Controller {
 
         $data_usuario_receptor = array(
             'Fecha Comprobante'   => array($data_guia['fecha_comprobante'], '1'),
-            '.'                   => array('.', '1'),
-            'RUC/DNI'             => array($data_guia['cliente_numerodocumento'], '1'),
             'Documento Referencia' => array($data_guia['numero_comprobante_referencia'], '1'),
+
+            'RUC/DNI'             => array($data_guia['cliente_numerodocumento'], '2'),
+
             'Cliente'             => array($data_guia['cliente_nombre'], '2'),
             'Dirección'           => array($data_guia['cliente_direccion'], '2'),
         );
         $pdf->receptor_data(2, $data_usuario_receptor);
 
         $data_comprobante = array(
-            'Fecha Inicio Traslado' => array($data_guia['fecha_traslado'], '1'),
-            '.'                     => array('.', '1'),
+            'Fecha inicio traslado' => array($data_guia['fecha_traslado'], '1'),
             'Motivo traslado'       => array($data_guia['motivo_traslado'], '1'),
+            '.'                     => array('.', '2'),
             'Modalidad traslado'    => array($data_guia['modalidad_traslado'], '1'),
-            'Transporte DNI/RUC'    => array($data_guia['nro_documento_transporte'], '1'),
-            'Transporte Nro Placa'  => array($data_guia['transporte_nro_placa'], '1'),
-            'Transporte Razon social' => array($data_guia['razon_social_transporte'], '2'),
+            'RUC/DNI'   => array($data_guia['nro_documento_transporte'], '1'),
         );
+
+        if ($data_guia['id_modalidadtraslado'] === '02') {
+            $data_comprobante['Chofer']   = array($data_guia['nombres_chofer'] . ' ' . $data_guia['apellidos_chofer'], '2');
+            $data_comprobante['Licencia'] = array($data_guia['numero_licencia'], '1');
+            $data_comprobante['Nro Placa'] = array($data_guia['transporte_nro_placa'], '1');
+        } else {
+            $data_comprobante['Transportista'] = array($data_guia['razon_social_transporte'], '2');
+            $data_comprobante['Nro MTC']       = array($data_guia['numero_mtc'], '1');
+        }
+
         $pdf->comprobante_data(2, $data_comprobante);
 
         $peso       = $data_guia['peso'];

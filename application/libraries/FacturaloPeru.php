@@ -84,7 +84,7 @@ class FacturaloPeru {
 
         $data = [
             'serie_documento'              => $data_guia['serie_comprobante'],
-            'numero_documento'             => '#',
+            'numero_documento'             => $data_guia['numero_comprobante'],
             'fecha_de_emision'             => $data_guia['fecha_comprobante'],
             'hora_de_emision'              => date('H:i:s'),
             'codigo_tipo_documento'        => '09',
@@ -152,6 +152,9 @@ class FacturaloPeru {
             ];
         }
 
+        //echo json_encode($data);
+		//exit();
+
         return $data;
     }
 
@@ -170,8 +173,27 @@ class FacturaloPeru {
         return $this->send_cpe($data, $rutas[$tipo_envio]);
     }
 
+    private function es_modo_prueba()
+    {
+        $CI = &get_instance();
+        return $CI->config->item('CPE_tipo_proceso') !== 'produccion';
+    }
+
     private function send_cpe($data, $ruta_url)
     {
+        if ($this->es_modo_prueba()) {
+            return array(
+                'respuesta_curl' => 'ok',
+                'success'        => true,
+                'data'           => array(
+                    'number'      => 'PRUEBA-' . date('His'),
+                    'filename'    => 'PRUEBA',
+                    'external_id' => 'prueba-' . uniqid(),
+                ),
+                'links' => array('xml' => '', 'cdr' => '', 'pdf' => ''),
+            );
+        }
+
         $curl = curl_init();
         curl_setopt_array($curl, array(
             CURLOPT_URL            => $ruta_url,
