@@ -63,7 +63,7 @@ class MY_Controller extends CI_Controller {
             "logo_empresa" =>'assets/img/logo_empresa.png',
             "razon_social" =>'PETROLMECANICA JC S.A.C.',
             "ruc" =>'20602440908',
-            "direccion" =>'Pj. La Amistad nro. 145 Bar. Mollepampa - Cajamarca - Cajamarca',
+            "direccion" =>'Pj. La Amistad nro. 146 Bar. Mollepampa - Cajamarca - Cajamarca',
             "direccion_adicional" =>'Calle San francisco nro. 435 - urb. las palmeras - Jaen - Cajamarca',
             "contacto" =>'Cel.978833002 | Correos: edinson@petrolmecanicajc.com,  petrolmecanica.jc@gmail.com',
             "rubro" =>'Venta al por mayor de otros tipos de maquinaria y equipo <br> Fabricación de productos metalicos para uso estructural',

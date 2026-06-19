@@ -51,7 +51,7 @@ class Facturalaya{
 			'nom_comercial' 			=> 'PETROLMECANICA JC S.A.C.', //Nombre Comercial
 			'razon_social' 				=> 'PETROLMECANICA JC S.A.C.', //Razón Social
 			'codigo_ubigeo' 			=> '060101',
-			'direccion' 				=> 'PJ. LA AMISTAD NRO. 145 BAR. MOLLEPAMPA',
+			'direccion' 				=> 'PJ. LA AMISTAD NRO. 146 BAR. MOLLEPAMPA',
 			'modalidad_envio_sunat' 	=> 'inmediato', //no cambiar
 			'direccion_departamento' 	=> 'CAJAMARCA', //del ubigeo
 			'direccion_provincia' 		=> 'CAJAMARCA', //del ubigeo
