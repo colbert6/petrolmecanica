@@ -23,6 +23,10 @@ class Guia extends CI_Model {
         $this->nro_documento_transporte = $this->input->post('nro_documento_transporte');
 		$this->razon_social_transporte = $this->input->post('razon_social_transporte');
         $this->transporte_nro_placa = strtoupper($this->input->post('transporte_nro_placa'));
+		$this->nombres_chofer = $this->input->post('nombres_chofer');
+		$this->apellidos_chofer = $this->input->post('apellidos_chofer');
+		$this->numero_licencia = $this->input->post('numero_licencia');
+		$this->numero_mtc = $this->input->post('numero_mtc');
         $this->id_ubigeo_destino = $this->input->post('id_ubigeo_destino');
         $this->dir_destino = $this->input->post('dir_destino');
         $this->id_ubigeo_partida = $this->input->post('id_ubigeo_partida');
@@ -58,6 +62,10 @@ class Guia extends CI_Model {
 			guia.nro_documento_transporte as nro_documento_transporte,
 			guia.razon_social_transporte as razon_social_transporte,
 			guia.transporte_nro_placa as transporte_nro_placa,
+			guia.nombres_chofer as nombres_chofer,
+			guia.apellidos_chofer as apellidos_chofer,
+			guia.numero_licencia as numero_licencia,
+			guia.numero_mtc as numero_mtc,
 			guia.id_ubigeo_destino as id_ubigeo_destino,
 			guia.dir_destino as dir_destino,
 			guia.id_ubigeo_partida as id_ubigeo_partida,
@@ -87,9 +95,14 @@ class Guia extends CI_Model {
 			guia.fecha_traslado as fecha_traslado,			
 			guia.motivo_traslado as motivo_traslado,
 			IF(guia.id_modalidadtraslado="01","Transporte_publico","Transporte_privado") as modalidad_traslado,
+			guia.id_modalidadtraslado as id_modalidadtraslado,
 			guia.nro_documento_transporte as nro_documento_transporte,
 			guia.razon_social_transporte as razon_social_transporte,
 			guia.transporte_nro_placa as transporte_nro_placa,
+			guia.nombres_chofer as nombres_chofer,
+			guia.apellidos_chofer as apellidos_chofer,
+			guia.numero_licencia as numero_licencia,
+			guia.numero_mtc as numero_mtc,
 			ubi_dest.descripcion_ubigeo as destino_descripcion_ubigeo,
 			guia.dir_destino as dir_destino,
 			ubi_part.descripcion_ubigeo as partida_descripcion_ubigeo,

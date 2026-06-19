@@ -24,7 +24,7 @@ date_default_timezone_set('America/Lima');
 |
 */
 $config['base_url'] = 'https://'.$_SERVER["SERVER_NAME"].'/sistem/';
-$config['Facturalaya_Secret_data_Tipo_proceso'] = 'produccion';
+$config['CPE_tipo_proceso'] = 'produccion';
 
 /* INFORMACIÓN DE LA EMPRESA*/
 $config['MY_Controller_sistema'] =  'PETROLMECANICA JC - TREBLOCs';

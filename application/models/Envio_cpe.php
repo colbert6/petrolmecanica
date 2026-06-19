@@ -38,7 +38,8 @@ class Envio_cpe extends CI_Model {
     public function set_envio($data_envio, $data_result)
     {   
         $this->idmaster = $data_envio['idmaster'];
-        $this->tipo = isset($data_envio['cod_tipo_documento'])?$data_envio['codigo_tipo_documento']:0;
+        $this->tipo = isset($data_envio['codigo_tipo_documento']) ? $data_envio['codigo_tipo_documento']
+                    : (isset($data_envio['cod_tipo_documento']) ? $data_envio['cod_tipo_documento'] : 0);
         $this->correlativo = isset($data_envio['numero_documento'])?$data_envio['numero_documento']:0; 
         $this->serie = isset($data_envio['serie_documento'])?$data_envio['serie_documento']:"0";
 
@@ -50,7 +51,8 @@ class Envio_cpe extends CI_Model {
 
         $this->tipoenvio = $data_envio['tipo_envio'];
         $this->fecha_envio = date("Y-m-d H:i:s");
-        $this->fecha_emi = isset($data_envio['fecha_comprobante'])?$data_envio['fecha_de_emision']:""; 
+        $this->fecha_emi = isset($data_envio['fecha_de_emision']) ? $data_envio['fecha_de_emision']
+                         : (isset($data_envio['fecha_comprobante']) ? $data_envio['fecha_comprobante'] : ''); 
         $this->data_result =  json_encode($data_result);
 
         return  $this->db->insert('envio_electronico', $this);
