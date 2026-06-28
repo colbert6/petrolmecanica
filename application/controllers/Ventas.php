@@ -625,5 +625,32 @@ class Ventas extends MY_Controller {
             }
         }
     }
-    
+
+    public function test_update_estado_cpe()
+    {
+        $this->load->library('FacturaloPeru');
+        $this->load->model('venta');
+
+        $idventa      = $this->input->get('idventa');
+        $envio_cpe_fp = new FacturaloPeru();
+
+        $data_venta = $this->venta->cpe_venta($idventa);
+
+        $data = array(
+            'document_type_id' => "01",#$data_venta['codigo_tipo_documento'],
+            'series'           => $data_venta['serie_documento'],
+            'number'           => (int) $data_venta['numero_documento'],
+            'date_of_issue'    => $data_venta['fecha_de_emision'],
+            'total'            => (float) $data_venta['total_venta'],
+        );
+
+        $result = $envio_cpe_fp->builder_cpe($data, 'validar_documento');
+
+        header('Content-Type: application/json');
+        print json_encode(
+            array('data_enviada' => $data, 'respuesta' => $result),
+            JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE
+        );
+    }
+
 }

@@ -164,6 +164,8 @@ class FacturaloPeru {
             'generar_comprobante' => self::BASE_URL . '/documents',
             'generar_anulacion'   => self::BASE_URL . '/voided',
             'generar_guia'        => self::BASE_URL . '/dispatches',
+            'actualizar_estado'   => self::BASE_URL . '/documents/updatedocumentstatus',
+            'validar_documento'   => self::BASE_URL . '/documents/validate-document',
         ];
 
         if (!isset($rutas[$tipo_envio])) {
