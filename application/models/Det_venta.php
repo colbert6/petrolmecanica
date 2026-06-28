@@ -75,7 +75,7 @@ class Det_venta extends CI_Model {
             ""  as codigo_producto_sunat,
             IF(tipo_producto = "servicio", "ZZ" ,"NIU" ) as unidad_de_medida,
             ROUND(detv.cantidad)  as cantidad,
-            ROUND(detv.precioxpresentacion/ 1.18, 2) as valor_unitario,
+            ROUND(detv.precioxpresentacion/ 1.18, 6) as valor_unitario,
             "01" as codigo_tipo_precio, 
             detv.precioxpresentacion as precio_unitario,
             "10" as codigo_tipo_afectacion_igv, 

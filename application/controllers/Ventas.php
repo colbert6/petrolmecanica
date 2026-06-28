@@ -20,12 +20,24 @@ class Ventas extends MY_Controller {
         $crud = new grocery_CRUD();
 
         $crud->set_table('venta');
-        $crud->columns('fecha_creacion','cliente_razon_social', 'tipo_comprobante_idtipo_comprobante',  'nro_documento','total','estado');
+        $crud->columns('fecha_creacion','cliente_razon_social', 'tipo_comprobante_idtipo_comprobante',  'nro_documento','total', 'envio_cpe_emision');
 
         //$crud->display_as('fecha_creacion','Fecha');
         $crud->display_as('cliente_razon_social','Cliente');
         $crud->display_as('tipo_comprobante_idtipo_comprobante','Tipo Comp.');
         $crud->display_as('serie_comprobante_idserie_comprobante','Serie');
+        $crud->display_as('envio_cpe_emision','Envío SUNAT');
+
+        $crud->callback_column('envio_cpe_emision', function($value, $row) {
+            if ((int)$row->envio_cpe_baja === 1) {
+                return '<span class="label label-warning">Por anular</span>';
+            }
+            switch ((int)$value) {
+                case 1:  return '<span class="label label-success">Aceptado</span>';
+                case 2:  return '<span class="label label-danger">Rechazado</span>';
+                default: return '<span class="label label-warning">Pendiente</span>';
+            }
+        });
 
         $crud->set_subject('Venta');
         $crud->set_relation('tienda_idtienda','tienda','descripcion');
@@ -504,18 +516,23 @@ class Ventas extends MY_Controller {
             return $this_response;
         }
 
-        $sent_sunat = $result_builder_cpe['response']['sent_sunat'] ?? true;
         $this->registrar_envio_cpe($data_json, $result_builder_cpe, $idventa, $tipo_envio);
-        $this->actualizar_estado_venta($idventa, $tipo_envio, $result_builder_cpe, $sent_sunat);
-        $this_response['respuesta'] = 'ok';
 
-        if (!$sent_sunat) {
-            $codigo      = $result_builder_cpe['response']['code'] ?? '';
-            $descripcion = $result_builder_cpe['response']['description'] ?? '';
-            $this_response['advertencia'] = true;
-            $this_response['mensaje']     = "Comprobante enviado al proveedor pero SUNAT lo rechazó. Código $codigo: $descripcion";
+        if ($tipo_envio === 'generar_comprobante') {
+            $sent_sunat = $result_builder_cpe['response']['sent_sunat'] ?? true;
+            $this->actualizar_estado_venta($idventa, $tipo_envio, $result_builder_cpe, $sent_sunat ? 1 : 2);
+
+            if (!$sent_sunat) {
+                $codigo      = $result_builder_cpe['response']['code'] ?? '';
+                $descripcion = $result_builder_cpe['response']['description'] ?? '';
+                $this_response['advertencia'] = true;
+                $this_response['mensaje']     = "Comprobante enviado a proveedor, pero SUNAT lo rechazó. Código $codigo: $descripcion";
+            }
+        } else {
+            $this->actualizar_estado_venta($idventa, $tipo_envio, $result_builder_cpe, 1);
         }
 
+        $this_response['respuesta'] = 'ok';
         return $this_response;
     }
 
