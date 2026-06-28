@@ -248,7 +248,9 @@ class Ventas extends MY_Controller {
                 if ($result_envio_cpe['respuesta'] == 'ok' && $this->db->trans_status() !== false) {
                     $this->db->trans_commit();
                     $return['estado']  = true;
-                    $return['mensaje'] = 'VENTA GUARDADA <br> Envio comprobante electrónico EXITOSO';
+                    $return['mensaje'] = empty($result_envio_cpe['advertencia'])
+                        ? 'VENTA GUARDADA <br> Envio comprobante electrónico EXITOSO'
+                        : 'VENTA GUARDADA <br> ADVERTENCIA: ' . $result_envio_cpe['mensaje'];
                 } else {
                     $return['estado']  = false;
                     $return['mensaje'] = 'ERROR en Envio comprobante electrónico. <br> INFO: <br>' . $result_envio_cpe['mensaje'];
@@ -309,7 +311,9 @@ class Ventas extends MY_Controller {
             if ($result_envio_cpe['respuesta'] == 'ok' && $this->db->trans_status() !== false) {
                 $this->db->trans_commit();
                 $return['estado'] = true;
-                $return['msj']    = 'VENTA ANULADA';
+                $return['msj']    = empty($result_envio_cpe['advertencia'])
+                    ? 'VENTA ANULADA'
+                    : 'VENTA ANULADA <br> ADVERTENCIA: ' . $result_envio_cpe['mensaje'];
             } else {
                 $error = $this->db->error();
                 $this->db->trans_rollback();
@@ -500,16 +504,17 @@ class Ventas extends MY_Controller {
             return $this_response;
         }
 
-        if (isset($result_builder_cpe['response']['sent_sunat']) && !$result_builder_cpe['response']['sent_sunat']) {
+        $sent_sunat = $result_builder_cpe['response']['sent_sunat'] ?? true;
+        $this->registrar_envio_cpe($data_json, $result_builder_cpe, $idventa, $tipo_envio);
+        $this->actualizar_estado_venta($idventa, $tipo_envio, $result_builder_cpe, $sent_sunat);
+        $this_response['respuesta'] = 'ok';
+
+        if (!$sent_sunat) {
             $codigo      = $result_builder_cpe['response']['code'] ?? '';
             $descripcion = $result_builder_cpe['response']['description'] ?? '';
-            $this_response['mensaje'] = "SUNAT rechazó el comprobante. Código $codigo: $descripcion";
-            $this_response['detalle'] = $result_builder_cpe;
-            return $this_response;
+            $this_response['advertencia'] = true;
+            $this_response['mensaje']     = "Comprobante enviado al proveedor pero SUNAT lo rechazó. Código $codigo: $descripcion";
         }
-
-        $this->guardar_resultado_cpe($data_json, $result_builder_cpe, $idventa, $tipo_envio);
-        $this_response['respuesta'] = 'ok';
 
         return $this_response;
     }
@@ -551,7 +556,7 @@ class Ventas extends MY_Controller {
         }
     }
 
-    private function guardar_resultado_cpe($data_json, $result_builder_cpe, $idventa, $tipo_envio)
+    private function registrar_envio_cpe($data_json, $result_builder_cpe, $idventa, $tipo_envio)
     {
         $this->load->model('envio_cpe');
 
@@ -560,7 +565,6 @@ class Ventas extends MY_Controller {
         unset($result_builder_cpe['data']['qr']); // tamaño excesivo para guardar en bd
 
         $this->envio_cpe->set_envio($data_json, $result_builder_cpe);
-        $this->envio_cpe->update_envio_cpe($idventa, $tipo_envio, $result_builder_cpe['data']['external_id']);
 
         if ($tipo_envio === 'generar_comprobante') {
             $archivos = [
@@ -569,6 +573,15 @@ class Ventas extends MY_Controller {
             ];
             $this->descargar_archivos_sunat($archivos);
         }
+    }
+
+    private function actualizar_estado_venta($idventa, $tipo_envio, $result_builder_cpe, $sent_sunat)
+    {
+        $this->load->model('envio_cpe');
+
+        $estado      = $sent_sunat ? 1 : 2;
+        $external_id = $result_builder_cpe['data']['external_id'] ?? '';
+        $this->envio_cpe->update_envio_cpe($idventa, $tipo_envio, $external_id, $estado);
     }
 
     private function descargar_archivos_sunat($archivos)
