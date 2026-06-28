@@ -288,31 +288,36 @@ class Ventas extends MY_Controller {
             return;
         }
 
-        $this->db->trans_start();
+        try {
+            $this->db->trans_start();
 
-        $this->stock->devolver_stock('venta anulada', $idventa);
-        $this->kardex->insert_devolucion_kardex('venta', $idventa);
-        $this->venta->anular_venta($idventa);
-        $this->det_venta->anular_det_venta($idventa);
+            $this->stock->devolver_stock('venta anulada', $idventa);
+            $this->kardex->insert_devolucion_kardex('venta', $idventa);
+            $this->venta->anular_venta($idventa);
+            $this->det_venta->anular_det_venta($idventa);
 
-        if ($this->db->trans_status() === false) {
-            $error = $this->db->error();
-            $return['msj'] = $return['error'] = 'ERROR: Operaciones de Base de Datos. <br>' . $error['message'];
+            if ($this->db->trans_status() === false) {
+                $error = $this->db->error();
+                $return['msj'] = $return['error'] = 'ERROR: Operaciones de Base de Datos. <br>' . $error['message'];
+                $this->db->trans_rollback();
+                print json_encode($return);
+                return;
+            }
+
+            $result_envio_cpe = $this->enviar_comprobante_proveedor_cpe('generar_anulacion', $idventa);
+
+            if ($result_envio_cpe['respuesta'] == 'ok' && $this->db->trans_status() !== false) {
+                $this->db->trans_commit();
+                $return['estado'] = true;
+                $return['msj']    = 'VENTA ANULADA';
+            } else {
+                $error = $this->db->error();
+                $this->db->trans_rollback();
+                $return['msj'] = $return['error'] = 'ERROR: Envio electrónico. <br>- ' . $result_envio_cpe['mensaje'] . '<br>- ' . $error['message'];
+            }
+        } catch (Exception $e) {
             $this->db->trans_rollback();
-            print json_encode($return);
-            return;
-        }
-
-        $result_envio_cpe = $this->enviar_comprobante_proveedor_cpe('generar_anulacion', $idventa);
-
-        if ($result_envio_cpe['respuesta'] == 'ok' && $this->db->trans_status() !== false) {
-            $this->db->trans_commit();
-            $return['estado'] = true;
-            $return['msj']    = 'VENTA ANULADA';
-        } else {
-            $error = $this->db->error();
-            $this->db->trans_rollback();
-            $return['msj'] = $return['error'] = 'ERROR: Envio electrónico. <br>- ' . $result_envio_cpe['mensaje'] . '<br>- ' . $error['message'];
+            $return['msj'] = $return['error'] = 'ERROR: Error en código (' . $e->getMessage() . ')';
         }
 
         print json_encode($return);
