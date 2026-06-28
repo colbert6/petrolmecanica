@@ -68,8 +68,8 @@ class Envio_cpe extends CI_Model {
         return  1;
     }
 
-    public function update_envio_cpe($idventa, $tipo, $external_id = '')
-    {   
+    public function update_envio_cpe($idventa, $tipo, $external_id = '', $estado = 1)
+    {
 		$tabla_nombre = "venta";
 		$campo_llave_nombre = "idventa";
         switch ($tipo) {
@@ -81,22 +81,22 @@ class Envio_cpe extends CI_Model {
              case 'generar_anulacion':
                 $campo_update_nombre = 'envio_cpe_baja';
                 break;
-				
+
 			case 'generar_guia_remision':
 				$tabla_nombre = "guia_remision";
 				$campo_llave_nombre = "idguia_remision";
                 $campo_update_nombre = 'envio_cpe_emision';
                 break;
-            
+
             default:
                 $campo_update_nombre = '';
                 break;
         }
         if($campo_update_nombre != '' ){
-            $this->db->set($campo_update_nombre, 1);
+            $this->db->set($campo_update_nombre, $estado);
             $this->db->where($campo_llave_nombre,$idventa);
             $this->db->update($tabla_nombre);
-        }       
+        }
 
         return  1;
     }    

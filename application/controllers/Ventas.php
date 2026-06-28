@@ -20,12 +20,24 @@ class Ventas extends MY_Controller {
         $crud = new grocery_CRUD();
 
         $crud->set_table('venta');
-        $crud->columns('fecha_creacion','cliente_razon_social', 'tipo_comprobante_idtipo_comprobante',  'nro_documento','total','estado');
+        $crud->columns('fecha_creacion','cliente_razon_social', 'tipo_comprobante_idtipo_comprobante',  'nro_documento','total', 'envio_cpe_emision');
 
         //$crud->display_as('fecha_creacion','Fecha');
         $crud->display_as('cliente_razon_social','Cliente');
         $crud->display_as('tipo_comprobante_idtipo_comprobante','Tipo Comp.');
         $crud->display_as('serie_comprobante_idserie_comprobante','Serie');
+        $crud->display_as('envio_cpe_emision','Envío SUNAT');
+
+        $crud->callback_column('envio_cpe_emision', function($value, $row) {
+            if ((int)$row->envio_cpe_baja === 1) {
+                return '<span class="label label-warning">Por anular</span>';
+            }
+            switch ((int)$value) {
+                case 1:  return '<span class="label label-success">Aceptado</span>';
+                case 2:  return '<span class="label label-danger">Rechazado</span>';
+                default: return '<span class="label label-warning">Pendiente</span>';
+            }
+        });
 
         $crud->set_subject('Venta');
         $crud->set_relation('tienda_idtienda','tienda','descripcion');
@@ -248,7 +260,9 @@ class Ventas extends MY_Controller {
                 if ($result_envio_cpe['respuesta'] == 'ok' && $this->db->trans_status() !== false) {
                     $this->db->trans_commit();
                     $return['estado']  = true;
-                    $return['mensaje'] = 'VENTA GUARDADA <br> Envio comprobante electrónico EXITOSO';
+                    $return['mensaje'] = empty($result_envio_cpe['advertencia'])
+                        ? 'VENTA GUARDADA <br> Envio comprobante electrónico EXITOSO'
+                        : 'VENTA GUARDADA <br> ADVERTENCIA: ' . $result_envio_cpe['mensaje'];
                 } else {
                     $return['estado']  = false;
                     $return['mensaje'] = 'ERROR en Envio comprobante electrónico. <br> INFO: <br>' . $result_envio_cpe['mensaje'];
@@ -288,31 +302,38 @@ class Ventas extends MY_Controller {
             return;
         }
 
-        $this->db->trans_start();
+        try {
+            $this->db->trans_start();
 
-        $this->stock->devolver_stock('venta anulada', $idventa);
-        $this->kardex->insert_devolucion_kardex('venta', $idventa);
-        $this->venta->anular_venta($idventa);
-        $this->det_venta->anular_det_venta($idventa);
+            $this->stock->devolver_stock('venta anulada', $idventa);
+            $this->kardex->insert_devolucion_kardex('venta', $idventa);
+            $this->venta->anular_venta($idventa);
+            $this->det_venta->anular_det_venta($idventa);
 
-        if ($this->db->trans_status() === false) {
-            $error = $this->db->error();
-            $return['msj'] = $return['error'] = 'ERROR: Operaciones de Base de Datos. <br>' . $error['message'];
+            if ($this->db->trans_status() === false) {
+                $error = $this->db->error();
+                $return['msj'] = $return['error'] = 'ERROR: Operaciones de Base de Datos. <br>' . $error['message'];
+                $this->db->trans_rollback();
+                print json_encode($return);
+                return;
+            }
+
+            $result_envio_cpe = $this->enviar_comprobante_proveedor_cpe('generar_anulacion', $idventa);
+
+            if ($result_envio_cpe['respuesta'] == 'ok' && $this->db->trans_status() !== false) {
+                $this->db->trans_commit();
+                $return['estado'] = true;
+                $return['msj']    = empty($result_envio_cpe['advertencia'])
+                    ? 'VENTA ANULADA'
+                    : 'VENTA ANULADA <br> ADVERTENCIA: ' . $result_envio_cpe['mensaje'];
+            } else {
+                $error = $this->db->error();
+                $this->db->trans_rollback();
+                $return['msj'] = $return['error'] = 'ERROR: Envio electrónico. <br>- ' . $result_envio_cpe['mensaje'] . '<br>- ' . $error['message'];
+            }
+        } catch (Exception $e) {
             $this->db->trans_rollback();
-            print json_encode($return);
-            return;
-        }
-
-        $result_envio_cpe = $this->enviar_comprobante_proveedor_cpe('generar_anulacion', $idventa);
-
-        if ($result_envio_cpe['respuesta'] == 'ok' && $this->db->trans_status() !== false) {
-            $this->db->trans_commit();
-            $return['estado'] = true;
-            $return['msj']    = 'VENTA ANULADA';
-        } else {
-            $error = $this->db->error();
-            $this->db->trans_rollback();
-            $return['msj'] = $return['error'] = 'ERROR: Envio electrónico. <br>- ' . $result_envio_cpe['mensaje'] . '<br>- ' . $error['message'];
+            $return['msj'] = $return['error'] = 'ERROR: Error en código (' . $e->getMessage() . ')';
         }
 
         print json_encode($return);
@@ -483,21 +504,35 @@ class Ventas extends MY_Controller {
 
         $result_builder_cpe = $envio_cpe_fp->builder_cpe($data_json, $tipo_envio);
 
-        if ($result_builder_cpe['respuesta_curl'] != 'ok') {
+        if (($result_builder_cpe['respuesta_curl'] ?? '') != 'ok') {
             $this_response['mensaje'] = 'Error en respuesta curl. <br>' . json_encode($result_builder_cpe);
             $this_response['detalle'] = $result_builder_cpe;
             return $this_response;
         }
 
-        if (!$result_builder_cpe['success']) {
+        if (!($result_builder_cpe['success'] ?? false)) {
             $this_response['mensaje'] = 'Error en respuesta de proveedor. <br>' . json_encode($result_builder_cpe);
             $this_response['detalle'] = $result_builder_cpe;
             return $this_response;
         }
 
-        $this->guardar_resultado_cpe($data_json, $result_builder_cpe, $idventa, $tipo_envio);
-        $this_response['respuesta'] = 'ok';
+        $this->registrar_envio_cpe($data_json, $result_builder_cpe, $idventa, $tipo_envio);
 
+        if ($tipo_envio === 'generar_comprobante') {
+            $sent_sunat = $result_builder_cpe['response']['sent_sunat'] ?? true;
+            $this->actualizar_estado_venta($idventa, $tipo_envio, $result_builder_cpe, $sent_sunat ? 1 : 2);
+
+            if (!$sent_sunat) {
+                $codigo      = $result_builder_cpe['response']['code'] ?? '';
+                $descripcion = $result_builder_cpe['response']['description'] ?? '';
+                $this_response['advertencia'] = true;
+                $this_response['mensaje']     = "Comprobante enviado a proveedor, pero SUNAT lo rechazó. Código $codigo: $descripcion";
+            }
+        } else {
+            $this->actualizar_estado_venta($idventa, $tipo_envio, $result_builder_cpe, 1);
+        }
+
+        $this_response['respuesta'] = 'ok';
         return $this_response;
     }
 
@@ -507,6 +542,11 @@ class Ventas extends MY_Controller {
             case 'generar_comprobante':
                 $data_venta    = $this->venta->cpe_venta($idventa);
                 $data_detventa = $this->det_venta->cpe_detventa($idventa);
+
+                if (empty($data_venta) || empty($data_detventa)) {
+                    return array();
+                }
+
                 $detalle_cuotas = array();
 
                 if ($data_venta['nro_cuotas'] > 1) {
@@ -521,6 +561,11 @@ class Ventas extends MY_Controller {
 
             case 'generar_anulacion':
                 $data_venta = $this->venta->cpe_venta_anulacion($idventa);
+
+                if (empty($data_venta)) {
+                    return array();
+                }
+
                 return $envio_cpe_fp->formatear_anulacion_venta_estructura($data_venta, $idventa);
 
             default:
@@ -528,7 +573,7 @@ class Ventas extends MY_Controller {
         }
     }
 
-    private function guardar_resultado_cpe($data_json, $result_builder_cpe, $idventa, $tipo_envio)
+    private function registrar_envio_cpe($data_json, $result_builder_cpe, $idventa, $tipo_envio)
     {
         $this->load->model('envio_cpe');
 
@@ -537,7 +582,6 @@ class Ventas extends MY_Controller {
         unset($result_builder_cpe['data']['qr']); // tamaño excesivo para guardar en bd
 
         $this->envio_cpe->set_envio($data_json, $result_builder_cpe);
-        $this->envio_cpe->update_envio_cpe($idventa, $tipo_envio, $result_builder_cpe['data']['external_id']);
 
         if ($tipo_envio === 'generar_comprobante') {
             $archivos = [
@@ -546,6 +590,15 @@ class Ventas extends MY_Controller {
             ];
             $this->descargar_archivos_sunat($archivos);
         }
+    }
+
+    private function actualizar_estado_venta($idventa, $tipo_envio, $result_builder_cpe, $sent_sunat)
+    {
+        $this->load->model('envio_cpe');
+
+        $estado      = $sent_sunat ? 1 : 2;
+        $external_id = $result_builder_cpe['data']['external_id'] ?? '';
+        $this->envio_cpe->update_envio_cpe($idventa, $tipo_envio, $external_id, $estado);
     }
 
     private function descargar_archivos_sunat($archivos)
@@ -572,5 +625,32 @@ class Ventas extends MY_Controller {
             }
         }
     }
-    
+
+    public function test_update_estado_cpe()
+    {
+        $this->load->library('FacturaloPeru');
+        $this->load->model('venta');
+
+        $idventa      = $this->input->get('idventa');
+        $envio_cpe_fp = new FacturaloPeru();
+
+        $data_venta = $this->venta->cpe_venta($idventa);
+
+        $data = array(
+            'document_type_id' => "01",#$data_venta['codigo_tipo_documento'],
+            'series'           => $data_venta['serie_documento'],
+            'number'           => (int) $data_venta['numero_documento'],
+            'date_of_issue'    => $data_venta['fecha_de_emision'],
+            'total'            => (float) $data_venta['total_venta'],
+        );
+
+        $result = $envio_cpe_fp->builder_cpe($data, 'validar_documento');
+
+        header('Content-Type: application/json');
+        print json_encode(
+            array('data_enviada' => $data, 'respuesta' => $result),
+            JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE
+        );
+    }
+
 }

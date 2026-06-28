@@ -38,6 +38,7 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 !/public/qr_code/*.txt
 
 /public/*.txt
+/public/cpe_sunat/
 
 /assets/key/*.key
 /assets/key/*.pem
