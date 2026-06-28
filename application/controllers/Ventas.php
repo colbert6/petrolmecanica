@@ -495,6 +495,14 @@ class Ventas extends MY_Controller {
             return $this_response;
         }
 
+        if (isset($result_builder_cpe['response']['sent_sunat']) && !$result_builder_cpe['response']['sent_sunat']) {
+            $codigo      = $result_builder_cpe['response']['code'] ?? '';
+            $descripcion = $result_builder_cpe['response']['description'] ?? '';
+            $this_response['mensaje'] = "SUNAT rechazó el comprobante. Código $codigo: $descripcion";
+            $this_response['detalle'] = $result_builder_cpe;
+            return $this_response;
+        }
+
         $this->guardar_resultado_cpe($data_json, $result_builder_cpe, $idventa, $tipo_envio);
         $this_response['respuesta'] = 'ok';
 
