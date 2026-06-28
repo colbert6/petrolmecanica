@@ -488,13 +488,13 @@ class Ventas extends MY_Controller {
 
         $result_builder_cpe = $envio_cpe_fp->builder_cpe($data_json, $tipo_envio);
 
-        if ($result_builder_cpe['respuesta_curl'] != 'ok') {
+        if (($result_builder_cpe['respuesta_curl'] ?? '') != 'ok') {
             $this_response['mensaje'] = 'Error en respuesta curl. <br>' . json_encode($result_builder_cpe);
             $this_response['detalle'] = $result_builder_cpe;
             return $this_response;
         }
 
-        if (!$result_builder_cpe['success']) {
+        if (!($result_builder_cpe['success'] ?? false)) {
             $this_response['mensaje'] = 'Error en respuesta de proveedor. <br>' . json_encode($result_builder_cpe);
             $this_response['detalle'] = $result_builder_cpe;
             return $this_response;
@@ -520,6 +520,11 @@ class Ventas extends MY_Controller {
             case 'generar_comprobante':
                 $data_venta    = $this->venta->cpe_venta($idventa);
                 $data_detventa = $this->det_venta->cpe_detventa($idventa);
+
+                if (empty($data_venta) || empty($data_detventa)) {
+                    return array();
+                }
+
                 $detalle_cuotas = array();
 
                 if ($data_venta['nro_cuotas'] > 1) {
@@ -534,6 +539,11 @@ class Ventas extends MY_Controller {
 
             case 'generar_anulacion':
                 $data_venta = $this->venta->cpe_venta_anulacion($idventa);
+
+                if (empty($data_venta)) {
+                    return array();
+                }
+
                 return $envio_cpe_fp->formatear_anulacion_venta_estructura($data_venta, $idventa);
 
             default:
